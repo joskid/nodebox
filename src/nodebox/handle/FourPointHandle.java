@@ -26,7 +26,7 @@ public class FourPointHandle extends AbstractHandle {
         this.heightName = heightName;
     }
 
-    public void draw(CanvasContext ctx) {
+    public void draw(GraphicsContext ctx) {
         float cx = node.asFloat(xName);
         float cy = node.asFloat(yName);
         float width = node.asFloat(widthName);
@@ -43,7 +43,7 @@ public class FourPointHandle extends AbstractHandle {
         drawDot(cornerPath, right, bottom);
         drawDot(cornerPath, left, bottom);
         drawDot(cornerPath, cx, cy);
-        ctx.getCanvas().add(cornerPath);
+        ctx.draw(cornerPath);
         Path strokePath = new Path();
         strokePath.setFillColor(null);
         strokePath.setStrokeColor(HANDLE_COLOR);

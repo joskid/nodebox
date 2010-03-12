@@ -47,6 +47,8 @@ public class PythonCode implements NodeCode {
                 "_g = globals()\n" +
                 "for n in dir(_ctx):\n" +
                 "    _g[n] = getattr(_ctx, n)");
+        //PyCode code = interpreter.compile(source);
+        //code.__call__();
         interpreter.exec(source);
         ctx = (CanvasContext) interpreter.get("_ctx").__tojava__(CanvasContext.class);
         try {

@@ -1,9 +1,6 @@
 package nodebox.handle;
 
-import nodebox.graphics.CanvasContext;
-import nodebox.graphics.Path;
-import nodebox.graphics.Point;
-import nodebox.graphics.Rect;
+import nodebox.graphics.*;
 import nodebox.node.Node;
 
 public class TranslateHandle extends AbstractHandle {
@@ -30,7 +27,7 @@ public class TranslateHandle extends AbstractHandle {
         this.tyName = tyName;
     }
 
-    public void draw(CanvasContext ctx) {
+    public void draw(GraphicsContext ctx) {
         float x = node.asFloat(txName);
         float y = node.asFloat(tyName);
         Path p = new Path();
@@ -88,7 +85,7 @@ public class TranslateHandle extends AbstractHandle {
             p.lineto(x - 5, y1);
             p.lineto(x + 5, y1);
         }
-        ctx.stroke(null);
+        ctx.nostroke();
         ctx.draw(p);
     }
 

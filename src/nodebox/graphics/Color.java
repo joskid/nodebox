@@ -34,40 +34,58 @@ public class Color implements Cloneable {
         return Math.max(0.0, Math.min(1.0, v));
     }
 
+     /**
+     * Create an empty (black) color object.
+     */
     public Color() {
         r = g = b = 0.0;
         a = 1.0;
     }
 
-    public Color(double... args) {
-        switch (args.length) {
-            case 0: // default value
-                r = g = b = 0.0;
-                a = 1.0;
-                break;
-            case 1: // grayscale value
-                r = g = b = clamp(args[0]);
-                a = 1.0;
-                break;
-            case 2: // grayscale and alpha value
-                r = g = b = clamp(args[0]);
-                a = clamp(args[1]);
-                break;
-            case 3: // R/G/B value
-                r = clamp(args[0]);
-                g = clamp(args[1]);
-                b = clamp(args[2]);
-                a = 1.0;
-                break;
-            case 4: // R/G/B/A value
-                r = clamp(args[0]);
-                g = clamp(args[1]);
-                b = clamp(args[2]);
-                a = clamp(args[3]);
-                break;
-            default:
-                throw new IllegalArgumentException("Color takes maximum 4 values.");
-        }
+    /**
+     * Create a new color with the given grayscale value.
+     *
+     * @param v the gray component.
+     */
+    public Color(double v) {
+        this(v, v, v, 1.0);
+    }
+    /**
+     * Create a new color with the given grayscale and alpha value.
+     *
+     * @param v the grayscale value.
+     * @param a the alpha value.
+     */
+
+    public Color(double v, double a) {
+        this(v, v, v, a);
+    }
+
+
+    /**
+     * Create a new color with the the given R/G/B value.
+     *
+     * @param r the red component.
+     * @param g the green component.
+     * @param b the blue component.
+     */
+     public Color(double r, double g, double b) {
+        this(r, g, b, 1.0);
+    }
+
+    /**
+     * Create a new color with the the given R/G/B/A value.
+     *
+     * @param r the red component.
+     * @param g the green component.
+     * @param b the blue component.
+     * @param a the alpha component.
+     */
+    public Color(double r, double g, double b, double a) {
+        this.r = clamp(r);
+        this.g = clamp(g);
+        this.b = clamp(b);
+        this.a = clamp(a);
     }
 
     public Color(String colorName) {
@@ -85,6 +103,14 @@ public class Color implements Cloneable {
         this.a = a255 / 255.0;
     }
 
+    /**
+     * Create a new color with the the given color.
+     * <p/>
+     * The color object is cloned; you can change the original afterwards.
+     * If the color object is null, the new color is turned off (same as nocolor).
+     *
+     * @param color the color object.
+     */
     public Color(java.awt.Color color) {
         this.r = color.getRed() / 255.0;
         this.g = color.getGreen() / 255.0;
@@ -92,6 +118,14 @@ public class Color implements Cloneable {
         this.a = color.getAlpha() / 255.0;
     }
 
+    /**
+     * Create a new color with the the given color.
+     * <p/>
+     * The color object is cloned; you can change the original afterwards.
+     * If the color object is null, the new color is turned off (same as nocolor).
+     *
+     * @param other the color object.
+     */
     public Color(Color other) {
         this.r = other.r;
         this.g = other.g;

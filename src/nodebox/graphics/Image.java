@@ -179,7 +179,7 @@ public class Image extends AbstractGrob {
         }
     }
 
-    public void inheritFromContext(CanvasContext ctx) {
+    public void inheritFromContext(GraphicsContext ctx) {
         // TODO: Implement
     }
 

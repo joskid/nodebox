@@ -2,6 +2,7 @@ package nodebox.handle;
 
 import nodebox.client.Viewer;
 import nodebox.graphics.CanvasContext;
+import nodebox.graphics.GraphicsContext;
 import nodebox.graphics.Point;
 import nodebox.node.Node;
 
@@ -125,7 +126,7 @@ public class CombinedHandle extends AbstractHandle {
         setVisible(true);
     }
 
-    public void draw(CanvasContext ctx) {
+    public void draw(GraphicsContext ctx) {
         for (Handle handle : handles)
             handle.draw(ctx);
     }

@@ -155,7 +155,7 @@ public class Canvas extends AbstractTransformable {
 
     //// Drawing ////
 
-    public void inheritFromContext(CanvasContext ctx) {
+    public void inheritFromContext(GraphicsContext ctx) {
         // TODO: Implement
     }
 

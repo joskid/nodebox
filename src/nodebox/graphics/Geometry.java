@@ -365,7 +365,7 @@ public class Geometry extends AbstractGeometry implements Colorizable {
 
     //// Drawing operations ////
 
-    public void inheritFromContext(CanvasContext ctx) {
+    public void inheritFromContext(GraphicsContext ctx) {
         throw new UnsupportedOperationException();
     }
 

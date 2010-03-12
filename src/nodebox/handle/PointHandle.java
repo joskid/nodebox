@@ -1,9 +1,6 @@
 package nodebox.handle;
 
-import nodebox.graphics.CanvasContext;
-import nodebox.graphics.Color;
-import nodebox.graphics.Point;
-import nodebox.graphics.Rect;
+import nodebox.graphics.*;
 import nodebox.node.Node;
 
 public class PointHandle extends AbstractHandle {
@@ -27,7 +24,7 @@ public class PointHandle extends AbstractHandle {
         this.yName = yName;
     }
 
-    public void draw(CanvasContext ctx) {
+    public void draw(GraphicsContext ctx) {
         float x = node.asFloat(xName);
         float y = node.asFloat(yName);
         drawDot(ctx, x, y);

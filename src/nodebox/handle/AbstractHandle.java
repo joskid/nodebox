@@ -96,11 +96,9 @@ public abstract class AbstractHandle implements Handle {
 
     //// Utility methods ////
 
-    protected void drawDot(CanvasContext ctx, float x, float y) {
-        Path p = new Path();
-        p.setFillColor(HANDLE_COLOR);
-        p.rect(x, y, HANDLE_SIZE, HANDLE_SIZE);
-        ctx.draw(p);
+    protected void drawDot(GraphicsContext ctx, float x, float y) {
+        ctx.fill(HANDLE_COLOR);
+        ctx.rect(x, y, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     protected void drawDot(Path p, float x, float y) {

@@ -81,7 +81,7 @@ public abstract class AbstractGrob implements Grob {
         savedTransform = null;
     }
 
-    public void inheritFromContext(CanvasContext ctx) {
+    public void inheritFromContext(GraphicsContext ctx) {
     }
 
     //// Object methods ////

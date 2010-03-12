@@ -45,7 +45,7 @@ public class RotateHandle extends AbstractHandle {
             return 0;
     }
 
-    public void draw(CanvasContext ctx) {
+    public void draw(GraphicsContext ctx) {
         float cx = getCenterX();
         float cy = getCenterY();
         ctx.fill();

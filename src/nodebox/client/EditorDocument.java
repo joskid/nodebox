@@ -86,7 +86,7 @@ public class EditorDocument extends JFrame {
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.translate(getWidth() / 2, getHeight() / 2);
+            //g2.translate(getWidth() / 2, getHeight() / 2);
             context.getCanvas().draw(g2);
         }
     }
@@ -136,6 +136,7 @@ public class EditorDocument extends JFrame {
             interpreter.setErr(errorStream);
             Exception pythonException = null;
             String pythonCode = codeArea.getText();
+            pythonCode = "_g = globals()\nfor n in dir(g): _g[n] = getattr(g, n)\n\n" + pythonCode;
             try {
                 interpreter.exec(pythonCode);
             } catch (Exception e) {

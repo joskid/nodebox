@@ -18,10 +18,52 @@
  */
 package nodebox.graphics;
 
+import nodebox.node.Node;
+import nodebox.node.Parameter;
+import nodebox.node.ProcessingContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CanvasContext {
+
+    public enum RectMode {
+        CORNER, CORNERS, CENTER, RADIUS
+    }
+
+    public enum EllipseMode {
+        CENTER, RADIUS, CORNER, CORNERS
+    }
+
+    public static enum VarType {
+        NUMBER(Parameter.Type.FLOAT, Parameter.Widget.FLOAT),
+        TEXT(Parameter.Type.STRING, Parameter.Widget.TEXT),
+        BOOLEAN(Parameter.Type.INT, Parameter.Widget.TOGGLE),
+        FONT(Parameter.Type.STRING, Parameter.Widget.FONT);
+
+        private final Parameter.Type type;
+        private final Parameter.Widget widget;
+
+        VarType(Parameter.Type type, Parameter.Widget widget) {
+            this.type = type;
+            this.widget = widget;
+        }
+    }
+
+    public static Text.Align LEFT = Text.Align.LEFT;
+    public static Text.Align RIGHT = Text.Align.RIGHT;
+    public static Text.Align CENTER = Text.Align.CENTER;
+    public static Text.Align JUSTIFY = Text.Align.JUSTIFY;
+
+    public static Color.Mode RGB = Color.Mode.RGB;
+    public static Color.Mode HSB = Color.Mode.HSB;
+    public static Color.Mode CMYK = Color.Mode.CMYK;
+
+    public static VarType NUMBER = VarType.NUMBER;
+    public static VarType TEXT = VarType.TEXT;
+    public static VarType BOOLEAN = VarType.BOOLEAN;
+    public static VarType FONT = VarType.FONT;
+
 
     private Canvas canvas;
     // TODO: Support output mode
@@ -38,6 +80,8 @@ public class CanvasContext {
     private float fontSize;
     private float lineHeight;
     private Text.Align align;
+    private RectMode rectMode = RectMode.CORNER;
+    private EllipseMode ellipseMode = EllipseMode.CORNER;
 
     //// Initialization ////
 
@@ -177,6 +221,8 @@ public class CanvasContext {
 
     //// Primitives ////
 
+    // TODO: Support rect modes.
+
     public Path rect(Rect r) {
         Path p = new Path();
         p.rect(r);
@@ -187,7 +233,14 @@ public class CanvasContext {
 
     public Path rect(float x, float y, float width, float height) {
         Path p = new Path();
-        p.rect(x, y, width, height);
+        switch (rectMode) {
+            case CENTER:
+                p.rect(x, y, width, height);
+                break;
+            case CORNER:
+                p.cornerRect(x, y, width, height);
+                break;
+        }
         inheritFromContext(p);
         canvas.add(p);
         return p;
@@ -224,7 +277,14 @@ public class CanvasContext {
 
     public Path ellipse(float x, float y, float width, float height) {
         Path p = new Path();
-        p.ellipse(x, y, width, height);
+        switch (ellipseMode) {
+            case CENTER:
+                p.ellipse(x, y, width, height);
+                break;
+            case CORNER:
+                p.cornerEllipse(x, y, width, height);
+                break;
+        }
         inheritFromContext(p);
         canvas.add(p);
         return p;
@@ -297,6 +357,15 @@ public class CanvasContext {
     }
 
     public void drawpath(Path path) {
+        inheritFromContext(path);
+        canvas.add(path);
+    }
+
+    public void drawpath(Iterable<Point> points) {
+        Path path = new Path();
+        for (Point pt : points) {
+            path.addPoint(pt);
+        }
         inheritFromContext(path);
         canvas.add(path);
     }
@@ -707,8 +776,43 @@ public class CanvasContext {
 
     //// Utility methods ////
 
-    public void var(Object... args) {
-        throw new RuntimeException("var is no longer supported. Create parameters on the node instead.");
+    public void var(String name, VarType type) {
+        var(name, type, null, null, null);
+    }
+
+    public void var(String name, VarType type, Object value) {
+        var(name, type, value, null, null);
+    }
+
+    public void var(String name, VarType type, Object value, Float min, Float max) {
+        Node node = ProcessingContext.getCurrentContext().getNode();
+        if (node == null) return;
+        Parameter p = node.getParameter(name);
+        if (p != null) {
+            if (p.getType() != type.type) {
+                p.setType(type.type);
+            }
+            if (p.getWidget() != type.widget) {
+                p.setWidget(type.widget);
+            }
+            if (p.getMinimumValue() != null && !p.getMinimumValue().equals(min)) {
+                p.setMinimumValue(min);
+            }
+            if (p.getMaximumValue() != null && !p.getMaximumValue().equals(max)) {
+                p.setMaximumValue(max);
+            }
+        } else {
+            p = node.addParameter(name, type.type);
+            p.setWidget(type.widget);
+            if (value != null) {
+                p.setValue(value);
+            }
+            if (min != null || max != null) {
+                p.setBoundingMethod(Parameter.BoundingMethod.HARD);
+                p.setMinimumValue(min);
+                p.setMaximumValue(max);
+            }
+        }
     }
 
     public double random() {

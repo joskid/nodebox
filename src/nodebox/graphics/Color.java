@@ -26,6 +26,8 @@ public class Color implements Cloneable {
 
     private static final Pattern HEX_STRING_PATTERN = Pattern.compile("^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$");
 
+    public enum Mode { RGB, HSB, CMYK }
+
     private double r, g, b, a;
 
     public static double clamp(double v) {

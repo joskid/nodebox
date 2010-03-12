@@ -3,11 +3,12 @@ package nodebox.graphics;
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Base class for all geometric (vector) data.
  */
-public class Path extends AbstractGeometry implements Colorizable {
+public class Path extends AbstractGeometry implements Colorizable, Iterable<Point> {
 
     // Simulate a quarter of a circle.
     private static final float ONE_MINUS_QUARTER = 1.0f - 0.552f;
@@ -268,6 +269,14 @@ public class Path extends AbstractGeometry implements Colorizable {
         roundedRect(cx, cy, width, height, rx, ry);
     }
 
+    public void cornerRect(float x, float y, float width, float height) {
+        addPoint(x, y);
+        addPoint(x + width, y);
+        addPoint(x + width, y + height);
+        addPoint(x, y + height);
+        close();
+    }
+
     public void roundedRect(Rect r, float roundness) {
         roundedRect(r, roundness, roundness);
     }
@@ -321,6 +330,11 @@ public class Path extends AbstractGeometry implements Colorizable {
      */
     public void ellipse(float cx, float cy, float width, float height) {
         Ellipse2D.Float e = new Ellipse2D.Float(cx - width / 2, cy - height / 2, width, height);
+        extend(e);
+    }
+
+    public void cornerEllipse(float x, float y, float width, float height) {
+        Ellipse2D.Float e = new Ellipse2D.Float(x, y, width, height);
         extend(e);
     }
 
@@ -658,6 +672,19 @@ public class Path extends AbstractGeometry implements Colorizable {
         return currentContour.pointAt(resT);
     }
 
+    /**
+     * Same as pointAt(t).
+     * <p/>
+     * This method is here for compatibility with NodeBox 1.
+     *
+     * @param t relative coordinate of the point.
+     * @return coordinates for point at t.
+     * @see #pointAt(float)
+     */
+    public Point point(float t) {
+        return pointAt(t);
+    }
+
     //// Geometric operations ////
 
     /**
@@ -873,6 +900,13 @@ public class Path extends AbstractGeometry implements Colorizable {
     public Path cloneAndClear() {
         return new Path(this, false);
     }
+
+    //// Iterator implementation
+
+    public Iterator<Point> iterator() {
+        return getPoints().iterator();
+    }
+
 
     private class Bezier {
         private float x1, y1, x2, y2, x3, y3, x4, y4;

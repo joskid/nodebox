@@ -5,18 +5,20 @@ import nodebox.node.Parameter;
 import nodebox.node.ProcessingContext;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     // TODO: Support output mode
-    // TODO: Support color mode
+    protected Color.Mode colorMode;
     protected Color fillColor;
     protected Color strokeColor;
     protected float strokeWidth;
     protected Path path;
     protected boolean autoClosePath;
     protected boolean pathClosed;
+    protected Transform.Mode transformMode;
     protected Transform transform = new Transform();
     protected ArrayList<Transform> transformStack;
     protected String fontName;
@@ -27,16 +29,19 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     protected GraphicsContext.EllipseMode ellipseMode = GraphicsContext.EllipseMode.CORNER;
 
     public void resetContext() {
+        colorMode = Color.Mode.RGB;
         fillColor = new Color();
         strokeColor = null;
         strokeWidth = 1f;
         path = null;
+        autoClosePath = true;
+        transformMode = Transform.Mode.CENTER;
         transform = new Transform();
         transformStack = new ArrayList<Transform>();
         fontName = "Helvetica";
         fontSize = 24;
         lineHeight = 1.2f;
-        align = Text.Align.CENTER;
+        align = Text.Align.LEFT;
     }
 
     //// Primitives ////
@@ -135,6 +140,41 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return p;
     }
 
+    public Path star(float cx, float cy) {
+        return star(cx, cy, 20, 100, 50, true);
+    }
+
+    public Path star(float cx, float cy, int points) {
+        return star(cx, cy, points, 100, 50, true);
+    }
+
+    public Path star(float cx, float cy, int points, float outer) {
+        return star(cx, cy, points, outer, 50, true);
+    }
+
+    public Path star(float cx, float cy, int points, float outer, float inner) {
+        return star(cx, cy, points, outer, inner, true);
+    }
+
+    public Path star(float cx, float cy, int points, float outer, float inner, boolean draw) {
+        float PI = (float) Math.PI;
+        Path p = new Path();
+        p.moveto(cx, cy + outer / 2);
+        for (int i = 1; i < points * 2; i++) {
+            float angle = i * PI / points;
+            float x = (float) Math.sin(angle);
+            float y = (float) Math.cos(angle);
+            float radius = i % 2 == 0 ? inner / 2 : outer / 2;
+            x += cx + radius * x;
+            y += cy + radius * y;
+            p.lineto(x, y);
+        }
+        p.close();
+        inheritFromContext(p);
+        if (draw)
+            addPath(p);
+        return p;
+    }
 
     //// Path commands ////
 
@@ -239,6 +279,15 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     //// Transformation commands ////
 
+
+    public Transform.Mode transform() {
+        return transformMode;
+    }
+
+    public Transform.Mode transform(Transform.Mode mode) {
+        return transformMode = mode;
+    }
+
     public void push() {
         transformStack.add(0, transform.clone());
     }
@@ -289,12 +338,13 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         throw new RuntimeException("outputmode is not implemented yet.");
     }
 
-    public String colormode() {
-        throw new RuntimeException("colormode is not implemented yet.");
+    public Color.Mode colormode() {
+        return colorMode;
     }
 
-    public String colormode(String mode) {
-        throw new RuntimeException("colormode is not implemented yet.");
+    public Color.Mode colormode(Color.Mode mode) {
+        // TODO: Support color mode
+        return colorMode = mode;
     }
 
     /**
@@ -684,8 +734,45 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Object choice(List objects) {
         if (objects == null || objects.isEmpty()) return null;
-        return objects.get((int) random(objects.size()));
+        return objects.get((int) random(objects.size() - 1));
     }
+
+    public Iterator<Point> grid(int columns, int rows) {
+        return grid(columns, rows, 1, 1);
+    }
+
+    public Iterator<Point> grid(float columns, float rows) {
+        return grid(Math.round(columns), Math.round(rows), 1, 1);
+    }
+
+    public Iterator<Point> grid(float columns, float rows, double columnSize, double rowSize) {
+        return grid(Math.round(columns), Math.round(rows), columnSize, rowSize);
+    }
+
+    public Iterator<Point> grid(final int columns, final int rows, final double columnSize, final double rowSize) {
+        return new Iterator<Point>() {
+            int x = 0;
+            int y = 0;
+
+            public boolean hasNext() {
+                return y < rows;
+            }
+
+            public Point next() {
+                Point pt = new Point((float) (x * columnSize), (float) (y * rowSize));
+                x++;
+                if (x >= columns) {
+                    x = 0;
+                    y++;
+                }
+                return pt;
+            }
+
+            public void remove() {
+            }
+        };
+    }
+
 
     //// Context drawing /////
 
@@ -713,6 +800,18 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         p.setFillColor(fillColor == null ? null : fillColor.clone());
         p.setStrokeColor(strokeColor == null ? null : strokeColor.clone());
         p.setStrokeWidth(strokeWidth);
+        Rect r = p.getBounds();
+        float dx = r.getX() + r.getWidth() / 2;
+        float dy = r.getY() + r.getHeight() / 2;
+        if (transformMode == Transform.Mode.CENTER) {
+            Transform t = new Transform();
+            t.translate(dx, dy);
+            t.append(transform);
+            t.translate(-dx, -dy);
+            t.map(p.getPoints());
+        } else {
+            transform.map(p.getPoints());
+        }
     }
 
     protected void inheritFromContext(Text t) {

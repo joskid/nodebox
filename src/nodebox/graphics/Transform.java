@@ -7,6 +7,10 @@ import java.awt.geom.Point2D;
 
 public class Transform implements Cloneable {
 
+    public enum Mode {
+        CORNER, CENTER
+    }
+
     private AffineTransform affineTransform;
 
     public static Transform translated(float tx, float ty) {

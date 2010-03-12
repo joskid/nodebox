@@ -2,6 +2,7 @@ package nodebox.graphics;
 
 import nodebox.node.Parameter;
 
+import java.util.Iterator;
 import java.util.List;
 
 public interface GraphicsContext {
@@ -67,6 +68,16 @@ public interface GraphicsContext {
 
     public Path line(float x1, float y1, float x2, float y2);
 
+    public Path star(float cx, float cy);
+
+    public Path star(float cx, float cy, int points);
+
+    public Path star(float cx, float cy, int points, float outer);
+
+    public Path star(float cx, float cy, int points, float outer, float inner);
+
+    public Path star(float cx, float cy, int points, float outer, float inner, boolean draw);
+
     public void beginpath();
 
     public void beginpath(float x, float y);
@@ -99,6 +110,11 @@ public interface GraphicsContext {
 
     public void endclip();
 
+    public Transform.Mode transform();
+
+    public Transform.Mode transform(Transform.Mode mode);
+
+
     public void push();
 
     public void pop();
@@ -121,11 +137,11 @@ public interface GraphicsContext {
 
     public String outputmode(String mode);
 
-    public String colormode();
+    public Color.Mode colormode();
 
-    public String colormode(String mode);
+    public Color.Mode colormode(Color.Mode mode);
 
-      /**
+    /**
      * Create an empty (black) color object.
      *
      * @return the new color.
@@ -302,7 +318,7 @@ public interface GraphicsContext {
      * Turn off the stroke color.
      */
     public void nostroke();
-    
+
     public float strokewidth();
 
     public float strokewidth(float w);
@@ -368,6 +384,10 @@ public interface GraphicsContext {
     public double random(double min, double max);
 
     public Object choice(List objects);
+
+    public Iterator<Point> grid(int columns, int rows);
+
+    public Iterator<Point> grid(int columns, int rows, double columnSize, double rowSize);
 
     public void draw(Grob g);
 }

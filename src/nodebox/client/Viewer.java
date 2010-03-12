@@ -5,6 +5,7 @@ import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PPaintContext;
+import nodebox.graphics.Canvas;
 import nodebox.graphics.*;
 import nodebox.handle.Handle;
 import nodebox.node.Node;
@@ -15,8 +16,8 @@ import nodebox.node.event.NodeAttributeChangedEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.Color;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -40,6 +41,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
     private boolean showOrigin = false;
     private PLayer viewerLayer;
     private JPopupMenu viewerMenu;
+    private Class outputClass;
 
     public Viewer(Pane pane, Node node) {
         this.pane = pane;
@@ -188,13 +190,24 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         // Set bounds from output value.
         if (getNode() != null) {
             Object outputValue = getNode().getOutputValue();
-            if (outputValue instanceof Grob) {
-                viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
-                viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
-            } else if (outputValue != null) {
-                resetView();
-                viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
-                viewerLayer.setOffset(5, 5);
+            if (outputValue != null && outputClass != outputValue.getClass()) {
+                if (outputValue instanceof Canvas) {
+                    // The canvas is placed in the top-left corner, as in NodeBox 1.
+                    resetView();
+                    viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                    viewerLayer.setOffset(0, 0);
+                } else if (outputValue instanceof Grob) {
+                    // Other graphic objects are displayed in the center.
+                    resetView();
+                    viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                    viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
+                } else {
+                    // Other output will be converted to a string, and placed just off the top-left corner.
+                    resetView();
+                    viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+                    viewerLayer.setOffset(5, 5);
+                }
+                outputClass = outputValue.getClass();
             }
         }
         repaint();

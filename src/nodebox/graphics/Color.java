@@ -37,15 +37,35 @@ public class Color implements Cloneable {
         a = 1.0;
     }
 
-    public Color(double r, double g, double b) {
-        this(r, g, b, 1.0);
-    }
-
-    public Color(double r, double g, double b, double a) {
-        this.r = clamp(r);
-        this.g = clamp(g);
-        this.b = clamp(b);
-        this.a = clamp(a);
+    public Color(double... args) {
+        switch (args.length) {
+            case 0: // default value
+                r = g = b = 0.0;
+                a = 1.0;
+                break;
+            case 1: // grayscale value
+                r = g = b = clamp(args[0]);
+                a = 1.0;
+                break;
+            case 2: // grayscale and alpha value
+                r = g = b = clamp(args[0]);
+                a = clamp(args[1]);
+                break;
+            case 3: // R/G/B value
+                r = clamp(args[0]);
+                g = clamp(args[1]);
+                b = clamp(args[2]);
+                a = 1.0;
+                break;
+            case 4: // R/G/B/A value
+                r = clamp(args[0]);
+                g = clamp(args[1]);
+                b = clamp(args[2]);
+                a = clamp(args[3]);
+                break;
+            default:
+                throw new IllegalArgumentException("Color takes maximum 4 values.");
+        }
     }
 
     public Color(String colorName) {

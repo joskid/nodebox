@@ -353,7 +353,7 @@ public class Contour extends AbstractGeometry {
 
     //// Graphics ////
 
-    public void inheritFromContext(GraphicsContext ctx) {
+    public void inheritFromContext(CanvasContext ctx) {
     }
 
     public void draw(Graphics2D g) {

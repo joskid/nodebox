@@ -1,6 +1,6 @@
 package nodebox.handle;
 
-import nodebox.graphics.GraphicsContext;
+import nodebox.graphics.CanvasContext;
 import nodebox.graphics.Path;
 import nodebox.graphics.Point;
 import nodebox.graphics.Text;
@@ -14,7 +14,7 @@ public class DisplayPointsHandle extends AbstractHandle {
         super(node);
     }
 
-    public void draw(GraphicsContext ctx) {
+    public void draw(CanvasContext ctx) {
         if (!(node.getOutputValue() instanceof Path)) return;
         Path dots = new Path();
         dots.setFillColor(HANDLE_COLOR);
@@ -31,7 +31,7 @@ public class DisplayPointsHandle extends AbstractHandle {
         this.displayPointNumbers = displayPointNumbers;
     }
 
-    private void drawDots(GraphicsContext ctx, Path path, Path dots) {
+    private void drawDots(CanvasContext ctx, Path path, Path dots) {
         boolean displayPointNumbers = this.displayPointNumbers;
         int i = 0;
         for (Point pt : path.getPoints()) {

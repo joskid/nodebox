@@ -1,6 +1,6 @@
 package nodebox.client;
 
-import nodebox.graphics.GraphicsContext;
+import nodebox.graphics.CanvasContext;
 import nodebox.graphics.Text;
 import nodebox.graphics.Geometry;
 import nodebox.graphics.Path;
@@ -22,7 +22,7 @@ public class EditorDocument extends JFrame {
     private final static String WINDOW_MODIFIED = "windowModified";
     private static Logger logger = Logger.getLogger("nodebox.client.EditorDocument");
 
-    private GraphicsContext context;
+    private CanvasContext context;
     private PythonInterpreter interpreter;
     private EditorViewer viewer;
     private CodeArea codeArea;
@@ -33,7 +33,7 @@ public class EditorDocument extends JFrame {
     private RedoAction redoAction = new RedoAction();
 
     public EditorDocument() {
-        context = new GraphicsContext();
+        context = new CanvasContext();
         interpreter = new PythonInterpreter();
         JPanel rootPanel = new JPanel(new BorderLayout());
         rootPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -117,7 +117,7 @@ public class EditorDocument extends JFrame {
             interpreter.set("Path", nodebox.graphics.Path.class);
             interpreter.set("Canvas", nodebox.graphics.Canvas.class);
             interpreter.set("Color", nodebox.graphics.Color.class);
-            interpreter.set("GraphicsContext", nodebox.graphics.GraphicsContext.class);
+            interpreter.set("GraphicsContext", CanvasContext.class);
             interpreter.set("Grob", nodebox.graphics.Grob.class);
             interpreter.set("Path", Path.class);
             interpreter.set("Geometry", Geometry.class);

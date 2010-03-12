@@ -2,7 +2,7 @@ package nodebox.handle;
 
 
 import nodebox.client.Viewer;
-import nodebox.graphics.GraphicsContext;
+import nodebox.graphics.CanvasContext;
 import nodebox.graphics.Point;
 import nodebox.node.Node;
 
@@ -18,7 +18,7 @@ public interface Handle {
 
     public void update();
 
-    public void draw(GraphicsContext ctx);
+    public void draw(CanvasContext ctx);
 
     public void setVisible(boolean visible);
 

@@ -26,7 +26,7 @@ public class FourPointHandle extends AbstractHandle {
         this.heightName = heightName;
     }
 
-    public void draw(GraphicsContext ctx) {
+    public void draw(CanvasContext ctx) {
         float cx = node.asFloat(xName);
         float cy = node.asFloat(yName);
         float width = node.asFloat(widthName);

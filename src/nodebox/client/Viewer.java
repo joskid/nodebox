@@ -5,7 +5,7 @@ import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PPaintContext;
-import nodebox.graphics.GraphicsContext;
+import nodebox.graphics.CanvasContext;
 import nodebox.graphics.Grob;
 import nodebox.graphics.IGeometry;
 import nodebox.graphics.Path;
@@ -332,7 +332,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
                 // Create a canvas with a transparent background
                 nodebox.graphics.Canvas canvas = new nodebox.graphics.Canvas();
                 canvas.setBackground(new nodebox.graphics.Color(0, 0, 0, 0));
-                GraphicsContext ctx = new GraphicsContext(canvas);
+                CanvasContext ctx = new CanvasContext(canvas);
                 handle.draw(ctx);
                 ctx.getCanvas().draw(g2);
             }

@@ -21,7 +21,7 @@ package nodebox.graphics;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphicsContext {
+public class CanvasContext {
 
     private Canvas canvas;
     // TODO: Support output mode
@@ -41,12 +41,12 @@ public class GraphicsContext {
 
     //// Initialization ////
 
-    public GraphicsContext() {
+    public CanvasContext() {
         canvas = new Canvas();
         resetContext(true);
     }
 
-    public GraphicsContext(Canvas canvas) {
+    public CanvasContext(Canvas canvas) {
         this.canvas = canvas;
         resetContext(false);
     }
@@ -467,49 +467,13 @@ public class GraphicsContext {
     }
 
     /**
-     * Set the current fill color to given grayscale value.
+     * Set the current fill color to the given color components.
      *
-     * @param x the gray component.
+     * @param args the color components.
      * @return the current fill color.
      */
-    public Color fill(float x) {
-        return fillColor = new Color(x, x, x);
-    }
-
-    /**
-     * Set the current fill color to given grayscale and alpha value.
-     *
-     * @param x the grayscale value.
-     * @param y the alpha value.
-     * @return the current fill color.
-     */
-    public Color fill(float x, float y) {
-        return fillColor = new Color(x, x, x, y);
-    }
-
-    /**
-     * Set the current fill color to the given R/G/B value.
-     *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
-     * @return the current fill color.
-     */
-    public Color fill(float x, float y, float z) {
-        return fillColor = new Color(x, y, z);
-    }
-
-    /**
-     * Set the current fill color to the given R/G/B/A value.
-     *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
-     * @param a the alpha component.
-     * @return the current fill color.
-     */
-    public Color fill(float x, float y, float z, float a) {
-        return fillColor = new Color(x, y, z, a);
+    public Color fill(double ... args) {
+        return fillColor = new Color(args);
     }
 
     /**

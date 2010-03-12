@@ -863,7 +863,7 @@ public class Path extends AbstractGeometry implements Colorizable {
         }
     }
 
-    public void inheritFromContext(GraphicsContext ctx) {
+    public void inheritFromContext(CanvasContext ctx) {
     }
 
     public Path clone() {

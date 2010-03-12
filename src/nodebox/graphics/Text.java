@@ -199,7 +199,7 @@ public class Text extends AbstractGrob {
 
     //// Drawing ////
 
-    public void inheritFromContext(GraphicsContext ctx) {
+    public void inheritFromContext(CanvasContext ctx) {
         // TODO: Implement
     }
 

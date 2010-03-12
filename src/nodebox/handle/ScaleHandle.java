@@ -1,6 +1,6 @@
 package nodebox.handle;
 
-import nodebox.graphics.GraphicsContext;
+import nodebox.graphics.CanvasContext;
 import nodebox.graphics.Point;
 import nodebox.graphics.Rect;
 import nodebox.node.Node;
@@ -32,7 +32,7 @@ public class ScaleHandle extends AbstractHandle {
         this.syName = syName;
     }
 
-    public void draw(GraphicsContext ctx) {
+    public void draw(CanvasContext ctx) {
         ctx.nofill();
         ctx.stroke(HANDLE_COLOR);
         float halfWidth = handleWidth / 2;

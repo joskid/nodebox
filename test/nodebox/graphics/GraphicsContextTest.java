@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 public class GraphicsContextTest extends TestCase {
 
     public void testInheritFromContext() {
-        GraphicsContext ctx = new GraphicsContext();
+        CanvasContext ctx = new CanvasContext();
         Color c = new Color();
         assertEquals(c, ctx.fill());
         ctx.rect(0, 0, 100, 100);

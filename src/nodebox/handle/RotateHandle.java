@@ -45,10 +45,10 @@ public class RotateHandle extends AbstractHandle {
             return 0;
     }
 
-    public void draw(GraphicsContext ctx) {
+    public void draw(CanvasContext ctx) {
         float cx = getCenterX();
         float cy = getCenterY();
-        ctx.fill(null);
+        ctx.fill();
         ctx.stroke(HANDLE_COLOR);
         ctx.ellipse(cx, cy, handleLength * 2, handleLength * 2);
         double[] xy;

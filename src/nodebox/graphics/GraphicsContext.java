@@ -69,9 +69,15 @@ public interface GraphicsContext {
 
     public Path oval(float x, float y, float width, float height);
 
+    public Path oval(float x, float y, float width, float height, boolean draw);
+
     public Path ellipse(float x, float y, float width, float height);
 
+    public Path ellipse(float x, float y, float width, float height, boolean draw);
+
     public Path line(float x1, float y1, float x2, float y2);
+
+    public Path line(float x1, float y1, float x2, float y2, boolean draw);
 
     public Path star(float cx, float cy);
 
@@ -82,6 +88,18 @@ public interface GraphicsContext {
     public Path star(float cx, float cy, int points, float outer, float inner);
 
     public Path star(float cx, float cy, int points, float outer, float inner, boolean draw);
+
+    public Path arrow(float x, float y);
+
+    public Path arrow(float x, float y, ArrowType type);
+
+    public Path arrow(float x, float y, float width);
+
+    public Path arrow(float x, float y, float width, boolean draw);
+
+    public Path arrow(float x, float y, float width, ArrowType type);
+
+    public Path arrow(float x, float y, float width, ArrowType type, boolean draw);
 
     public void beginpath();
 

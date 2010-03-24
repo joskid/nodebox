@@ -26,7 +26,9 @@ public class Color implements Cloneable {
 
     private static final Pattern HEX_STRING_PATTERN = Pattern.compile("^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$");
 
-    public enum Mode { RGB, HSB, CMYK }
+    public enum Mode {
+        RGB, HSB, CMYK
+    }
 
     private double r, g, b, a;
 
@@ -34,12 +36,11 @@ public class Color implements Cloneable {
         return Math.max(0.0, Math.min(1.0, v));
     }
 
-     /**
+    /**
      * Create an empty (black) color object.
      */
     public Color() {
-        r = g = b = 0.0;
-        a = 1.0;
+        this(0, 0, 0, 1.0, Mode.RGB);
     }
 
     /**
@@ -48,8 +49,9 @@ public class Color implements Cloneable {
      * @param v the gray component.
      */
     public Color(double v) {
-        this(v, v, v, 1.0);
+        this(v, v, v, 1.0, Mode.RGB);
     }
+
     /**
      * Create a new color with the given grayscale and alpha value.
      *
@@ -58,9 +60,20 @@ public class Color implements Cloneable {
      */
 
     public Color(double v, double a) {
-        this(v, v, v, a);
+        this(v, v, v, a, Mode.RGB);
     }
 
+    /**
+     * Create a new color with the the given R/G/B value.
+     *
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
+     * @param m the specified color mode.
+     */
+    public Color(double x, double y, double z, Mode m) {
+        this(x, y, z, 1.0, m);
+    }
 
     /**
      * Create a new color with the the given R/G/B value.
@@ -69,12 +82,12 @@ public class Color implements Cloneable {
      * @param g the green component.
      * @param b the blue component.
      */
-     public Color(double r, double g, double b) {
-        this(r, g, b, 1.0);
+    public Color(double r, double g, double b) {
+        this(r, g, b, 1.0, Mode.RGB);
     }
 
     /**
-     * Create a new color with the the given R/G/B/A value.
+     * Create a new color with the the given R/G/B/A or H/S/B/A value.
      *
      * @param r the red component.
      * @param g the green component.
@@ -82,9 +95,23 @@ public class Color implements Cloneable {
      * @param a the alpha component.
      */
     public Color(double r, double g, double b, double a) {
-        this.r = clamp(r);
-        this.g = clamp(g);
-        this.b = clamp(b);
+        this(r, g, b, a, Mode.RGB);
+    }
+
+    /**
+     * Create a new color with the the given R/G/B/A or H/S/B/A value.
+     *
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
+     * @param a the alpha component.
+     * @param m the specified color mode.
+     */
+    public Color(double x, double y, double z, double a, Mode m) {
+        // TODO: implement color conversion.
+        this.r = clamp(x);
+        this.g = clamp(y);
+        this.b = clamp(z);
         this.a = clamp(a);
     }
 
@@ -151,6 +178,18 @@ public class Color implements Cloneable {
 
     public boolean isVisible() {
         return a > 0.0;
+    }
+
+    private void updateRGB() {
+
+    }
+
+    private void updateHSB() {
+
+    }
+
+    private void updateCMYK() {
+
     }
 
     public java.awt.Color getAwtColor() {

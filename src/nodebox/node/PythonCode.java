@@ -43,8 +43,8 @@ public class PythonCode implements NodeCode {
         PythonInterpreter interpreter = new PythonInterpreter(namespace);
         // Immediately run the code to extract the cook(self) method.
         interpreter.exec("from nodebox1.graphics import Context\n" +
-                "_ctx = Context()\n" +
                 "_g = globals()\n" +
+                "_ctx = Context(ns=_g)\n" +
                 "for n in dir(_ctx):\n" +
                 "    _g[n] = getattr(_ctx, n)");
         //PyCode code = interpreter.compile(source);

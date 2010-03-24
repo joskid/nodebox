@@ -10,6 +10,7 @@ import java.util.List;
 
 public abstract class AbstractGraphicsContext implements GraphicsContext {
 
+
     // TODO: Support output mode
     protected Color.Mode colorMode;
     protected Color fillColor;
@@ -192,15 +193,30 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path arrow(float x, float y) {
-        return arrowNormal(x, y, 100, true);
+        return arrow(x, y, 100, ArrowType.NORMAL, true);
+    }
+
+    public Path arrow(float x, float y, ArrowType type) {
+        return arrow(x, y, 100, type, true);
     }
 
     public Path arrow(float x, float y, float width) {
-        return arrowNormal(x, y, width, true);
+        return arrow(x, y, width, NORMAL, true);
     }
 
     public Path arrow(float x, float y, float width, boolean draw) {
-        return arrowNormal(x, y, width, draw);
+        return arrow(x, y, width, NORMAL, draw);
+    }
+
+    public Path arrow(float x, float y, float width, ArrowType type) {
+        return arrow(x, y, width, type, true);
+    }
+
+    public Path arrow(float x, float y, float width, ArrowType type, boolean draw) {
+        if (type == NORMAL)
+            return arrowNormal(x, y, width, draw);
+        else
+            return arrowFortyFive(x, y, width, draw);
     }
 
     private Path arrowNormal(float x, float y, float width, boolean draw) {
@@ -223,7 +239,27 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return p;
     }
 
-    // TODO: implement arrow45
+    private Path arrowFortyFive(float x, float y, float width, boolean draw) {
+        float head = .3f;
+        float tail = 1 + head;
+
+        Path p = new Path();
+        p.moveto(x, y);
+        p.lineto(x, y+width*(1-head));
+        p.lineto(x-width*head, y+width);
+        p.lineto(x-width*head, y+width*tail*.4f);
+        p.lineto(x-width*tail*.6f, y+width);
+        p.lineto(x-width, y+width*tail*.6f);
+        p.lineto(x-width*tail*.4f, y+width*head);
+        p.lineto(x-width, y+width*head);
+        p.lineto(x-width*(1-head), y);
+        p.lineto(x, y);
+        p.close();
+        inheritFromContext(p);
+        if (draw)
+            addPath(p);
+        return p;
+    }
 
     //// Path commands ////
 

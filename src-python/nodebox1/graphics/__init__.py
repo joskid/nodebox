@@ -37,8 +37,8 @@ class Context(CanvasContext):
         # todo: handle kwargs
         return p
     
-    def arrow(self, x, y, width=100, draw=True, **kwargs):
-        p = CanvasContext.arrow(self, x, y, width, Boolean(draw))
+    def arrow(self, x, y, width=100, type=CanvasContext.NORMAL, draw=True, **kwargs):
+        p = CanvasContext.arrow(self, x, y, width, type, Boolean(draw))
         # todo: handle kwargs, implement arrow45
         return p
         

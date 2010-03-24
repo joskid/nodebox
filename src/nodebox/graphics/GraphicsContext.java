@@ -30,6 +30,8 @@ public interface GraphicsContext {
         }
     }
 
+    public enum ArrowType { NORMAL, FORTYFIVE }
+
     public static Text.Align LEFT = Text.Align.LEFT;
     public static Text.Align RIGHT = Text.Align.RIGHT;
     public static Text.Align CENTER = Text.Align.CENTER;
@@ -43,6 +45,9 @@ public interface GraphicsContext {
     public static VarType TEXT = VarType.TEXT;
     public static VarType BOOLEAN = VarType.BOOLEAN;
     public static VarType FONT = VarType.FONT;
+
+    public static ArrowType NORMAL = ArrowType.NORMAL;
+    public static ArrowType FORTYFIVE = ArrowType.FORTYFIVE;
 
     public RectMode rectmode();
 

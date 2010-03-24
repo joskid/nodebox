@@ -42,4 +42,27 @@ class Context(CanvasContext):
         # todo: handle kwargs, implement arrow45
         return p
         
+    ### Path Commands ###
+
+    def beginpath(self, x=None, y=None):
+        if x != None and y != None:
+            CanvasContext.beginpath(self, x, y)
+        else:
+            CanvasContext.beginpath(self)
     
+    def endpath(self, draw=True):
+        return CanvasContext.endpath(self, Boolean(draw))
+    
+    def drawpath(self, path, **kwargs):
+        p = CanvasContext.drawpath(self, path)
+        # todo: handle kwargs
+        return p
+    
+    def autoclosepath(self, **kwargs):
+        close = kwargs.get("close")
+        if close is None:
+            return CanvasContext.autoclosepath(self)
+        else:
+            return CanvasContext.autoclosepath(self, Boolean(close))
+    
+    # todo: findpath

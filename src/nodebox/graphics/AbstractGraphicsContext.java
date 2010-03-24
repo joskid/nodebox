@@ -378,28 +378,28 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     /**
-     * Create a new color with the the given R/G/B value.
+     * Create a new color with the the given R/G/B or H/S/B value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @return the new color.
      */
     public Color color(float x, float y, float z) {
-        return new Color(x, y, z);
+        return new Color(x, y, z, colormode());
     }
 
     /**
-     * Create a new color with the the given R/G/B/A value.
+     * Create a new color with the the given R/G/B/A or H/S/B/A value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @param a the alpha component.
      * @return the new color.
      */
     public Color color(float x, float y, float z, float a) {
-        return new Color(x, y, z, a);
+        return new Color(x, y, z, a, colormode());
     }
 
     /**
@@ -446,28 +446,28 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     /**
-     * Set the current fill color to the given R/G/B value.
+     * Set the current fill color to the given R/G/B or H/S/B value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @return the current fill color.
      */
     public Color fill(float x, float y, float z) {
-        return fillColor = new Color(x, y, z);
+        return fillColor = new Color(x, y, z, colormode());
     }
 
     /**
-     * Set the current fill color to the given R/G/B/A value.
+     * Set the current fill color to the given R/G/B/A or H/S/B/A value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @param a the alpha component.
      * @return the current fill color.
      */
     public Color fill(float x, float y, float z, float a) {
-        return fillColor = new Color(x, y, z, a);
+        return fillColor = new Color(x, y, z, a, colormode());
     }
 
     /**
@@ -518,28 +518,28 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     /**
-     * Set the current stroke color to the given R/G/B value.
+     * Set the current stroke color to the given R/G/B or H/S/B value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @return the current stroke color.
      */
     public Color stroke(float x, float y, float z) {
-        return strokeColor = new Color(x, y, z);
+        return strokeColor = new Color(x, y, z, colormode());
     }
 
     /**
-     * Set the current stroke color to the given R/G/B/A value.
+     * Set the current stroke color to the given R/G/B/A or H/S/B/A value.
      *
-     * @param x the red component.
-     * @param y the green component.
-     * @param z the blue component.
+     * @param x the red or hue component.
+     * @param y the green or saturation component.
+     * @param z the blue or brightness component.
      * @param a the alpha component.
      * @return the current stroke color.
      */
     public Color stroke(float x, float y, float z, float a) {
-        return strokeColor = new Color(x, y, z, a);
+        return strokeColor = new Color(x, y, z, a, colormode());
     }
 
     /**

@@ -159,12 +159,12 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     public Path star(float cx, float cy, int points, float outer, float inner, boolean draw) {
         float PI = (float) Math.PI;
         Path p = new Path();
-        p.moveto(cx, cy + outer / 2);
+        p.moveto(cx, cy + outer);
         for (int i = 1; i < points * 2; i++) {
             float angle = i * PI / points;
             float x = (float) Math.sin(angle);
             float y = (float) Math.cos(angle);
-            float radius = i % 2 == 0 ? inner / 2 : outer / 2;
+            float radius = i % 2 == 0 ? outer : inner;
             x += cx + radius * x;
             y += cy + radius * y;
             p.lineto(x, y);

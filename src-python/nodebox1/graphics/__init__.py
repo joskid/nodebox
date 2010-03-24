@@ -66,3 +66,30 @@ class Context(CanvasContext):
             return CanvasContext.autoclosepath(self, Boolean(close))
     
     # todo: findpath
+    
+    ### Transformation commands ###
+    
+    def transform(self, mode=None):
+        if mode is None:
+            return CanvasContext.transform(self)
+        else:
+            return CanvasContext.transform(self, mode)
+    
+    def translate(self, tx=0, ty=0):
+        CanvasContext.translate(self, tx, ty)
+    
+    def rotate(self, degrees=0, radians=0):
+        # todo: radians
+        CanvasContext.rotate(self, degrees)
+    
+    def scale(self, sx=1, sy=None):
+        if sy is None:
+            CanvasContext.scale(self, sx)
+        else:
+            CanvasContext.scale(self, sx, sy)
+    
+    def skew(self, kx=0, ky=None):
+        if ky is None:
+            CanvasContext.skew(self, kx)
+        else:
+            CanvasContext.skew(self, kx, ky)

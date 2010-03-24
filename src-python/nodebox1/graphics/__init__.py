@@ -36,5 +36,10 @@ class Context(CanvasContext):
         p = CanvasContext.star(self, startx, starty, points, outer, inner, Boolean(draw))
         # todo: handle kwargs
         return p
+    
+    def arrow(self, x, y, width=100, draw=True, **kwargs):
+        p = CanvasContext.arrow(self, x, y, width, Boolean(draw))
+        # todo: handle kwargs, implement arrow45
+        return p
         
     

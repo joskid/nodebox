@@ -191,6 +191,40 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return p;
     }
 
+    public Path arrow(float x, float y) {
+        return arrowNormal(x, y, 100, true);
+    }
+
+    public Path arrow(float x, float y, float width) {
+        return arrowNormal(x, y, width, true);
+    }
+
+    public Path arrow(float x, float y, float width, boolean draw) {
+        return arrowNormal(x, y, width, draw);
+    }
+
+    private Path arrowNormal(float x, float y, float width, boolean draw) {
+        float head = width * .4f;
+        float tail = width * .2f;
+
+        Path p = new Path();
+        p.moveto(x, y);
+        p.lineto(x-head, y+head);
+        p.lineto(x-head, y+tail);
+        p.lineto(x-width, y+tail);
+        p.lineto(x-width, y-tail);
+        p.lineto(x-head, y-tail);
+        p.lineto(x-head, y-head);
+        p.lineto(x, y);
+        p.close();
+        inheritFromContext(p);
+        if (draw)
+            addPath(p);
+        return p;
+    }
+
+    // TODO: implement arrow45
+
     //// Path commands ////
 
     public void beginpath() {

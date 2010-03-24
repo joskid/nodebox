@@ -114,10 +114,19 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Path oval(float x, float y, float width, float height) {
         // TODO: Deprecation warning
-        return ellipse(x, y, width, height);
+        return ellipse(x, y, width, height, true);
+    }
+
+    public Path oval(float x, float y, float width, float height, boolean draw) {
+        // TODO: Deprecation warning
+        return ellipse(x, y, width, height, draw);
     }
 
     public Path ellipse(float x, float y, float width, float height) {
+        return ellipse(x, y, width, height, true);
+    }
+
+    public Path ellipse(float x, float y, float width, float height, boolean draw) {
         Path p = new Path();
         switch (ellipseMode) {
             case CENTER:
@@ -128,15 +137,21 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
                 break;
         }
         inheritFromContext(p);
-        addPath(p);
+        if (draw)
+            addPath(p);
         return p;
     }
 
     public Path line(float x1, float y1, float x2, float y2) {
+        return line(x1, y1, x2, y2, true);
+    }
+
+    public Path line(float x1, float y1, float x2, float y2, boolean draw) {
         Path p = new Path();
         p.line(x1, y1, x2, y2);
         inheritFromContext(p);
-        addPath(p);
+        if (draw)
+            addPath(p);
         return p;
     }
 

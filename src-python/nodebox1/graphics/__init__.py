@@ -1,3 +1,4 @@
+from java.lang import Boolean
 from nodebox.graphics import CanvasContext
 
 class Context(CanvasContext):
@@ -15,3 +16,25 @@ class Context(CanvasContext):
         # during construction time.
         self._ns["WIDTH"] = width
         self._ns["HEIGHT"] = height
+
+    #### Primitives ####
+    
+    # todo: rect
+    
+    def ellipse(self, x, y, width, height, draw=True, **kwargs):
+        p = CanvasContext.ellipse(self, x, y, width, height, Boolean(draw))
+        # todo: handle kwargs
+        return p
+    oval = ellipse
+    
+    def line(self, x1, y1, x2, y2, draw=True, **kwargs):
+        p = CanvasContext.line(self, x1, y1, x2, y2, Boolean(draw))
+        # todo: handle kwargs
+        return p
+    
+    def star(self, startx, starty, points=20, outer=100, inner=50, draw=True, **kwargs):
+        p = CanvasContext.star(self, startx, starty, points, outer, inner, Boolean(draw))
+        # todo: handle kwargs
+        return p
+        
+    

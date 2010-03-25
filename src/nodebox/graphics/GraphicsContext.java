@@ -378,8 +378,6 @@ public interface GraphicsContext {
 
     public Path textpath(String text, float x, float y, float width, float height);
 
-    public Path textpath(String text, float x, float y, float width, float height, boolean draw);
-
     public Rect textmetrics(String text);
 
     public Rect textmetrics(String text, float width);

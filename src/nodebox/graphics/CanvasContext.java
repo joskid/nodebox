@@ -146,23 +146,6 @@ public class CanvasContext extends AbstractGraphicsContext {
         return canvas;
     }
 
-    //// Font commands ////
-
-    public Text text(String text, float x, float y) {
-        return text(text, x, y, 0, 0);
-    }
-
-    public Text text(String text, float x, float y, float width) {
-        return text(text, x, y, width, 0);
-    }
-
-    public Text text(String text, float x, float y, float width, float height) {
-        Text t = new Text(text, x, y, width, height);
-        inheritFromContext(t);
-        canvas.add(t);
-        return t;
-    }
-
     //// Image methods ////
 
     public Image image(String path, float x, float y) {

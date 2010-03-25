@@ -93,7 +93,22 @@ class Context(CanvasContext):
             CanvasContext.skew(self, kx)
         else:
             CanvasContext.skew(self, kx, ky)
-            
+    
+    ### Color Commands ###
+
+    def colormode(self, mode=None, range=None):
+        if mode is not None:
+            return CanvasContext.colormode(self, mode)
+        # todo: range
+        return CanvasContext.colormode(self)
+
+    # todo: colorrange
+
+    def strokewidth(self, width=None):
+        if width is not None:
+            return CanvasContext.strokewidth(self, width)
+        return CanvasContext.strokewidth(self)
+    
     ### Font Commands ###
     
     def font(self, fontname=None, fontsize=None):

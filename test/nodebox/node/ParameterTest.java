@@ -18,14 +18,6 @@
  */
 package nodebox.node;
 
-import nodebox.graphics.Color;
-import nodebox.node.event.NodeAttributesEvent;
-import nodebox.node.event.ValueChangedEvent;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 public class ParameterTest extends NodeTestCase {
 
 //    private static class TestParameterValueListener implements NodeEventListener {
@@ -55,7 +47,7 @@ public class ParameterTest extends NodeTestCase {
 //        public int changeCounter = 0;
 //
 //        public void receive(NodeEvent event) {
-//            if (event instanceof NodeAttributesEvent) {
+//            if (event instanceof NodeAttributesChangedEvent) {
 //                changeCounter++;
 //            }
 //        }
@@ -758,7 +750,7 @@ public class ParameterTest extends NodeTestCase {
 //        public int count = 0;
 //
 //        public void receive(NodeEvent event) {
-//            if (event instanceof NodeAttributesEvent) {
+//            if (event instanceof NodeAttributesChangedEvent) {
 //                count++;
 //            }
 //        }

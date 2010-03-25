@@ -18,9 +18,7 @@
  */
 package nodebox.node;
 
-import nodebox.node.event.NodeAttributesEvent;
-import nodebox.node.event.NodeDirtyEvent;
-import nodebox.node.event.NodeUpdatedEvent;
+import nodebox.node.event.*;
 
 public class NodeTest extends NodeTestCase {
 
@@ -29,7 +27,7 @@ public class NodeTest extends NodeTestCase {
         public int counter;
 
         public void receive(NodeEvent event) {
-            if (!(event instanceof NodeAttributesEvent)) return;
+            if (!(event instanceof NodeAttributesChangedEvent)) return;
             counter++;
         }
 
@@ -55,6 +53,20 @@ public class NodeTest extends NodeTestCase {
 
     }
 
+     private class MockNodeEventListener implements NodeEventListener {
+
+        NodeEvent event;
+
+        public void receive(NodeEvent event) {
+            this.event = event;
+        }
+
+        public void reset() {
+            this.event = null;
+        }
+
+    }
+
     private class AddPortNode extends Node {
 
         private AddPortNode(NodeLibrary library) {
@@ -64,6 +76,12 @@ public class NodeTest extends NodeTestCase {
         @Override
         public void cook(ProcessingContext context) throws RuntimeException {
             addPort("test", Integer.class, Port.Direction.IN);
+        }
+    }
+
+    private class N extends Node {
+        private N(NodeLibrary library) {
+            super(library);
         }
     }
 
@@ -83,11 +101,72 @@ public class NodeTest extends NodeTestCase {
         assertProcessingError(n, "already a port named test");
     }
 
+    public void testTypeName() {
+        Node n1 = new Node(testLibrary);
+        assertEquals("node", n1.getTypeName());
+        Node n2 = new AddPortNode(testLibrary);
+        assertEquals("addPortNode", n2.getTypeName());
+        Node n3 = new N(testLibrary);
+        assertEquals("n", n3.getTypeName());
+    }
+
+    public void testAttributes() {
+                Node n = new Node(testLibrary);
+                        MockNodeEventListener l = new MockNodeEventListener();
+        testLibrary.addListener(l);
+        n.setAttributes(NodeAttributes.builder().description("hello").image("test.png").build());
+                assertEquals(NodeAttributesChangedEvent.class, l.event.getClass());
+        assertEquals("hello", n.getDescription());
+        assertEquals("test.png", n.getImage());
+    }
+
+    public void testParent() {
+        Macro root = testLibrary.getRootMacro();
+        // Create a node without a parent.
+        // Since this node is not added to the test library, it has no parent.
+        Node n = new Node(testLibrary);
+        assertFalse(n.hasParent());
+        assertNull(n.getParent());
+        assertNull(n.getRoot());
+
+        Macro m = new Macro(testLibrary);
+        assertFalse(n.hasParent());
+        assertNull(n.getParent());
+        assertNull(n.getRoot());
+
+        Macro parent = (Macro) root.createChild(Macro.class, "parent");
+        Node child = parent.createChild(Macro.class, "child");
+        assertEquals(root, root.getRoot());
+        assertEquals(root, parent.getRoot());
+        assertEquals(root, child.getRoot());
+        assertNull(root.getParent());
+        assertEquals(root, parent.getParent());
+        assertEquals(parent, child.getParent());
+    }
+
+    public void testAbsolutePath() {
+        Macro root = testLibrary.getRootMacro();
+        Macro parent = (Macro) root.createChild(Macro.class, "parent");
+        Node child = parent.createChild(Macro.class, "child");
+        assertEquals("/", root.getAbsolutePath());
+        assertEquals("/parent", parent.getAbsolutePath());
+        assertEquals("/parent/child", child.getAbsolutePath());
+    }
+
+    public void testPosition() {
+        Macro root = testLibrary.getRootMacro();
+                MockNodeEventListener l = new MockNodeEventListener();
+        testLibrary.addListener(l);
+        root.setPosition(50, 20);
+        assertEquals(NodePositionChangedEvent.class, l.event.getClass());
+        assertEquals(50, root.getX());
+        assertEquals(20, root.getY());
+    }
+
     public void testBasicUsage() {
 //        Node dotNode = Node.ROOT_NODE.newInstance(testLibrary, "dotNode");
 //        dotNode.addPort("x", Port.Type.FLOAT);
 //        dotNode.addPort("y", Port.Type.FLOAT);
-//        dotNode.setValue("_code", new JavaMethodWrapper(getClass(), "_dot"));
 //        dotNode.addPort("_output", Port.Type.STRING);
 //
 //        // Check default values
@@ -112,7 +191,6 @@ public class NodeTest extends NodeTestCase {
 //        assertEquals("dot(0.0,0.0)", dotNode.getOutputValue());
 //
 //        // Now let the instance use its own code
-//        dotInstance.setValue("_code", new JavaMethodWrapper(getClass(), "_dot2"));
 //        dotInstance.update();
 //        assertEquals("dot2(25.0,42.0)", dotInstance.getOutputValue());
     }
@@ -240,9 +318,12 @@ public class NodeTest extends NodeTestCase {
 
     public void testNodeNaming() {
         Node n = new Node(testLibrary);
+        assertEquals("node", n.getName());
+
+        assertInvalidName(n, null, "names cannot be null.");
+
         assertInvalidName(n, "1234", "names cannot start with a digit.");
 
-        assertInvalidName(n, "node", "names can not be one of the reserved words.");
         assertInvalidName(n, "root", "names can not be one of the reserved words.");
         assertInvalidName(n, "network", "names can not be one of the reserved words.");
         assertInvalidName(n, "context", "names can not be one of the reserved words.");
@@ -740,7 +821,7 @@ public class NodeTest extends NodeTestCase {
         try {
             n.setName(newName);
             fail("the following condition was not met: " + reason);
-        } catch (InvalidNameException ignored) {
+        } catch (Exception ignored) {
         }
     }
 

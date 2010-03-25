@@ -363,7 +363,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
             // Check for events on children of the current macro
             if (event instanceof NodePositionChangedEvent) {
                 childPositionChanged(event.getSource());
-            } else if (event instanceof NodeAttributesEvent) {
+            } else if (event instanceof NodeAttributesChangedEvent) {
                 childAttributeChanged(event.getSource());
             } else if (event instanceof NodePortsChangedEvent) {
                 childPortsChanged(event.getSource());

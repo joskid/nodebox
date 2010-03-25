@@ -1,6 +1,7 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
+import nodebox.node.event.ChildAddedEvent;
 
 import java.io.File;
 import java.util.List;
@@ -360,6 +361,16 @@ public class NodeLibraryTest extends TestCase {
 //        assertEquals(newAlpha, newBeta.getPrototype());
     }
 
+    public void testEvents() {
+        NodeLibrary library = new NodeLibrary("test");
+        Macro root = library.getRootMacro();
+        MockNodeEventListener l = new MockNodeEventListener(); 
+        library.addListener(l);
+        root.createChild(Node.class);
+        assertEquals(ChildAddedEvent.class, l.event.getClass());
+
+    }
+
     /**
      * Assert that the search string only appears once in the source.
      *
@@ -434,4 +445,17 @@ public class NodeLibraryTest extends TestCase {
 //    }
 
 
+    private class MockNodeEventListener implements NodeEventListener {
+
+        NodeEvent event;
+
+        public void receive(NodeEvent event) {
+            this.event = event;
+        }
+
+        public void reset() {
+            this.event = null;
+        }
+
+    }
 }

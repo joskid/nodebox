@@ -22,9 +22,7 @@ public class ChildRemovedEvent extends NodeEvent {
 
     @Override
     public String toString() {
-        return "ChildRemovedEvent{" +
-                "source=" + getSource() +
-                "child=" + child +
-                '}';
+        return String.format("[%s source=%s child=%s]", getClass().getSimpleName(), getSource(), getChild());
     }
+
 }

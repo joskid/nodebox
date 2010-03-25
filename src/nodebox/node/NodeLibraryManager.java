@@ -8,9 +8,6 @@ import java.util.regex.Pattern;
 public class NodeLibraryManager {
 
     public static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^(([\\w_]+\\.?)+)\\.([\\w_]+)$");
-    public static final Pattern INT_PATTERN = Pattern.compile("^\\-?[0-9]+$");
-    public static final Pattern FLOAT_PATTERN = Pattern.compile("^\\-?[0-9]+\\.[0-9]+$");
-    public static final Pattern CODE_PATTERN = Pattern.compile("^(java):(([\\w_]+\\.?)+)\\.([\\w_]+)$");
 
     private List<File> searchPaths = new ArrayList<File>();
     private Map<String, NodeLibrary> libraries = new HashMap<String, NodeLibrary>();
@@ -144,42 +141,6 @@ public class NodeLibraryManager {
         NodeLibrary library = NodeLibrary.fromFile(f, this);
         add(library);
         return library;
-    }
-
-    /**
-     * Given a component identifier, load the appropriate piece of code.
-     * A component identifier looks like this:
-     * <pre>java/net.nodebox.node.NodeTest._circle</pre>
-     * It is a method specifier.
-     *
-     * @param identifier the component identifier
-     * @return the NodeCode
-     * @throws IllegalArgumentException if the identifier could not be parsed.
-     */
-    public static NodeCode getCode(String identifier) throws IllegalArgumentException {
-        Matcher m = CODE_PATTERN.matcher(identifier);
-        if (!m.matches() || m.groupCount() != 4) {
-            throw new IllegalArgumentException("The given identifier '" + identifier + "' is not valid.");
-        }
-        String runtime = m.group(1);
-        String className = m.group(2);
-        // This is group 4, because of the nested group in our regex pattern.
-        String methodName = m.group(4);
-
-        if (!"java".equals(runtime)) {
-            throw new IllegalArgumentException("Invalid runtime; only java is supported.");
-        }
-        Class clazz;
-        try {
-            clazz = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("The class '" + className + "' could not be found.", e);
-        }
-        try {
-            return new JavaMethodWrapper(clazz, methodName);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("The method '" + methodName + "' for class '" + className + "' does not exist, has the wrong signature or is not static.", e);
-        }
     }
 
     /**

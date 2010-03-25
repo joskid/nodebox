@@ -1,7 +1,5 @@
 package nodebox.node;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import nodebox.node.event.*;
 import nodebox.util.FileUtils;
 import org.xml.sax.SAXException;
@@ -257,12 +255,12 @@ public class NodeLibrary {
     }
 
     public void fireNodePositionChanged(Node source) {
-        eventBus.send(new NodeAttributesEvent(source));
+        eventBus.send(new NodePositionChangedEvent(source));
 
     }
 
     public void fireNodeAttributesChanged(Node source) {
-        eventBus.send(new NodeAttributesEvent(source));
+        eventBus.send(new NodeAttributesChangedEvent(source));
     }
 
     public void fireChildAdded(Macro source, Node child) {
@@ -294,7 +292,7 @@ public class NodeLibrary {
     }
 
     public void firePortAttributesChangedEvent(Node source, Port port) {
-        eventBus.send(new PortAttributesEvent(source, port));
+        eventBus.send(new PortAttributesChangedEvent(source, port));
     }
 
     //// Standard overrides ////

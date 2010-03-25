@@ -4,14 +4,16 @@ import nodebox.node.Node;
 import nodebox.node.NodeEvent;
 import nodebox.node.Port;
 
-public class PortAttributesEvent extends NodeEvent {
+public class PortAttributesChangedEvent extends NodeEvent {
 
     private final Port port;
 
-    public PortAttributesEvent(Node source, Port port) {
+    public PortAttributesChangedEvent(Node source, Port port) {
         super(source);
         this.port = port;
     }
 
-    
+    public Port getPort() {
+        return port;
+    }
 }

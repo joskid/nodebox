@@ -42,5 +42,6 @@ public final class MenuItem {
     public String toString() {
         return String.format("[%s: %s]", key, label);
     }
+
 }
 

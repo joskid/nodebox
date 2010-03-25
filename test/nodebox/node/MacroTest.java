@@ -75,6 +75,19 @@ public class MacroTest extends NodeTestCase {
         assertEquals(parent, child.getParent());
     }
 
+    public void testRenameChild() {
+        Macro parent = new Macro(testLibrary);
+        Node n1 = parent.createChild(Node.class, "n1");
+        parent.addChild(n1);
+        assertTrue(parent.hasChild(n1));
+        assertTrue(parent.hasChild("n1"));
+        assertFalse(parent.hasChild("n2"));
+        n1.setName("n2");
+        assertTrue(parent.hasChild(n1));
+        assertFalse(parent.hasChild("n1"));
+        assertTrue(parent.hasChild("n2"));
+    }
+
     public void testDataEvent() {
 //        Node net = testNetworkNode.newInstance(testLibrary, "net");
 //        TestDataListener l = new TestDataListener(net);

@@ -2,7 +2,7 @@ package nodebox.client;
 
 import nodebox.client.port.*;
 import nodebox.node.*;
-import nodebox.node.event.NodeAttributesEvent;
+import nodebox.node.event.NodeAttributesChangedEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +126,7 @@ public class PortView extends JComponent implements PaneView, NodeEventListener 
 
     public void receive(NodeEvent event) {
         if (event.getSource() != node) return;
-        if (!(event instanceof NodeAttributesEvent)) return;
+        if (!(event instanceof NodeAttributesChangedEvent)) return;
         rebuildInterface();
     }
 

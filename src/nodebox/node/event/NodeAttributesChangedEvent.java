@@ -3,9 +3,9 @@ package nodebox.node.event;
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
 
-public class NodeAttributesEvent extends NodeEvent {
+public class NodeAttributesChangedEvent extends NodeEvent {
 
-    public NodeAttributesEvent(Node source) {
+    public NodeAttributesChangedEvent(Node source) {
         super(source);
     }
 }

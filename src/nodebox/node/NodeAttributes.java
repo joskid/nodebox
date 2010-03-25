@@ -1,9 +1,11 @@
 package nodebox.node;
 
+/**
+ * The node attributes contain all the metadata about a node, such as its name and description.
+ */
 public final class NodeAttributes {
 
     public static final String IMAGE_GENERIC = "__generic";
-
 
     private final String description;
     private final String image;
@@ -46,4 +48,5 @@ public final class NodeAttributes {
     public String getImage() {
         return image;
     }
+
 }

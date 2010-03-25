@@ -24,12 +24,10 @@ import nodebox.graphics.Color;
 import nodebox.graphics.Point;
 import nodebox.handle.Handle;
 
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A Node is a building block in a network and encapsulates specific functionality.
@@ -60,12 +58,8 @@ public class Node {
         PRODUCER, FILTER, CONSUMER
     }
 
-    public enum Attribute {
-        LIBRARY, NAME, POSITION, EXPORT, DESCRIPTION, IMAGE, PARAMETER, PORT
-    }
-
-    private NodeLibrary library;
-    private Macro parent;
+    private final NodeLibrary library;
+    Macro parent;
     private Mode mode = Mode.PRODUCER;
     private NodeAttributes attributes;
     private String name;
@@ -79,6 +73,7 @@ public class Node {
     public Node(NodeLibrary library) {
         checkNotNull(library);
         this.library = library;
+        this.name = getTypeName();
     }
 
     //// Library ////
@@ -89,42 +84,104 @@ public class Node {
 
     //// Mode ////
 
+    /**
+     * Get the node's operational mode.
+     * <p/>
+     * The mode defines how a node is processed: within a macro, all consumer nodes are rendered in order.
+     *
+     * @return the operational mode.
+     */
     public Mode getMode() {
         return mode;
     }
 
+    /**
+     * Set the operation mode.
+     *
+     * @param mode the operational mode.
+     */
     public void setMode(Mode mode) {
         this.mode = mode;
     }
 
     //// Naming /////
 
+    /**
+     * Return the node's type name. This name can be used as the prefix for auto-numbering nodes.
+     * It is based on the node's class name: if a node class is "ImportSVG", the type name is "importSVG".
+     *
+     * @return the node's type name
+     */
+    public String getTypeName() {
+        String className = getClass().getSimpleName();
+        return className.substring(0, 1).toLowerCase() + className.substring(1);
+    }
+
+    /**
+     * Get the name of the node.
+     *
+     * @return the node name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Set the node name.
+     * <p/>
+     * The name has some limitations: it cannot start with a number or a double underscore, or be a reserved word
+     * (node, network, root, context).
+     * <p/>
+     * The name needs to be unique within its parent macro.
+     *
+     * @param name the new name
+     * @throws InvalidNameException if the name is of the wrong format or not unique
+     */
     public void setName(String name) throws InvalidNameException {
+        if (name == null) throw new InvalidNameException(this, "", "Name cannot be null.");
+        checkNotNull(this.name);
         if (this.name.equals(name)) return;
         validateName(name);
-        parent.renameChild(this.name, name);
         this.name = name;
+        if (parent != null)
+            parent._renameChild(this, name);
         getLibrary().fireNodeAttributesChanged(this);
     }
 
     //// Attributes ////
 
+    /**
+     * Get the node's description.
+     *
+     * @return the node description
+     */
     public String getDescription() {
         return attributes.getDescription();
     }
 
+    /**
+     * Get the image used to represent the node.
+     *
+     * @return the node image
+     */
     public String getImage() {
         return attributes.getImage();
     }
 
+    /**
+     * Get the node attributes. This contains all the metadata about the node, such as its image and description.
+     *
+     * @return the node attributes
+     */
     public NodeAttributes getAttributes() {
         return attributes;
     }
 
+    /**
+     * Set the node attributes (metadata).
+     *
+     * @param attributes the node attributes
+     */
     public void setAttributes(NodeAttributes attributes) {
         this.attributes = attributes;
         getLibrary().fireNodeAttributesChanged(this);
@@ -153,38 +210,46 @@ public class Node {
 
     //// Parent/child relationship ////
 
+    /**
+     * Get the node's parent macro.
+     *
+     * @return the parent macro or null if this node has no parent
+     */
     public Macro getParent() {
         return parent;
     }
 
+    /**
+     * Get the node's root macro.
+     *
+     * @return the root macro or null if this node has no parent
+     */
     public Macro getRoot() {
-        if (parent == null) return (Macro) this;
-        Macro m = getParent();
-        while (m.getParent() != null) {
-            m = m.getParent();
+        Macro root = getLibrary().getRootMacro();
+        if (parent != null || this == root) {
+            return root;
+        } else {
+            return null;
         }
-        return m;
     }
 
     /**
-     * Reparent the node.
-     * <p/>
-     * This breaks all connections.
+     * Check if the node has a parent macro.
      *
-     * @param parent the new parent
+     * @return true if the node has a parent
      */
-    public void setParent(Macro parent) {
-        checkNotNull(parent);
-        checkState(parent.getLibrary() == library, "parent macro is not in the same library.");
-        this.parent.removeChild(this);
-        this.parent = parent;
-        this.parent.addChild(this);
-    }
-
     public boolean hasParent() {
         return parent != null;
     }
 
+    /**
+     * Check if the node is the deepest element in the hierarchy.
+     * <p/>
+     * The default node implementation always returns true.
+     *
+     * @return true if this node has no children
+     * @see Macro#isLeaf()
+     */
     public boolean isLeaf() {
         return true;
     }
@@ -199,14 +264,23 @@ public class Node {
 
     //// Path ////
 
+    /**
+     * Get an absolute path to this node starting from the root.
+     * Example: "/grandParent1/parent1/child"
+     *
+     * @return the absolute path to this node
+     */
     public String getAbsolutePath() {
         StringBuffer name = new StringBuffer("/");
         Macro parent = getParent();
-        while (parent != null) {
+        Macro root = getRoot();
+        while (parent != null && parent != root) {
             name.insert(1, parent.getName() + "/");
             parent = parent.getParent();
         }
-        name.append(getName());
+        if (this != root) {
+            name.append(getName());
+        }
         return name.toString();
     }
 

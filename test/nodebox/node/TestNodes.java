@@ -59,9 +59,7 @@ public class TestNodes extends NodeLibrary {
             setExported(true);
             v1In = addPort("v1", Integer.class, Port.Direction.IN);
             v2In = addPort("v2", Integer.class, Port.Direction.IN);
-            resultOut = addPort("v2", Integer.class, Port.Direction.OUT);
-            addPort(v2In);
-            addPort(resultOut);
+            resultOut = addPort("result", Integer.class, Port.Direction.OUT);
         }
 
         @Override

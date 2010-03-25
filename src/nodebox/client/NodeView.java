@@ -381,11 +381,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            try {
-//                inputPort.connect(outputNode);
-            } catch (ConnectionError ce) {
-                JOptionPane.showMessageDialog(networkView, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
-            }
+                //inputPort.connect(outputNode);
         }
     }
 

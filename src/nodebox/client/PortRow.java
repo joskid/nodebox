@@ -1,10 +1,9 @@
 package nodebox.client;
 
-import nodebox.node.ConnectionError;
 import nodebox.node.NodeEvent;
 import nodebox.node.NodeEventListener;
 import nodebox.node.Port;
-import nodebox.node.event.NodeAttributesEvent;
+import nodebox.node.event.NodeAttributesChangedEvent;
 import nodebox.node.event.ValueChangedEvent;
 
 import javax.imageio.ImageIO;
@@ -158,7 +157,7 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
             if (e.getPort() != port) return;
 //            setEnabled(port.isEnabled());
             setExpressionStatus();
-        } else if (event instanceof NodeAttributesEvent) {
+        } else if (event instanceof NodeAttributesChangedEvent) {
 //            setEnabled(port.isEnabled());
         }
     }
@@ -218,11 +217,7 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
 
     private class ExpressionFieldChangedAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            try {
-                // port.setExpression(expressionField.getText());
-            } catch (ConnectionError ce) {
-                JOptionPane.showMessageDialog(PortRow.this, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
-            }
+            // port.setExpression(expressionField.getText());
         }
     }
 }

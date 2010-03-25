@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,7 +37,7 @@ public class Macro extends Node {
      * @return the new child node
      */
     public Node createChild(Class childClass) {
-        return createChild(childClass, uniqueName(childClass.getSimpleName()));
+        return createChild(childClass, null);
     }
 
     /**
@@ -51,10 +49,12 @@ public class Macro extends Node {
      */
     public Node createChild(Class childClass, String name) {
         checkNotNull(childClass);
-        checkNotNull(name);
         try {
             Constructor c = childClass.getConstructor(NodeLibrary.class);
             Node child = (Node) c.newInstance(getLibrary());
+            if (name == null) {
+                name = uniqueName(child.getTypeName());
+            }
             child.setName(name);
             addChild(child);
             return child;
@@ -72,7 +72,7 @@ public class Macro extends Node {
                 .putAll(children)
                 .put(child.getName(), child)
                 .build();
-        child.setParent(this);
+        child.parent = this;
         getLibrary().fireChildAdded(this, child);
 //        // This method is called indirectly by newInstance.
 //        // newInstance has set the parent, but has not added it to
@@ -101,20 +101,16 @@ public class Macro extends Node {
     }
 
     public boolean removeChild(Node child) {
-        return false;
-//        assert (node != null);
-//        if (!contains(node))
-//            return false;
-//        node.markDirty();
-//        node.disconnect();
-//        node.parent = null;
-//        children.remove(node.getName());
-//        if (node == renderedChild) {
-//            setRenderedChild(null);
-//        }
-//        getLibrary().fireChildRemoved(this, node);
-//        return true;
-
+        if (!children.containsValue(child)) return false;
+        child.parent = null;
+        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
+        for (Node c : children.values()) {
+            if (c != child) {
+                b.put(c.getName(), c);
+            }
+        }
+        children = b.build();
+        return true;
     }
 
     public boolean isLeaf() {
@@ -125,8 +121,22 @@ public class Macro extends Node {
         return children.isEmpty();
     }
 
-    public void renameChild(String oldName, String newName) {
+    /* package private */
 
+    void _renameChild(Node child, String newName) {
+        checkNotNull(child);
+        checkState(hasChild(child));
+        checkNotNull(newName);
+        String oldName = child.getName();
+        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
+        for (Node c : children.values()) {
+            if (c.getName().equals(oldName)) {
+                b.put(newName, c);
+            } else {
+                b.put(c.getName(), c);
+            }
+        }
+        children = b.build();
     }
 
     public boolean hasChild(String nodeName) {
@@ -271,6 +281,7 @@ public class Macro extends Node {
 
     /**
      * Remove the given connection.
+     *
      * @param conn the connection to remove
      * @return true if the connection was removed.
      */
@@ -338,7 +349,7 @@ public class Macro extends Node {
     /**
      * Check if the given input is connected to the given output.
      *
-     * @param input the input port of a child of this node.
+     * @param input  the input port of a child of this node.
      * @param output the output port of a child of this node.
      * @return true if the input is connected to the output.
      */

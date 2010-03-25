@@ -19,8 +19,7 @@ public class ChildAddedEvent extends NodeEvent {
 
     @Override
     public String toString() {
-        return "ChildAddedEvent{" +
-                "child=" + child +
-                "} " + super.toString();
+        return String.format("[%s source=%s child=%s]", getClass().getSimpleName(), getSource(), getChild());
     }
+
 }

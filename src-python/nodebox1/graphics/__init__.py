@@ -1,5 +1,5 @@
 from java.lang import Boolean
-from nodebox.graphics import CanvasContext
+from nodebox.graphics import CanvasContext, Path, NodeBoxError
 
 class Context(CanvasContext):
     def __init__(self, canvas=None, ns=None):
@@ -23,23 +23,23 @@ class Context(CanvasContext):
     
     def ellipse(self, x, y, width, height, draw=True, **kwargs):
         p = CanvasContext.ellipse(self, x, y, width, height, Boolean(draw))
-        # todo: handle kwargs
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
     oval = ellipse
     
     def line(self, x1, y1, x2, y2, draw=True, **kwargs):
         p = CanvasContext.line(self, x1, y1, x2, y2, Boolean(draw))
-        # todo: handle kwargs
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
     
     def star(self, startx, starty, points=20, outer=100, inner=50, draw=True, **kwargs):
         p = CanvasContext.star(self, startx, starty, points, outer, inner, Boolean(draw))
-        # todo: handle kwargs
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
     
     def arrow(self, x, y, width=100, type=CanvasContext.NORMAL, draw=True, **kwargs):
         p = CanvasContext.arrow(self, x, y, width, type, Boolean(draw))
-        # todo: handle kwargs, implement arrow45
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
         
     ### Path Commands ###
@@ -55,7 +55,7 @@ class Context(CanvasContext):
     
     def drawpath(self, path, **kwargs):
         p = CanvasContext.drawpath(self, path)
-        # todo: handle kwargs
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
     
     def autoclosepath(self, **kwargs):
@@ -124,7 +124,7 @@ class Context(CanvasContext):
         if outline:
             t = CanvasContext.text(self, txt, x, y, width, height, Boolean(False))
             p = t.path
-            # todo: handle kwargs
+            self._setAttributesFromKwargs(p, **kwargs)
             if draw:
                 self.addPath(p)
             return p
@@ -137,7 +137,7 @@ class Context(CanvasContext):
         if width is None: width = 0
         if height is None: height = 0
         p = CanvasContext.textpath(self, txt, x, y, width, height)
-        # todo: handle kwargs
+        self._setAttributesFromKwargs(p, **kwargs)
         return p
 
     def textmetrics(self, txt, width=None, height=None, **kwargs):
@@ -158,4 +158,14 @@ class Context(CanvasContext):
         h = CanvasContext.textheight(self, txt, height)
         # todo: handle kwargs?
         return h
-
+    
+    def _setAttributesFromKwargs(self, item, **kwargs):
+        keys = kwargs.keys()
+        if isinstance(item, Path):
+            for kwarg, attr in (('fill', 'fillColor'), ('stroke', 'strokeColor'), ('strokewidth', 'strokeWidth')):
+                if kwarg in keys:
+                    v = kwargs.pop(kwarg)
+                    setattr(item, attr, v)
+        remaining = kwargs.keys()
+        if remaining:
+            raise NodeBoxError, "Unknown argument(s) '%s'" % ", ".join(remaining)

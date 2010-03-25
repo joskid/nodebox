@@ -1,10 +1,13 @@
 package nodebox.node;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public abstract class NodeEvent {
 
-    private Node source;
+    private final Node source;
 
     protected NodeEvent(Node source) {
+        checkNotNull(source);
         this.source = source;
     }
 
@@ -14,8 +17,6 @@ public abstract class NodeEvent {
 
     @Override
     public String toString() {
-        return "NodeEvent{" +
-                "source=" + source +
-                '}';
+        return String.format("[%s source=%s]", getClass().getSimpleName(), source);
     }
 }

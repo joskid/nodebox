@@ -2,26 +2,27 @@ package nodebox.node.event;
 
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
-import nodebox.node.Parameter;
+import nodebox.node.Port;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ValueChangedEvent extends NodeEvent {
 
-    private Parameter parameter;
+    private final Port port;
 
-    public ValueChangedEvent(Node source, Parameter parameter) {
+    public ValueChangedEvent(Node source, Port port) {
         super(source);
-        this.parameter = parameter;
+        checkNotNull(port);
+        this.port = port;
     }
 
-    public Parameter getParameter() {
-        return parameter;
+    public Port getPort() {
+        return port;
     }
 
     @Override
     public String toString() {
-        return "ValueChangedEvent{" +
-                "source=" + getSource() +
-                "parameter=" + parameter +
-                '}';
+        return String.format("[%s source=%s port=%s]", getClass().getSimpleName(), getSource(), port);
     }
+
 }

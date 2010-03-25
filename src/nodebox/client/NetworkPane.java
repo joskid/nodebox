@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import nodebox.node.Macro;
 import nodebox.node.Node;
 
 import java.awt.*;
@@ -11,7 +12,7 @@ public class NetworkPane extends Pane implements PropertyChangeListener {
 
     private PaneHeader paneHeader;
     private NetworkView networkView;
-    private Node node;
+    private Macro macro;
     private NButton newNodeButton;
 
 
@@ -27,7 +28,7 @@ public class NetworkPane extends Pane implements PropertyChangeListener {
         networkView.addPropertyChangeListener(this);
         add(paneHeader, BorderLayout.NORTH);
         add(networkView, BorderLayout.CENTER);
-        setNode(document.getActiveNetwork());
+        setMacro(document.getActiveMacro());
     }
 
     public Pane clone() {
@@ -46,19 +47,19 @@ public class NetworkPane extends Pane implements PropertyChangeListener {
         return networkView;
     }
 
-    public Node getNode() {
-        return node;
+    public Node getMacro() {
+        return macro;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
-        networkView.setNode(node);
+    public void setMacro(Macro macro) {
+        this.macro = macro;
+        networkView.setMacro(macro);
         networkView.select(getDocument().getActiveNode());
     }
 
     @Override
-    public void currentNodeChanged(Node activeNetwork) {
-        setNode(activeNetwork);
+    public void currentMacroChanged(Macro macro) {
+        setMacro(macro);
     }
 
     @Override

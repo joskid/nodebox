@@ -4,10 +4,7 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PPaintContext;
-import nodebox.node.ConnectionError;
-import nodebox.node.InvalidNameException;
-import nodebox.node.Node;
-import nodebox.node.Port;
+import nodebox.node.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,6 +19,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 public class NodeView extends PNode implements Selectable, PropertyChangeListener {
 
@@ -87,7 +85,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
      * @return an Image object.
      */
     public static BufferedImage getImageForNode(Node node) {
-        if (node == null || node.getImage() == null || node.getImage().equals(Node.IMAGE_GENERIC)) return nodeGeneric;
+        if (node == null || node.getImage() == null || node.getImage().equals(NodeAttributes.IMAGE_GENERIC))
+            return nodeGeneric;
         File libraryFile = node.getLibrary().getFile();
         if (libraryFile != null) {
             File libraryDirectory = libraryFile.getParentFile();
@@ -103,7 +102,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
             }
         }
         // Look for the prototype
-        return getImageForNode(node.getPrototype());
+        return nodeGeneric;
     }
 
     /**
@@ -114,8 +113,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
      */
     public static int getVerticalOffsetForPort(Port port) {
         Node node = port.getNode();
-        java.util.List<Port> ports = node.getPorts();
-        int portIndex = node.getPorts().indexOf(port);
+        Collection<Port> ports = node.getPorts();
+        int portIndex = 0; // TODO node.getPorts().indexOf(port);
         int portCount = ports.size();
         int totalPortsHeight = (NODE_PORT_HEIGHT + NODE_PORT_MARGIN) * (portCount - 1) + NODE_PORT_HEIGHT;
         int offsetPerPort = NODE_PORT_HEIGHT + NODE_PORT_MARGIN;
@@ -126,7 +125,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     /**
      * Create an icon with the node's image and the rounded embellishments.
      *
-     * @param node the node
+     * @param node      the node
+     * @param drawPorts if true, draws the ports
      * @return an Image object.
      */
     public static BufferedImage getFullImageForNode(Node node, boolean drawPorts) {
@@ -140,7 +140,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         Graphics2D fg = fullIcon.createGraphics();
         if (drawPorts) {
             // Count the input ports and draw them.
-            java.util.List<Port> inputs = node.getPorts();
+            Collection<Port> inputs = node.getPorts();
             for (Port p : inputs) {
                 int portY = getVerticalOffsetForPort(p);
                 fg.drawImage(nodeInPort, 0, portY, null);
@@ -199,8 +199,6 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         g.drawImage(fullIcon, 0, 0, null);
         if (node.hasError())
             g.drawImage(nodeError, 0, 0, null);
-        if (node.isRendered())
-            g.drawImage(nodeRendered, 0, 0, null);
         g.drawImage(nodeRim, 0, 0, null);
 
         // Draw the node name.
@@ -274,8 +272,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                 if (y > NODE_FULL_SIZE - 4) {
                     doRename();
                 } else {
-                    node.setRendered();
-                    //networkView.getPane().getDocument().setActiveNetwork(node);
+                    // TODO node.setRendered();
+                    //networkView.getPane().getDocument().setActiveMacro(node);
                 }
             }
             e.setHandled(true);
@@ -334,35 +332,35 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void mouseReleased(PInputEvent event) {
-            if (networkView.isConnecting()) {
-                // Check if both source and target are set.
-                if (networkView.getConnectionSource() != null && networkView.getConnectionTarget() != null) {
-                    Node source = networkView.getConnectionSource().getNode();
-                    Node target = networkView.getConnectionTarget().getNode();
-                    // Look for compatible ports.
-                    java.util.List<Port> compatiblePorts = target.getCompatibleInputs(source);
-                    if (compatiblePorts.isEmpty()) {
-                        // There are no compatible parameters.
-                    } else if (compatiblePorts.size() == 1) {
-                        // Only one possible connection, make it now.
-                        Port inputPort = compatiblePorts.get(0);
-                        try {
-                            inputPort.connect(source);
-                        } catch (ConnectionError e) {
-                            JOptionPane.showMessageDialog(networkView, e.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } else {
-                        JPopupMenu menu = new JPopupMenu("Select input");
-                        for (Port p : compatiblePorts) {
-                            Action a = new SelectCompatiblePortAction(source, p);
-                            menu.add(a);
-                        }
-                        Point pt = getNetworkView().getMousePosition();
-                        menu.show(getNetworkView(), pt.x, pt.y);
-                    }
-                }
-                networkView.endConnection();
-            }
+//            if (networkView.isConnecting()) {
+//                // Check if both source and target are set.
+//                if (networkView.getConnectionSource() != null && networkView.getConnectionTarget() != null) {
+//                    Node source = networkView.getConnectionSource().getNode();
+//                    Node target = networkView.getConnectionTarget().getNode();
+//                    // Look for compatible ports.
+//                    java.util.List<Port> compatiblePorts = target.getCompatibleInputs(source);
+//                    if (compatiblePorts.isEmpty()) {
+//                        // There are no compatible parameters.
+//                    } else if (compatiblePorts.size() == 1) {
+//                        // Only one possible connection, make it now.
+//                        Port inputPort = compatiblePorts.get(0);
+//                        try {
+//                            inputPort.connect(source);
+//                        } catch (ConnectionError e) {
+//                            JOptionPane.showMessageDialog(networkView, e.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
+//                        }
+//                    } else {
+//                        JPopupMenu menu = new JPopupMenu("Select input");
+//                        for (Port p : compatiblePorts) {
+//                            Action a = new SelectCompatiblePortAction(source, p);
+//                            menu.add(a);
+//                        }
+//                        Point pt = getNetworkView().getMousePosition();
+//                        menu.show(getNetworkView(), pt.x, pt.y);
+//                    }
+//                }
+//                networkView.endConnection();
+//            }
         }
 
         private boolean isPanningEvent(PInputEvent event) {
@@ -384,7 +382,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
 
         public void actionPerformed(ActionEvent e) {
             try {
-                inputPort.connect(outputNode);
+//                inputPort.connect(outputNode);
             } catch (ConnectionError ce) {
                 JOptionPane.showMessageDialog(networkView, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
             }
@@ -411,7 +409,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            node.setRendered();
+//            node.setRendered();
             networkView.repaint();
         }
     }
@@ -435,7 +433,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            node.getParent().remove(node);
+            node.getParent().removeChild(node);
         }
     }
 
@@ -446,7 +444,11 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            NodeBoxDocument.getCurrentDocument().setActiveNetwork(node);
+            if (node instanceof Macro) {
+                NodeBoxDocument.getCurrentDocument().setActiveMacro((Macro) node);
+            } else {
+                Toolkit.getDefaultToolkit().beep();
+            }
         }
     }
 

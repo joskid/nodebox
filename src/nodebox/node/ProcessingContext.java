@@ -3,6 +3,7 @@ package nodebox.node;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,52 +14,67 @@ import java.util.Set;
  */
 public class ProcessingContext {
 
-    private HashMap<String, Object> valueMap = new HashMap<String, Object>();
+    private long frame;
+    private Set<Node> executedNodes = new HashSet<Node>();
+    private HashMap<Node, HashMap<String, Object>> nodeValues = new HashMap<Node, HashMap<String, Object>>();
     private ByteArrayOutputStream outputBytes;
     private ByteArrayOutputStream errorBytes;
     private PrintStream outputStream;
     private PrintStream errorStream;
 
-    private enum State {
-        UPDATING, PROCESSED
-    }
-
-    /**
-     * A list of parameters that have already been started updating.
-     * This set is used to detect cycles.
-     */
-    private Map<Parameter, State> updatedParameters = new HashMap<Parameter, State>();
-
     public ProcessingContext() {
-        put("FRAME", 1);
+        frame = 1;
         outputBytes = new ByteArrayOutputStream();
         outputStream = new PrintStream(outputBytes);
         errorBytes = new ByteArrayOutputStream();
         errorStream = new PrintStream(errorBytes);
     }
 
-    //// Map operations ////
-
-    public void put(String key, Object value) {
-        valueMap.put(key, value);
+    public ProcessingContext(ProcessingContext parentContext) {
+        nodeValues = new HashMap<Node, HashMap<String, Object>>(parentContext.nodeValues);
     }
 
-    public Object get(String key) {
-        return valueMap.get(key);
+    //// Frame ////
+
+    public long getFrame() {
+        return frame;
     }
 
-    public boolean containsKey(String key) {
-        return valueMap.containsKey(key);
+    //// Node values ////
+
+    public Map<String, Object> valuesForNode(Node node) {
+        return nodeValues.get(node);
     }
 
-    public Set<String> keySet() {
-        return valueMap.keySet();
+    public Object getValueForNodeKey(Node node, String key) {
+        Map<String, Object> values = nodeValues.get(node);
+        if (values == null) return null;
+        return values.get(key);
     }
 
-    //// Map shortcuts ////
+    public Set<String> keysForNodes(Node node) {
+        Map<String, Object> values = nodeValues.get(node);
+        if (values == null) return new HashSet<String>(0);
+        return values.keySet();
+    }
 
-    public int getFrame() {
-        return (Integer) get("FRAME");
+    public void setValueForNodeKey(Node node, String key, Object value) {
+        HashMap<String, Object> values = nodeValues.get(node);
+        if (values == null) {
+            values = new HashMap<String, Object>();
+            nodeValues.put(node, values);
+        }
+        values.put(key, value);
+    }
+
+    //// Executed ////
+
+    public boolean hasExecuted(Node node) {
+        return executedNodes.contains(node);
+    }
+
+    public void addToExecutedNodes(Node node) {
+        executedNodes.add(node);
     }
 
     //// Output/error streams  ////
@@ -79,34 +95,4 @@ public class ProcessingContext {
         return errorBytes.toString();
     }
 
-    // TODO: These are no longer used. Check and remove.
-    public void beginUpdating(Parameter parameter) {
-        State state = updatedParameters.get(parameter);
-        if (state == null) {
-            updatedParameters.put(parameter, State.UPDATING);
-        } else if (state == State.UPDATING) {
-            throw new AssertionError("You should check beforehand if a parameter was updating.");
-        } else if (state == State.PROCESSED) {
-            throw new RuntimeException("Parameter " + parameter + " has already been processed: infinite recursion detected.");
-        }
-    }
-
-    public void endUpdating(Parameter parameter) {
-        State state = updatedParameters.get(parameter);
-        if (state == null) {
-            throw new AssertionError("You should have called beginUpdating first.");
-        } else if (state == State.UPDATING) {
-            updatedParameters.put(parameter, State.PROCESSED);
-        } else if (state == State.PROCESSED) {
-            throw new AssertionError("You should only call endUpdating once.");
-        }
-    }
-
-    public boolean isUpdating(Parameter p) {
-        return updatedParameters.get(p) == State.UPDATING;
-    }
-
-    public boolean hasProcessed(Parameter p) {
-        return updatedParameters.get(p) == State.PROCESSED;
-    }
 }

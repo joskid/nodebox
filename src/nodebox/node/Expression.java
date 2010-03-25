@@ -64,11 +64,11 @@ public class Expression {
         }
     }
 
-    private final Parameter parameter;
+    private final Port parameter;
     private final String expression;
     private transient Throwable error;
     private transient Serializable compiledExpression;
-    private Set<WeakReference<Parameter>> markedParameterReferences;
+    Set<WeakReference<Port>> markedPortReferences;
 
     /**
      * Construct and set the expression.
@@ -79,11 +79,11 @@ public class Expression {
      * @param parameter
      * @param expression
      */
-    public Expression(Parameter parameter, String expression) {
-        assert parameter != null; // We need the current parameter for stamp expressions.
+    public Expression(Port parameter, String expression) {
+        assert parameter != null; // We need the current port for stamp expressions.
         this.parameter = parameter;
         this.expression = expression;
-        markedParameterReferences = null;
+        markedPortReferences = null;
         compiledExpression = null;
     }
 
@@ -104,11 +104,11 @@ public class Expression {
     /* package private */
 
     void setError(Exception error) {
-        // This method is called from Parameter to set an error for cyclic dependencies.
+        // This method is called from Port to set an error for cyclic dependencies.
         this.error = error;
     }
 
-    public Parameter getParameter() {
+    public Port getPort() {
         return parameter;
     }
 
@@ -173,7 +173,7 @@ public class Expression {
             error = null;
         } catch (Exception e) {
             error = e;
-            throw new ExpressionError("Cannot compile expression '" + expression + "' on " + getParameter().getAbsolutePath() + ": " + e.getMessage(), e);
+            throw new ExpressionError("Cannot compile expression '" + expression + "' on " + getPort().getAbsolutePath() + ": " + e.getMessage(), e);
         }
     }
 
@@ -200,7 +200,7 @@ public class Expression {
     public Object evaluate(ProcessingContext context) throws ExpressionError {
         // If there was an error with the expression, throw it before doing anything.
         if (hasError()) {
-            throw new ExpressionError("Cannot compile expression '" + expression + "' on " + getParameter().getAbsolutePath() + ": " + getError().getMessage(), getError());
+            throw new ExpressionError("Cannot compile expression '" + expression + "' on " + getPort().getAbsolutePath() + ": " + getError().getMessage(), getError());
         }
 
         // If the expression was not compiled, compile it first.
@@ -211,16 +211,16 @@ public class Expression {
         // Set up state variables in the expression utilities class.
         // TODO: This is not thread-safe.
         ExpressionHelper.currentContext = context;
-        ExpressionHelper.currentParameter = parameter;
-        // Marked parameter references are used to find which parameters this expression references.
-        markedParameterReferences = new HashSet<WeakReference<Parameter>>();
-        ProxyResolverFactory prf = new ProxyResolverFactory(parameter.getNode(), context, markedParameterReferences);
+        ExpressionHelper.currentPort = parameter;
+        // Marked port references are used to find which parameters this expression references.
+        markedPortReferences = new HashSet<WeakReference<Port>>();
+        ProxyResolverFactory prf = new ProxyResolverFactory(parameter.getNode(), context, markedPortReferences);
         try {
             error = null;
             return MVEL.executeExpression(compiledExpression, prf);
         } catch (Exception e) {
             error = e;
-            throw new ExpressionError("Cannot evaluate expression '" + expression + "' on " + getParameter().getAbsolutePath() + ": " + e.getMessage(), e);
+            throw new ExpressionError("Cannot evaluate expression '" + expression + "' on " + getPort().getAbsolutePath() + ": " + e.getMessage(), e);
         }
     }
 
@@ -231,17 +231,17 @@ public class Expression {
      *
      * @return a set of parameters
      */
-    public Set<Parameter> getDependencies() {
-        if (markedParameterReferences == null) {
+    public Set<Port> getDependencies() {
+        if (markedPortReferences == null) {
             try {
                 evaluate();
             } catch (ExpressionError expressionError) {
-                return new HashSet<Parameter>(0);
+                return new HashSet<Port>(0);
             }
         }
-        HashSet<Parameter> dependencies = new HashSet<Parameter>(markedParameterReferences.size());
-        for (WeakReference<Parameter> ref : markedParameterReferences) {
-            Parameter p = ref.get();
+        HashSet<Port> dependencies = new HashSet<Port>(markedPortReferences.size());
+        for (WeakReference<Port> ref : markedPortReferences) {
+            Port p = ref.get();
             if (p != null)
                 dependencies.add(p);
         }
@@ -260,9 +260,9 @@ public class Expression {
             this.context = context;
         }
 
-        public ProxyResolverFactory(Node node, ProcessingContext context, Set<WeakReference<Parameter>> markedParameterReferences) {
+        public ProxyResolverFactory(Node node, ProcessingContext context, Set<WeakReference<Port>> markedPortReferences) {
             this.node = node;
-            proxy = new NodeAccessProxy(node, markedParameterReferences);
+            proxy = new NodeAccessProxy(node, markedPortReferences);
             this.context = context;
         }
 
@@ -292,10 +292,11 @@ public class Expression {
                 vr = new ProxyResolver(proxy, proxy.get(name));
                 variableResolvers.put(name, vr);
                 return vr;
-            } else if (context.containsKey(name)) {
-                vr = new ProcessingContextResolver(context, name);
-                variableResolvers.put(name, vr);
-                return vr;
+                // TODO: Be able to get stuff from the context variables
+//            } else if (context.containsKey(name)) {
+//                vr = new ProcessingContextResolver(context, name);
+//                variableResolvers.put(name, vr);
+//                return vr;
             } else if (nextFactory != null) {
                 return nextFactory.getVariableResolver(name);
             }
@@ -305,7 +306,7 @@ public class Expression {
         public boolean isResolveable(String name) {
             return (variableResolvers != null && variableResolvers.containsKey(name))
                     || (proxy.containsKey(name))
-                    || (context.containsKey(name))
+//                    || (context.containsKey(name))
                     || (nextFactory != null && nextFactory.isResolveable(name));
         }
 
@@ -317,7 +318,7 @@ public class Expression {
         public Set<String> getKnownVariables() {
             Set<String> knownVariables = new HashSet<String>();
             knownVariables.addAll(proxy.keySet());
-            knownVariables.addAll(context.keySet());
+            // knownVariables.addAll(context.keySet());
             return knownVariables;
         }
     }
@@ -361,7 +362,7 @@ public class Expression {
         }
 
         public void setValue(Object value) {
-            throw new CompileException("Parameter values cannot be changed through expressions.");
+            throw new CompileException("Port values cannot be changed through expressions.");
         }
     }
 
@@ -392,7 +393,8 @@ public class Expression {
         }
 
         public Object getValue() {
-            return context.get(name);
+            return null;
+//            return context.get(name);
         }
 
         public void setValue(Object o) {

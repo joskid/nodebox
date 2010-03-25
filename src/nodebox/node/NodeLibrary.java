@@ -1,5 +1,7 @@
 package nodebox.node;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import nodebox.node.event.*;
 import nodebox.util.FileUtils;
 import org.xml.sax.SAXException;
@@ -9,9 +11,11 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A Node library stores a set of (possibly hierarchical) nodes.
@@ -26,17 +30,12 @@ import java.util.Set;
  */
 public class NodeLibrary {
 
-    public static final NodeLibrary BUILTINS = new NodeLibrary();
-
     private String name;
     private File file;
-    private Node rootNode;
+    private Macro rootMacro;
     private HashMap<String, String> variables;
     private NodeCode code;
     private NodeEventBus eventBus = new NodeEventBus();
-
-    private DependencyGraph<Parameter, Object> parameterGraph = new DependencyGraph<Parameter, Object>();
-
 
     /**
      * Load a library from the given XML.
@@ -53,7 +52,7 @@ public class NodeLibrary {
      * @see nodebox.node.NodeLibraryManager#add(NodeLibrary)
      * @see nodebox.node.NodeLibraryManager#load(String, String)
      */
-    public static NodeLibrary load(String libraryName, String xml, NodeLibraryManager manager) throws RuntimeException {
+    public static NodeLibrary fromXml(String libraryName, String xml, NodeLibraryManager manager) throws RuntimeException {
         try {
             NodeLibrary library = new NodeLibrary(libraryName);
             load(library, new ByteArrayInputStream(xml.getBytes("UTF8")), manager);
@@ -81,7 +80,7 @@ public class NodeLibrary {
      * @see nodebox.node.NodeLibraryManager#add(NodeLibrary)
      * @see nodebox.node.NodeLibraryManager#load(File)
      */
-    public static NodeLibrary load(File f, NodeLibraryManager manager) throws RuntimeException {
+    public static NodeLibrary fromFile(File f, NodeLibraryManager manager) throws RuntimeException {
         try {
             // The library name is the file name without the ".ndbx" extension.
             // Chop off the .ndbx
@@ -119,21 +118,15 @@ public class NodeLibrary {
         parser.parse(is, handler);
     }
 
-    private NodeLibrary() {
-        this.name = "builtins";
-        this.file = null;
-        this.rootNode = null;
-        this.variables = null;
-    }
-
     public NodeLibrary(String name) {
         this(name, null);
     }
 
     public NodeLibrary(String name, File file) {
+        checkNotNull(name);
         this.name = name;
         this.file = file;
-        this.rootNode = Node.ROOT_NODE.newInstance(this, "root");
+        this.rootMacro = new Macro(this);
         this.variables = new HashMap<String, String>();
     }
 
@@ -147,12 +140,12 @@ public class NodeLibrary {
 
     //// Node management ////
 
-    public Node getRootNode() {
-        return rootNode;
+    public Macro getRootMacro() {
+        return rootMacro;
     }
 
     public List<Node> getExportedNodes() {
-        List<Node> allChildren = rootNode.getChildren();
+        Collection<Node> allChildren = rootMacro.getChildren();
         List<Node> exportedChildren = new ArrayList<Node>(allChildren.size());
         for (Node child : allChildren) {
             if (child.isExported()) {
@@ -164,45 +157,39 @@ public class NodeLibrary {
 
     public void add(Node node) {
         if (node.getLibrary() != this) throw new AssertionError("This node is already added to another library.");
-        // The root node can be null in only one case: when we're creating the builtins library.
-        // In that case, the rootNode becomes the given node.
-        if (rootNode == null) {
-            rootNode = node;
-        } else {
-            rootNode.add(node);
-        }
+        rootMacro.addChild(node);
     }
 
     /**
      * Get a node from this library.
      * <p/>
-     * Only exported nodes are returned. If you want all nodes, use getRootNode().getChild()
+     * Only exported nodes are returned. If you want all nodes, use getRootMacro().getChild()
      *
      * @param name the name of the node
      * @return the node, or null if a node with this name could not be found.
      */
     public Node get(String name) {
-        if ("root".equals(name)) return rootNode;
-        return rootNode.getExportedChild(name);
+        if ("root".equals(name)) return rootMacro;
+        return rootMacro.getExportedChild(name);
     }
 
     public Node remove(String name) {
-        Node node = rootNode.getChild(name);
+        Node node = rootMacro.getChild(name);
         if (node == null) return null;
-        rootNode.remove(node);
+        rootMacro.removeChild(node);
         return node;
     }
 
     public boolean remove(Node node) {
-        return rootNode.remove(node);
+        return rootMacro.removeChild(node);
     }
 
     public int size() {
-        return rootNode.size();
+        return rootMacro.size();
     }
 
     public boolean contains(String nodeName) {
-        return rootNode.contains(nodeName);
+        return rootMacro.hasChild(nodeName);
     }
 
     //// Variables ////
@@ -251,82 +238,6 @@ public class NodeLibrary {
         return NDBXWriter.asString(this);
     }
 
-    //// Parameter dependencies ////
-
-    /**
-     * Add a dependency between two parameters.
-     * <p/>
-     * Whenever the dependent node wants to update, it needs to check if the dependency
-     * is clean. Also, whenever the dependency changes, the dependent gets notified.
-     * <p/>
-     * Do not call this method directly. Instead, let Parameter create the dependencies by using setExpression().
-     *
-     * @param dependency the parameter that provides the value
-     * @param dependent  the parameter that needs the value
-     * @see nodebox.node.Parameter#setExpression(String)
-     */
-    public void addParameterDependency(Parameter dependency, Parameter dependent) {
-        parameterGraph.addDependency(dependency, dependent);
-    }
-
-    /**
-     * Remove all dependencies this parameter has.
-     * <p/>
-     * This method gets called when a parameter clears out its expression.
-     * <p/>
-     * Do not call this method directly. Instead, let Parameter remove dependencies by using clearExpression().
-     *
-     * @param p the parameter
-     * @see nodebox.node.Parameter#clearExpression()
-     */
-    public void removeParameterDependencies(Parameter p) {
-        parameterGraph.removeDependencies(p);
-    }
-
-    /**
-     * Remove all dependents this parameter has.
-     * <p/>
-     * This method gets called when the parameter is about to be removed. It signal all of its dependent nodes
-     * that the parameter will no longer be available.
-     * <p/>
-     * Do not call this method directly. Instead, let Parameter remove dependents by using removeParameter().
-     *
-     * @param p the parameter
-     * @see Node#removeParameter(String)
-     */
-    public void removeParameterDependents(Parameter p) {
-        parameterGraph.removeDependents(p);
-    }
-
-    /**
-     * Get all parameters that rely on this parameter.
-     * <p/>
-     * These parameters all have expressions that point to this parameter. Whenever this parameter changes,
-     * they get notified.
-     * <p/>
-     * This list contains all "live" parameters when you call it. Please don't hold on to this list for too long,
-     * since parameters can be added and removed at will.
-     *
-     * @param p the parameter
-     * @return a list of parameters that depend on this parameter. This list can safely be modified.
-     */
-    public Set<Parameter> getParameterDependents(Parameter p) {
-        return parameterGraph.getDependents(p);
-    }
-
-    /**
-     * Get all parameters this parameter depends on.
-     * <p/>
-     * This list contains all "live" parameters when you call it. Please don't hold on to this list for too long,
-     * since parameters can be added and removed at will.
-     *
-     * @param p the parameter
-     * @return a list of parameters this parameter depends on. This list can safely be modified.
-     */
-    public Set<Parameter> getParameterDependencies(Parameter p) {
-        return parameterGraph.getDependencies(p);
-    }
-
     //// Events ////
 
     public void addListener(NodeEventListener l) {
@@ -345,15 +256,20 @@ public class NodeLibrary {
         eventBus.send(new NodeUpdatedEvent(source, context));
     }
 
-    public void fireNodeAttributeChanged(Node source, Node.Attribute attribute) {
-        eventBus.send(new NodeAttributeChangedEvent(source, attribute));
+    public void fireNodePositionChanged(Node source) {
+        eventBus.send(new NodeAttributesEvent(source));
+
     }
 
-    public void fireChildAdded(Node source, Node child) {
+    public void fireNodeAttributesChanged(Node source) {
+        eventBus.send(new NodeAttributesEvent(source));
+    }
+
+    public void fireChildAdded(Macro source, Node child) {
         eventBus.send(new ChildAddedEvent(source, child));
     }
 
-    public void fireChildRemoved(Node source, Node child) {
+    public void fireChildRemoved(Macro source, Node child) {
         eventBus.send(new ChildRemovedEvent(source, child));
     }
 
@@ -369,8 +285,16 @@ public class NodeLibrary {
         eventBus.send(new RenderedChildChangedEvent(source, child));
     }
 
-    public void fireValueChanged(Node source, Parameter parameter) {
-        eventBus.send(new ValueChangedEvent(source, parameter));
+    public void fireValueChanged(Node source, Port port) {
+        eventBus.send(new ValueChangedEvent(source, port));
+    }
+
+    public void fireNodePortsChangedEvent(Node source) {
+        eventBus.send(new NodePortsChangedEvent(source));
+    }
+
+    public void firePortAttributesChangedEvent(Node source, Port port) {
+        eventBus.send(new PortAttributesEvent(source, port));
     }
 
     //// Standard overrides ////
@@ -379,5 +303,4 @@ public class NodeLibrary {
     public String toString() {
         return getName();
     }
-
 }

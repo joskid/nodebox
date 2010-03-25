@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import nodebox.node.Macro;
 import nodebox.node.Node;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public abstract class Pane extends JPanel implements DocumentFocusListener {
 
     public abstract PaneView getPaneView();
 
-    public void currentNodeChanged(Node activeNetwork) {
+    public void currentMacroChanged(Macro macro) {
     }
 
     public void focusedNodeChanged(Node activeNode) {

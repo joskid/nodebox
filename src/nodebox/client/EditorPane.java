@@ -95,36 +95,37 @@ public class EditorPane extends Pane implements ComponentListener, CaretListener
     }
 
     private void setCode() {
-        Parameter pCode = null;
-        if (node != null) {
-            pCode = node.getParameter(codeType);
-        }
-        if (pCode == null) {
-            editor.setSource("");
-            editor.setEnabled(false);
-            messages.setEnabled(false);
-            messages.setBackground(Theme.MESSAGES_BACKGROUND_COLOR);
-            splitter.setPosition(1.0f);
-            updateMessages(node, null);
-        } else {
-            String code = pCode.asCode().getSource();
-            editor.setSource(code);
-            editor.setEnabled(true);
-            messages.setEnabled(true);
-            messages.setBackground(Color.white);
-            updateMessages(node, null);
-        }
+//        Parameter pCode = null;
+//        if (node != null) {
+//            pCode = node.getParameter(codeType);
+//        }
+//        if (pCode == null) {
+//            editor.setSource("");
+//            editor.setEnabled(false);
+//            messages.setEnabled(false);
+//            messages.setBackground(Theme.MESSAGES_BACKGROUND_COLOR);
+//            splitter.setPosition(1.0f);
+//            updateMessages(node, null);
+//        } else {
+//            String code = pCode.asCode().getSource();
+//            editor.setSource(code);
+//            editor.setEnabled(true);
+//            messages.setEnabled(true);
+//            messages.setBackground(Color.white);
+//            updateMessages(node, null);
+//        }
     }
 
     public boolean reload() {
-        if (node == null) return false;
-        Parameter pCode = node.getParameter(codeType);
-        if (pCode == null) return false;
-        NodeCode code = new PythonCode(editor.getSource());
-        pCode.set(code);
-        if (codeType.equals("_handle"))
-            getDocument().setActiveNode(node); // to make Viewer reload handle
         return true;
+//        if (node == null) return false;
+//        Parameter pCode = node.getParameter(codeType);
+//        if (pCode == null) return false;
+//        NodeCode code = new PythonCode(editor.getSource());
+//        pCode.set(code);
+//        if (codeType.equals("_handle"))
+//            getDocument().setActiveNode(node); // to make Viewer reload handle
+//        return true;
     }
 
     public void toggleMessages() {

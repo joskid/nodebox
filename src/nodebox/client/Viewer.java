@@ -13,8 +13,7 @@ import nodebox.handle.Handle;
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
 import nodebox.node.NodeEventListener;
-import nodebox.node.Parameter;
-import nodebox.node.event.NodeAttributeChangedEvent;
+import nodebox.node.event.NodeAttributesEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;
@@ -171,10 +170,9 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         if (event instanceof NodeUpdatedEvent) {
             if (event.getSource() != node) return;
             nodeUpdated();
-        } else if (event instanceof NodeAttributeChangedEvent) {
-            NodeAttributeChangedEvent e = (NodeAttributeChangedEvent) event;
+        } else if (event instanceof NodeAttributesEvent) {
+            NodeAttributesEvent e = (NodeAttributesEvent) event;
             if (e.getSource() != activeNode) return;
-            if (e.getAttribute() != Node.Attribute.PARAMETER) return;
             if (checkIfHandleEnabled()) {
                 repaint();
             }
@@ -189,15 +187,16 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         }
         // Set bounds from output value.
         if (getNode() != null) {
-            Object outputValue = getNode().getOutputValue();
-            if (outputValue instanceof Grob) {
-                viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
-                viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
-            } else if (outputValue != null) {
+            // TODO there is no "output value"! 
+//            Object outputValue = getMacro().getOutputValue();
+//            if (outputValue instanceof Grob) {
+//                viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
+//                viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
+//            } else if (outputValue != null) {
                 resetView();
                 viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
                 viewerLayer.setOffset(5, 5);
-            }
+//            }
         }
         repaint();
     }
@@ -205,12 +204,13 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
     //// Node attribute listener ////
 
     private boolean checkIfHandleEnabled() {
-        if (activeNode == null) return false;
-        Parameter handleParameter = activeNode.getParameter("_handle");
-        if (handleParameter == null) return false;
-        boolean newEnabled = handleParameter.isEnabled();
-        if (newEnabled == handleEnabled) return false;
-        handleEnabled = newEnabled;
+        // TODO This method requires enable expressions for the handle.
+//        if (activeNode == null) return false;
+//        Parameter handleParameter = activeNode.getPort("_handle");
+//        if (handleParameter == null) return false;
+//        boolean newEnabled = handleParameter.isEnabled();
+//        if (newEnabled == handleEnabled) return false;
+//        handleEnabled = newEnabled;
         return true;
     }
 
@@ -317,7 +317,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
             Graphics2D g2 = paintContext.getGraphics();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             if (getNode() == null) return;
-            Object outputValue = getNode().getOutputValue();
+            Object outputValue = null; // TODO getNode().getOutputValue();
             if (outputValue instanceof Grob) {
                 ((Grob) outputValue).draw(g2);
             } else if (outputValue != null) {

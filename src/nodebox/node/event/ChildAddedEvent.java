@@ -1,5 +1,6 @@
 package nodebox.node.event;
 
+import nodebox.node.Macro;
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
 
@@ -7,7 +8,7 @@ public class ChildAddedEvent extends NodeEvent {
 
     private Node child;
 
-    public ChildAddedEvent(Node source, Node child) {
+    public ChildAddedEvent(Macro source, Node child) {
         super(source);
         this.child = child;
     }

@@ -284,7 +284,7 @@ public class Contour extends AbstractGeometry {
      * Make new points along the contours of the existing path.
      *
      * @param amount     the amount of points to distribute.
-     * @param perContour this parameter was added to comply with the IGeometry interface, but is ignored since
+     * @param perContour this port was added to comply with the IGeometry interface, but is ignored since
      *                   we're at the contour level.
      * @return a list with "amount" points or zero points if the contour is empty.
      */
@@ -298,7 +298,7 @@ public class Contour extends AbstractGeometry {
      * The length of each segment is not given and will be determined based on the required number of points.
      *
      * @param amount     the number of points to generate.
-     * @param perContour this parameter is ignored since we're at the contour level.
+     * @param perContour this port is ignored since we're at the contour level.
      * @return a new Contour with the given number of points.
      */
     public Contour resampleByAmount(int amount, boolean perContour) {

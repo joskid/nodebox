@@ -1,10 +1,12 @@
 package nodebox.client;
 
+import com.google.common.collect.ImmutableList;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
+import nodebox.node.Macro;
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
 import nodebox.node.NodeEventListener;
@@ -19,6 +21,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class NetworkView extends PCanvas implements PaneView, NodeEventListener {
 
     public static final String SELECT_PROPERTY = "NetworkView.select";
@@ -30,7 +34,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     public static final float MAX_ZOOM = 1.0f;
 
     private Pane pane;
-    private Node node;
+    private Macro macro;
     private Set<NodeView> selection = new HashSet<NodeView>();
     private ConnectionLayer connectionLayer;
     private SelectionMarker selectionMarker;
@@ -39,12 +43,12 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     private NodeView connectionSource, connectionTarget;
     private Point2D connectionPoint;
 
-    public NetworkView(Pane pane, Node node) {
+    public NetworkView(Pane pane, Macro macro) {
         this.pane = pane;
-        this.node = node;
+        this.macro = macro;
         this.pane.getDocument().getNodeLibrary().addListener(this);
-        if (node != null)
-            this.networkError = node.hasError();
+        if (macro != null)
+            this.networkError = macro.hasError();
         setBackground(Theme.NETWORK_BACKGROUND_COLOR);
         SelectionHandler selectionHandler = new SelectionHandler();
         addInputEventListener(selectionHandler);
@@ -106,26 +110,26 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
         return pane;
     }
 
-    public Node getNode() {
-        return node;
+    public Macro getMacro() {
+        return macro;
     }
 
-    public void setNode(Node node) {
-        if (this.node == node) return;
-        Node oldNode = this.node;
-        this.node = node;
+    public void setMacro(Macro macro) {
+        if (this.macro == macro) return;
+        Node oldNode = this.macro;
+        this.macro = macro;
         getLayer().removeAllChildren();
         deselectAll();
-        if (node == null) return;
-        networkError = node.hasError();
+        if (macro == null) return;
+        networkError = macro.hasError();
         // Add nodes
-        for (Node n : node.getChildren()) {
+        for (Node n : macro.getChildren()) {
             NodeView nv = new NodeView(this, n);
             getLayer().addChild(nv);
         }
         validate();
         repaint();
-        firePropertyChange(NETWORK_PROPERTY, oldNode, node);
+        firePropertyChange(NETWORK_PROPERTY, oldNode, macro);
     }
 
     //// View queries ////
@@ -170,11 +174,11 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     }
 
     /**
-     * Select this node, and only this node.
+     * Select this macro, and only this macro.
      * <p/>
      * All other selected nodes will be deselected.
      *
-     * @param node the node to select.
+     * @param node the macro to select.
      */
     public void singleSelect(Node node) {
         if (node == null) return;
@@ -183,11 +187,11 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     }
 
     /**
-     * Select this node view, and only this node view.
+     * Select this macro view, and only this macro view.
      * <p/>
      * All other selected nodes will be deselected.
      *
-     * @param nodeView the node view to select.
+     * @param nodeView the macro view to select.
      */
     public void singleSelect(NodeView nodeView) {
         if (nodeView == null) return;
@@ -264,7 +268,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
         for (Object child : getLayer().getChildrenReference()) {
             if (!(child instanceof NodeView)) continue;
             NodeView nodeView = (NodeView) child;
-            // Check if the selection already contained the node view.
+            // Check if the selection already contained the macro view.
             // If it didn't, that means that the old selection is different
             // from the new selection.
             if (!selection.contains(nodeView)) {
@@ -291,20 +295,20 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     public void deleteSelected() {
         Set<NodeView> nodesToRemove = new HashSet<NodeView>(selection);
         for (NodeView nodeView : nodesToRemove) {
-            node.remove(nodeView.getNode());
+            macro.removeChild(nodeView.getNode());
         }
         connectionLayer.deleteSelected();
     }
 
     public void cutSelected() {
-        Node parent = getNode();
+        Macro parent = getMacro();
         ArrayList<Node> nodesToCopy = new ArrayList<Node>(selection.size());
         for (NodeView nv : selection) {
             Node n = nv.getNode();
             nodesToCopy.add(n);
         }
         for (Node n : nodesToCopy) {
-            parent.remove(n);
+            parent.removeChild(n);
         }
         Application.getInstance().setNodeClipboard(nodesToCopy);
     }
@@ -319,14 +323,14 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     }
 
     public void pasteSelected() {
-        Node newParent = getNode();
+        Macro newParent = getMacro();
         List<Node> nodesToCopy = Application.getInstance().getNodeClipboard();
         if (nodesToCopy == null || nodesToCopy.size() == 0) return;
         Node parent = nodesToCopy.get(0).getParent();
         // TODO: Cut operation removes parent from child nodes, so no parent is available.
         // This is a problem for connections.
         if (parent == null) return;
-        Collection<Node> newNodes = parent.copyChildren(nodesToCopy, newParent);
+        Collection<Node> newNodes = ImmutableList.of(); // parent.copyChildren(nodesToCopy, newParent);
         deselectAll();
         for (Node newNode : newNodes) {
             NodeView nv = getNodeView(newNode);
@@ -334,26 +338,36 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
             nv.updateIcon();
             addToSelection(nv);
         }
+        throw new UnsupportedOperationException("Pasting is not yet implemented");
     }
 
     //// Events ////
 
     public void receive(NodeEvent event) {
-        if (event instanceof NodeAttributeChangedEvent) {
-            if (event.getSource().getParent() != node) return;
-            childAttributeChanged(event.getSource(), ((NodeAttributeChangedEvent) event).getAttribute());
-        }
-        if (event.getSource() != node) return;
-        if (event instanceof ChildAddedEvent) {
-            childAdded(((ChildAddedEvent) event).getChild());
-        } else if (event instanceof ChildRemovedEvent) {
-            childRemoved(((ChildRemovedEvent) event).getChild());
-        } else if (event instanceof ConnectionAddedEvent || event instanceof ConnectionRemovedEvent) {
-            connectionLayer.repaint();
-        } else if (event instanceof RenderedChildChangedEvent) {
-            repaint();
-        } else if (event instanceof NodeUpdatedEvent) {
-            checkErrorAndRepaint();
+        checkNotNull(event);
+        checkNotNull(event.getSource());
+        if (event.getSource() == macro) {
+            // Check for events on the current macro
+            if (event instanceof ChildAddedEvent) {
+                childAdded(((ChildAddedEvent) event).getChild());
+            } else if (event instanceof ChildRemovedEvent) {
+                childRemoved(((ChildRemovedEvent) event).getChild());
+            } else if (event instanceof ConnectionAddedEvent || event instanceof ConnectionRemovedEvent) {
+                connectionLayer.repaint();
+            } else if (event instanceof RenderedChildChangedEvent) {
+                repaint();
+            } else if (event instanceof NodeUpdatedEvent) {
+                checkErrorAndRepaint();
+            }
+        } else if (event.getSource().getParent() == macro) {
+            // Check for events on children of the current macro
+            if (event instanceof NodePositionChangedEvent) {
+                childPositionChanged(event.getSource());
+            } else if (event instanceof NodeAttributesEvent) {
+                childAttributeChanged(event.getSource());
+            } else if (event instanceof NodePortsChangedEvent) {
+                childPortsChanged(event.getSource());
+            }
         }
     }
 
@@ -374,49 +388,51 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
         connectionLayer.repaint();
     }
 
-    public void childAttributeChanged(Node child, Node.Attribute attribute) {
-        NodeView nv = getNodeView(child);
-        if (nv == null) return;
-        // The port is part of the icon. If a port was added or removed, also update the icon.
-        if (attribute == Node.Attribute.PORT) {
-            nv.updateIcon();
-        } else if (attribute == Node.Attribute.NAME
-                || attribute == Node.Attribute.IMAGE
-                || attribute == Node.Attribute.PORT) {
-            // When visual attributes change, repaint the node view.
-            nv.repaint();
-        } else if (attribute == Node.Attribute.POSITION) {
-            // When the position changes, change the node view offset, and also repaint the connections.
-            if (!nv.getOffset().equals(child.getPosition().getPoint2D())) {
-                nv.setOffset(child.getX(), child.getY());
-            }
-            nv.repaint();
-            connectionLayer.repaint();
-        }
+    public void checkErrorAndRepaint() {
+        if (!networkError && !macro.hasError()) return;
+        networkError = macro.hasError();
+        repaint();
     }
 
-    public void checkErrorAndRepaint() {
-        if (!networkError && !node.hasError()) return;
-        networkError = node.hasError();
-        repaint();
+    public void childPositionChanged(Node child) {
+        NodeView nv = getNodeView(child);
+        // When the position changes, change the macro view offset, and also repaint the connections.
+        if (!nv.getOffset().equals(child.getPosition().getPoint2D())) {
+            nv.setOffset(child.getX(), child.getY());
+        }
+        nv.repaint();
+        connectionLayer.repaint();
+    }
+
+    public void childAttributeChanged(Node child) {
+        NodeView nv = getNodeView(child);
+        if (nv == null) return;
+        // When visual attributes change, repaint the macro view.
+        nv.repaint();
+    }
+
+    public void childPortsChanged(Node child) {
+        // The port is part of the icon. If a port was added or removed, also update the icon.        
+        NodeView nv = getNodeView(child);
+        nv.updateIcon();
     }
 
     //// Node manager ////
 
     public void showNodeSelectionDialog() {
-        NodeBoxDocument doc = getPane().getDocument();
-        NodeSelectionDialog dialog = new NodeSelectionDialog(doc, doc.getNodeLibrary(), doc.getManager());
-        Point pt = getMousePosition();
-        if (pt == null) {
-            pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
-        }
-        dialog.setVisible(true);
-        if (dialog.getSelectedNode() != null) {
-            Node n = getNode().create(dialog.getSelectedNode());
-            n.setPosition(new nodebox.graphics.Point(pt));
-            n.setRendered();
-            doc.setActiveNode(n);
-        }
+//        NodeBoxDocument doc = getPane().getDocument();
+//        NodeSelectionDialog dialog = new NodeSelectionDialog(doc, doc.getNodeLibrary(), doc.getManager());
+//        Point pt = getMousePosition();
+//        if (pt == null) {
+//            pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
+//        }
+//        dialog.setVisible(true);
+//        if (dialog.getSelectedNode() != null) {
+//            Node n = getMacro().create(dialog.getSelectedNode());
+//            n.setPosition(new nodebox.graphics.Point(pt));
+//            n.setRendered();
+//            doc.setActiveNode(n);
+//        }
     }
 
     //// Dragging ////
@@ -437,9 +453,9 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     //// Connections ////
 
     /**
-     * This method gets called when we start dragging a connection line from a node view.
+     * This method gets called when we start dragging a connection line from a macro view.
      *
-     * @param connectionSource the node view where we start from.
+     * @param connectionSource the macro view where we start from.
      */
     public void startConnection(NodeView connectionSource) {
         this.connectionSource = connectionSource;
@@ -483,7 +499,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     }
 
     /**
-     * NodeView calls this method to indicate that the new target is now the given node view.
+     * NodeView calls this method to indicate that the new target is now the given macro view.
      *
      * @param target the new NodeView target.
      */
@@ -511,11 +527,11 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
     //// Network navigation ////
 
     private void goUp() {
-        if (node.getParent() == null) {
+        if (macro.getParent() == null) {
             Toolkit.getDefaultToolkit().beep();
             return;
         }
-        NodeBoxDocument.getCurrentDocument().setActiveNetwork(node.getParent());
+        NodeBoxDocument.getCurrentDocument().setActiveMacro(macro.getParent());
     }
 
     private void goDown() {
@@ -523,8 +539,13 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
             Toolkit.getDefaultToolkit().beep();
             return;
         }
-        NodeView selectedNode = selection.iterator().next();
-        NodeBoxDocument.getCurrentDocument().setActiveNetwork(selectedNode.getNode());
+        NodeView nodeView = selection.iterator().next();
+        Node n = nodeView.getNode();
+        if (n instanceof Macro) {
+            NodeBoxDocument.getCurrentDocument().setActiveMacro((Macro) n);
+        } else {
+            Toolkit.getDefaultToolkit().beep();
+        }
     }
 
     //// Inner classes ////
@@ -559,7 +580,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
             if (e.getButton() != MouseEvent.BUTTON1) return;
             temporarySelection.clear();
             // Make sure no Node View is under the mouse cursor.
-            // In that case, we're not selecting, but moving a node.
+            // In that case, we're not selecting, but moving a macro.
             Point2D p = e.getPosition();
             NodeView nv = getNodeViewAt(p);
             if (nv == null) {

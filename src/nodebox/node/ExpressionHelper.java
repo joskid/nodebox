@@ -13,7 +13,7 @@ public class ExpressionHelper {
 
     // TODO: Expression system is not thread-safe.
     public static ProcessingContext currentContext;
-    public static Parameter currentParameter;
+    public static Port currentPort;
 
     public static Random randomGenerator = new Random();
 
@@ -89,10 +89,7 @@ public class ExpressionHelper {
     }
 
     public static Object stamp(String key, Object defaultValue) {
-        if (currentContext == null) return defaultValue;
-        currentParameter.markStampExpression();
-        Object v = currentContext.get(key);
-        return v != null ? v : defaultValue;
+        throw new UnsupportedOperationException("Stamp expressions are no longer supported. Use iterator nodes instead.");
     }
 
 }

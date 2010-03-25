@@ -10,7 +10,7 @@ import java.util.Set;
  * The NodeAccessProxy makes access to nodes and parameters more
  * convenient from expressions. So, instead of writing:
  * <p/>
- * <pre><code>network.getNode("rect1").getParameter("x").getValue()</code></pre>
+ * <pre><code>network.getMacro("rect1").getPort("x").getValue()</code></pre>
  * <p/>
  * You can write:
  * <p/>
@@ -24,7 +24,7 @@ public class NodeAccessProxy implements Map {
 
     private Node node;
     private Set<String> keySet;
-    private Set<WeakReference<Parameter>> markedParameterReferences;
+    private Set<WeakReference<Port>> markedPortReferences;
 
     public NodeAccessProxy(Node node) {
         this.node = node;
@@ -36,38 +36,27 @@ public class NodeAccessProxy implements Map {
      * This marker will be passed to recursive proxies.
      *
      * @param node                      the node
-     * @param markedParameterReferences a list of parameters that were marked.
+     * @param markedPortReferences a list of parameters that were marked.
      */
-    public NodeAccessProxy(Node node, Set<WeakReference<Parameter>> markedParameterReferences) {
+    public NodeAccessProxy(Node node, Set<WeakReference<Port>> markedPortReferences) {
         this(node);
-        this.markedParameterReferences = markedParameterReferences;
+        this.markedPortReferences = markedPortReferences;
     }
 
     private void updateKeys() {
         keySet = new HashSet<String>();
         // keySet is created in reverse order; from global to local scope.
-        // 1. Add nodes
-        // 1.1 Add names of the sibling nodes (nodes in the same network as this node.)
+        // 1. Add names of the sibling nodes (nodes in the same network as this node.)
         if (node.hasParent()) {
             for (Node n : node.getParent().getChildren()) {
                 keySet.add(n.getName());
             }
         }
-        // 1.2 Add its child nodes.
-        for (Node n : node.getChildren()) {
-            keySet.add(n.getName());
-        }
-        // 2. Add parameters
-        for (Parameter p : node.getParameters()) {
-            keySet.add(p.getName());
-        }
-        // 3. Add ports
+        // 2. Add ports
         for (Port p : node.getPorts()) {
             keySet.add(p.getName());
         }
-        // 4. Add reserved words
-        keySet.add("root");
-        keySet.add("parent");
+        // 3. Add reserved words
         keySet.add("node");
     }
 
@@ -84,9 +73,7 @@ public class NodeAccessProxy implements Map {
     }
 
     public boolean containsKey(Object key) {
-        if (key == null) return false;
-        if (!(key instanceof String)) return false;
-        return keySet.contains((String) key);
+        return key != null && key instanceof String && keySet.contains((String) key);
     }
 
     public boolean containsValue(Object value) {
@@ -94,7 +81,7 @@ public class NodeAccessProxy implements Map {
     }
 
     /**
-     * Retrieve the node or parameter value from the proxy.
+     * Retrieve the node or port value from the proxy.
      * Value retrieval happens in a specific order, from local to global:
      * <ul>
      * <li>Search for reserved words (network, root).</li>
@@ -113,43 +100,18 @@ public class NodeAccessProxy implements Map {
         // First search for reserved words.
         if (k.equals("node")) {
             return node;
-        } else if (k.equals("parent")) {
-            if (node.hasParent()) {
-                return new NodeAccessProxy(node.getParent(), markedParameterReferences);
-            } else {
-                return null;
-            }
-        } else if (k.equals("root")) {
-            if (node.hasParent()) {
-                return new NodeAccessProxy(node.getParent(), markedParameterReferences);
-            } else {
-                // If the node does not have a parent, I am my own root node.
-                return this;
-            }
-        }
-
-        // Search the parameters
-        if (node.hasParameter(k)) {
-            if (markedParameterReferences != null)
-                markedParameterReferences.add(new WeakReference<Parameter>(node.getParameter(k)));
-            return node.getValue(k);
         }
 
         // Search the ports
         if (node.hasPort(k)) {
-            return node.getPort(k);
-        }
-
-
-        // Network searches
-        // If this is a network, search its nodes first.
-        if (node.contains(k)) {
-            return new NodeAccessProxy(node.getChild(k), markedParameterReferences);
+            if (markedPortReferences != null)
+                markedPortReferences.add(new WeakReference<Port>(node.getPort(k)));
+            return node.getValue(k);
         }
 
         // Check the siblings (nodes in this node's network).
-        if (node.hasParent() && node.getParent().contains(k)) {
-            return new NodeAccessProxy(node.getParent().getChild(k), markedParameterReferences);
+        if (node.hasParent() && node.getParent().hasChild(k)) {
+            return new NodeAccessProxy(node.getParent().getChild(k), markedPortReferences);
         }
 
         // Don't know what to return.

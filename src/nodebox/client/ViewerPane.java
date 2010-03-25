@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import nodebox.node.Macro;
 import nodebox.node.Node;
 
 import java.awt.*;
@@ -31,7 +32,7 @@ public class ViewerPane extends Pane {
         viewer = new Viewer(this, null);
         add(paneHeader, BorderLayout.NORTH);
         add(viewer, BorderLayout.CENTER);
-        setNode(document.getActiveNetwork());
+        setNode(document.getActiveMacro());
     }
 
     public void toggleHandles() {
@@ -64,7 +65,7 @@ public class ViewerPane extends Pane {
     }
 
     @Override
-    public void currentNodeChanged(Node activeNetwork) {
+    public void currentMacroChanged(Macro activeNetwork) {
         setNode(activeNetwork);
     }
 

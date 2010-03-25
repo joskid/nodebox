@@ -14,7 +14,7 @@ import java.util.Locale;
  *     return Polygon.rect(self.x, self.y, self.width, self.height)
  * </code></pre>
  * <p/>
- * Self is a reference that points to a node access proxy that allows direct access to the node's parameter values.
+ * Self is a reference that points to a node access proxy that allows direct access to the node's port values.
  * You can access the node object using "self.node".
  * <p/>
  * When creating a PythonCode object, it is executed immediately to extract the "cook" function. Source code
@@ -122,7 +122,7 @@ public class PythonCode implements NodeCode {
     }
 
     /**
-     * The self wrapper allows easy access to parameter values from the node.
+     * The self wrapper allows easy access to port values from the node.
      * Instead of doing node.asString("someparameter"), you can use self.someparameter.
      * You can also access the node itself by querying self.node.
      * <p/>
@@ -143,7 +143,7 @@ public class PythonCode implements NodeCode {
         @Override
         public PyObject __findattr_ex__(String name) {
             if ("node".equals(name)) return Py.java2py(node);
-            Parameter p = node.getParameter(name);
+            Port p = node.getPort(name);
             if (p == null) {
                 Port port = node.getPort(name);
                 if (port == null) {
@@ -151,11 +151,7 @@ public class PythonCode implements NodeCode {
                     noParameterOrPortError(name);
                     throw new AssertionError("noParameterOrPortError method should have thrown an error.");
                 } else {
-                    if (port.getCardinality() == Port.Cardinality.SINGLE) {
-                        return Py.java2py(port.getValue());
-                    } else {
-                        return Py.java2py(port.getValues());
-                    }
+                    return Py.java2py(port.getValue());
                 }
             } else {
                 return Py.java2py(p.getValue());
@@ -167,13 +163,13 @@ public class PythonCode implements NodeCode {
          * (e.g. self.inventedParameter)
          * <p/>
          * We could use the original noAttributeError, but that results in an ugly object name (a reference
-         * to this proxy class). We'd much rather refer to the node identifier and parameter/port.
+         * to this proxy class). We'd much rather refer to the node identifier and port/port.
          *
-         * @param name the name of the parameter
+         * @param name the name of the port
          */
         public void noParameterOrPortError(String name) {
-            throw Py.AttributeError(String.format(Locale.US, "Node '%.50s' has no parameter or port '%.400s'",
-                    node.getIdentifier(), name));
+            throw Py.AttributeError(String.format(Locale.US, "Node '%.50s' has no port or port '%.400s'",
+                    node.getAbsolutePath(), name));
         }
 
     }

@@ -17,7 +17,6 @@ public class NodeLibraryManager {
     private boolean lookedForLibraries = false;
 
     public NodeLibraryManager() {
-        add(NodeLibrary.BUILTINS);
     }
 
     //// Search paths ////
@@ -129,7 +128,7 @@ public class NodeLibraryManager {
      * @throws RuntimeException if the XML data could not be parsed
      */
     public NodeLibrary load(String libraryName, String xml) throws RuntimeException {
-        NodeLibrary library = NodeLibrary.load(libraryName, xml, this);
+        NodeLibrary library = NodeLibrary.fromXml(libraryName, xml, this);
         add(library);
         return library;
     }
@@ -142,7 +141,7 @@ public class NodeLibraryManager {
      * @throws RuntimeException if the file is invalid or the XML data could not be parsed
      */
     public NodeLibrary load(File f) throws RuntimeException {
-        NodeLibrary library = NodeLibrary.load(f, this);
+        NodeLibrary library = NodeLibrary.fromFile(f, this);
         add(library);
         return library;
     }
@@ -194,7 +193,6 @@ public class NodeLibraryManager {
         lookForLibraries();
         List<Node> nodes = new ArrayList<Node>();
         // Add the root node separately.
-        nodes.add(Node.ROOT_NODE);
         for (NodeLibrary library : libraries.values()) {
             nodes.addAll(library.getExportedNodes());
         }

@@ -1,6 +1,6 @@
 package nodebox.client;
 
-import nodebox.node.Node;
+import nodebox.node.Macro;
 import nodebox.node.NodeEvent;
 import nodebox.node.NodeEventListener;
 import nodebox.node.event.NodeUpdatedEvent;
@@ -11,7 +11,7 @@ import java.awt.*;
 public class LoggingPane extends Pane implements NodeEventListener {
 
     private LoggingArea loggingArea;
-    private Node node;
+    private Macro macro;
 
     public LoggingPane(NodeBoxDocument document) {
         super(document);
@@ -27,16 +27,16 @@ public class LoggingPane extends Pane implements NodeEventListener {
     }
 
     @Override
-    public void currentNodeChanged(Node activeNetwork) {
-        this.node = activeNetwork;
+    public void currentMacroChanged(Macro activeNetwork) {
+        this.macro = activeNetwork;
     }
 
     public void receive(NodeEvent event) {
-        if (event.getSource() != this.node) return;
+        if (event.getSource() != this.macro) return;
         if (event instanceof NodeUpdatedEvent) {
             StringBuffer sb = new StringBuffer();
-            if (node.hasError()) {
-                sb.append(node.getError().toString());
+            if (macro.hasError()) {
+                sb.append(macro.getError().toString());
             }
             loggingArea.setText(sb.toString());
         }

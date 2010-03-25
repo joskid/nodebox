@@ -8,19 +8,16 @@ import java.awt.*;
 public class ParameterPane extends Pane {
 
     private PaneHeader paneHeader;
-    private ParameterView parameterView;
+    private PortView portView;
     private Node node;
 
     public ParameterPane(NodeBoxDocument document) {
         super(document);
         setLayout(new BorderLayout());
         paneHeader = new PaneHeader(this);
-        NButton metadataButton = new NButton("Metadata", "res/parameter-metadata.png");
-        metadataButton.setActionMethod(this, "editMetadata");
-        paneHeader.add(metadataButton);
-        parameterView = new ParameterView();
+        portView = new PortView();
         add(paneHeader, BorderLayout.NORTH);
-        add(parameterView, BorderLayout.CENTER);
+        add(portView, BorderLayout.CENTER);
         setNode(document.getActiveNode());
     }
 
@@ -37,7 +34,7 @@ public class ParameterPane extends Pane {
     }
 
     public PaneView getPaneView() {
-        return parameterView;
+        return portView;
     }
 
     public Node getNode() {
@@ -47,7 +44,7 @@ public class ParameterPane extends Pane {
     public void setNode(Node node) {
         if (this.node == node) return;
         this.node = node;
-        parameterView.setNode(node);
+        portView.setNode(node);
     }
 
     @Override
@@ -55,25 +52,4 @@ public class ParameterPane extends Pane {
         setNode(activeNode);
     }
 
-    public void editMetadata() {
-        if (node == null) return;
-        NodeAttributesEditor editor = new NodeAttributesEditor(node);
-        JFrame editorFrame = new JFrame(node.getName() + " Metadata");
-        editorFrame.getContentPane().add(editor);
-        editorFrame.setSize(580, 751);
-        editorFrame.setResizable(false);
-        // Center the frame based on the current window.
-        Window w = SwingUtilities.getWindowAncestor(this);
-        if (w == null) {
-            // If the current window could not be found, set to the default location.
-            editorFrame.setLocationByPlatform(true);
-        } else {
-            int ancestorCenterX = w.getX() + w.getWidth() / 2;
-            int ancestorCenterY = w.getY() + w.getHeight() / 2;
-            int x = ancestorCenterX - editorFrame.getWidth() / 2;
-            int y = ancestorCenterY - editorFrame.getHeight() / 2;
-            editorFrame.setLocation(x, y);
-        }
-        editorFrame.setVisible(true);
-    }
 }

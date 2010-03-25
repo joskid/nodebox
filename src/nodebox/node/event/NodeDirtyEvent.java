@@ -9,11 +9,4 @@ public class NodeDirtyEvent extends NodeEvent {
         super(source);
     }
 
-    @Override
-    public String toString() {
-        return "NodeDirtyEvent{" +
-                "source=" + getSource() +
-                '}';
-    }
-
 }

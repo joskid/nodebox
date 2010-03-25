@@ -24,10 +24,10 @@ public class Theme {
     public static final Color CONNECTION_CONNECTING_COLOR = new Color(170, 167, 18);
     public static final Color CONNECTION_ACTION_COLOR = new Color(0, 116, 168);
 
-    // Parameter view
-    public static final Color PARAMETER_EXPRESSION_BACKGROUND_COLOR = new Color(255, 255, 240);
-    public static final Color PARAMETER_LABEL_BACKGROUND = new Color(153, 153, 153);
-    public static final Color PARAMETER_VALUE_BACKGROUND = new Color(196, 196, 196);
+    // Port view
+    public static final Color PORT_EXPRESSION_BACKGROUND_COLOR = new Color(255, 255, 240);
+    public static final Color PORT_LABEL_BACKGROUND = new Color(153, 153, 153);
+    public static final Color PORT_VALUE_BACKGROUND = new Color(196, 196, 196);
     public static final Color DRAGGABLE_NUMBER_HIGLIGHT_COLOR = new Color(223, 223, 223);
 
     // Source editor
@@ -40,8 +40,8 @@ public class Theme {
     public static final Color EXPRESSION_ERROR_FOREGROUND_COLOR = new Color(200, 0, 0);
 
     // Node attributes editor
-    public static final Color NODE_ATTRIBUTES_PARAMETER_LIST_BACGKGROUND_COLOR = new Color(240, 240, 250);
-    public static final Color NODE_ATTRIBUTES_PARAMETER_COLOR = new Color(60, 60, 60);
+    public static final Color NODE_ATTRIBUTES_PORT_LIST_BACKGROUND_COLOR = new Color(240, 240, 250);
+    public static final Color NODE_ATTRIBUTES_PORT_COLOR = new Color(60, 60, 60);
 
     // Node selection dialog
     public static final Color NODE_SELECTION_BACKGROUND_COLOR = new Color(244, 244, 244);
@@ -58,7 +58,7 @@ public class Theme {
     public static Border LINE_BORDER;
     public static Border TOP_BOTTOM_BORDER;
     public static Border BOTTOM_BORDER;
-    public static Border PARAMETER_ROW_BORDER;
+    public static Border PORT_ROW_BORDER;
 
     // Fonts
     public static Font EDITOR_FONT;
@@ -84,7 +84,7 @@ public class Theme {
         TOP_BOTTOM_BORDER = new TopBottomBorder(topColor, bottomColor);
         Color whiteColor = new Color(255, 255, 255);
         BOTTOM_BORDER = new BottomBorder(whiteColor);
-        PARAMETER_ROW_BORDER = new RowBorder();
+        PORT_ROW_BORDER = new RowBorder();
 
         // Initialize fonts.
         if (PlatformUtils.onMac()) {
@@ -175,20 +175,20 @@ public class Theme {
 
         private static final Color LABEL_UP_COLOR = new Color(140, 140, 140);
         private static final Color LABEL_DOWN_COLOR = new Color(166, 166, 166);
-        private static final Color PARAMETER_UP_COLOR = new Color(179, 179, 179);
-        private static final Color PARAMETER_DOWN_COLOR = new Color(213, 213, 213);
+        private static final Color PORT_UP_COLOR = new Color(179, 179, 179);
+        private static final Color PORT_DOWN_COLOR = new Color(213, 213, 213);
 
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            int labelWidth = ParameterView.LABEL_WIDTH;
+            int labelWidth = PortView.LABEL_WIDTH;
             // Draw border on the side of the label
             g.setColor(LABEL_UP_COLOR);
             g.fillRect(x, y + height - 2, labelWidth - 2, 1);
             g.setColor(LABEL_DOWN_COLOR);
             g.fillRect(x, y + height - 1, labelWidth - 2, 1);
-            // Draw border on parameter side
-            g.setColor(PARAMETER_UP_COLOR);
+            // Draw border on port side
+            g.setColor(PORT_UP_COLOR);
             g.fillRect(x + labelWidth + 1, y + height - 2, width - labelWidth - 1, 1);
-            g.setColor(PARAMETER_DOWN_COLOR);
+            g.setColor(PORT_DOWN_COLOR);
             g.fillRect(x + labelWidth + 1, y + height - 1, width - labelWidth - 1, 1);
         }
 

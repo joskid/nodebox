@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import nodebox.node.Macro;
 import nodebox.node.Node;
 
 import javax.imageio.ImageIO;
@@ -30,7 +31,7 @@ public class AddressBar extends JPanel implements MouseListener, DocumentFocusLi
     private int armed = -1;
 
     private NodeBoxDocument document;
-    private Node node;
+    private Macro macro;
     private JProgressBar progressBar;
 
     public AddressBar(NodeBoxDocument document) {
@@ -46,11 +47,11 @@ public class AddressBar extends JPanel implements MouseListener, DocumentFocusLi
         progressBar.setBorderPainted(false);
         progressBar.setVisible(false);
         add(progressBar);
-        currentNodeChanged(document.getActiveNetwork());
+        currentMacroChanged(document.getActiveMacro());
     }
 
-    public void currentNodeChanged(Node node) {
-        this.node = node;
+    public void currentMacroChanged(Macro macro) {
+        this.macro = macro;
         repaint();
     }
 
@@ -65,22 +66,22 @@ public class AddressBar extends JPanel implements MouseListener, DocumentFocusLi
         progressBar.setVisible(visible);
     }
 
-    private java.util.List<Node> getNetworkParts() {
-        ArrayList<Node> parts = new ArrayList<Node>();
-        if (node == null) return parts;
-        Node currentNode = node;
-        parts.add(0, currentNode);
-        while (currentNode.getParent() != null) {
-            parts.add(0, currentNode.getParent());
-            currentNode = currentNode.getParent();
+    private java.util.List<Macro> getParents() {
+        ArrayList<Macro> parts = new ArrayList<Macro>();
+        if (macro == null) return parts;
+        Macro currentMacro = macro;
+        parts.add(0, currentMacro);
+        while (currentMacro.getParent() != null) {
+            parts.add(0, currentMacro.getParent());
+            currentMacro = currentMacro.getParent();
         }
         return parts;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        java.util.List<Node> nodes = getNetworkParts();
-        positions = new int[nodes.size()];
+        java.util.List<Macro> parents = getParents();
+        positions = new int[parents.size()];
         Graphics2D g2 = (Graphics2D) g;
 
         g2.setFont(Theme.SMALL_BOLD_FONT);
@@ -89,8 +90,8 @@ public class AddressBar extends JPanel implements MouseListener, DocumentFocusLi
 
         int x = 14;
 
-        for (int i = 0; i < nodes.size(); i++) {
-            Node part = nodes.get(i);
+        for (int i = 0; i < parents.size(); i++) {
+            Node part = parents.get(i);
             if (i == armed) {
                 g2.setColor(Theme.TEXT_ARMED_COLOR);
             } else {
@@ -120,11 +121,11 @@ public class AddressBar extends JPanel implements MouseListener, DocumentFocusLi
         int mx = e.getX();
         int partIndex = partIndex(mx);
         if (partIndex == -1) return;
-        java.util.List<Node> nodes = getNetworkParts();
-        Node selectedNode = nodes.get(partIndex);
-        //System.out.println("part = " + selectedNode);
-        if (selectedNode != null)
-            document.setActiveNetwork(selectedNode);
+        java.util.List<Macro> nodes = getParents();
+        Macro selectedMacro = nodes.get(partIndex);
+        //System.out.println("part = " + selectedMacro);
+        if (selectedMacro != null)
+            document.setActiveMacro(selectedMacro);
         repaint();
     }
 

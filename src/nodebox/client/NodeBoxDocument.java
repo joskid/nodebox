@@ -1,7 +1,5 @@
 package nodebox.client;
 
-import nodebox.graphics.Grob;
-import nodebox.graphics.PDFRenderer;
 import nodebox.node.*;
 import nodebox.node.event.NodeDirtyEvent;
 import nodebox.node.event.NodeUpdatedEvent;
@@ -31,7 +29,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
     public static String lastExportPath;
 
     private NodeLibrary nodeLibrary;
-    private Node activeNetwork;
+    private Macro activeMacro;
     private Node activeNode;
     private File documentFile;
     private boolean documentChanged;
@@ -39,8 +37,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
     private EventListenerList documentFocusListeners = new EventListenerList();
     private UndoManager undoManager = new UndoManager();
     private AddressBar addressBar;
-    //private RenderThread renderThread;
-    private ArrayList<ParameterEditor> parameterEditors = new ArrayList<ParameterEditor>();
+    private ArrayList<PortEditor> portEditors = new ArrayList<PortEditor>();
     private boolean loaded = false;
 
     public static NodeBoxDocument getCurrentDocument() {
@@ -74,13 +71,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
         updateTitle();
         setJMenuBar(new NodeBoxMenuBar(this));
         loaded = true;
-        requestActiveNetworkUpdate();
-        //renderThread = new RenderThread();
-        //renderThread.start();
+        requestActiveMacroUpdate();
     }
 
     public NodeBoxDocument(File file) throws RuntimeException {
-        this(NodeLibrary.load(file, Application.getInstance().getManager()));
+        this(NodeLibrary.fromFile(file, Application.getInstance().getManager()));
         lastFilePath = file.getParentFile().getAbsolutePath();
         setDocumentFile(file);
     }
@@ -97,7 +92,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
 
     public void fireActiveNetworkChanged() {
         for (EventListener l : documentFocusListeners.getListeners(DocumentFocusListener.class)) {
-            ((DocumentFocusListener) l).currentNodeChanged(activeNetwork);
+            ((DocumentFocusListener) l).currentMacroChanged(activeMacro);
         }
     }
 
@@ -113,30 +108,20 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
 
     private void setNodeLibrary(NodeLibrary nodeLibrary) {
         this.nodeLibrary = nodeLibrary;
-        setActiveNetwork(nodeLibrary.getRootNode());
+        setActiveMacro(nodeLibrary.getRootMacro());
         nodeLibrary.addListener(this);
     }
 
-    public Node getActiveNetwork() {
-        return activeNetwork;
+    public Macro getActiveMacro() {
+        return activeMacro;
     }
 
-    public void setActiveNetwork(Node activeNetwork) {
-        this.activeNetwork = activeNetwork;
+    public void setActiveMacro(Macro activeMacro) {
+        this.activeMacro = activeMacro;
         fireActiveNetworkChanged();
-        if (activeNetwork != null && !activeNetwork.isEmpty()) {
-            // Set the active node to the rendered child if available.
-            if (activeNetwork.getRenderedChild() != null) {
-                setActiveNode(activeNetwork.getRenderedChild());
-            } else {
-                // Otherwise set it to the first node.
-                setActiveNode(activeNetwork.getChildAt(0));
-            }
-        } else {
-            setActiveNode(null);
-        }
-        if (activeNetwork != null) {
-            requestActiveNetworkUpdate();
+        setActiveNode(null);
+        if (activeMacro != null) {
+            requestActiveMacroUpdate();
         }
     }
 
@@ -155,13 +140,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
 
     //// Parameter editor actions ////
 
-    public void addParameterEditor(ParameterEditor editor) {
-        if (parameterEditors.contains(editor)) return;
-        parameterEditors.add(editor);
+    public void addPortEditor(PortEditor editor) {
+        if (portEditors.contains(editor)) return;
+        portEditors.add(editor);
     }
 
-    public void removeParameterEditor(ParameterEditor editor) {
-        parameterEditors.remove(editor);
+    public void removeParameterEditor(PortEditor editor) {
+        portEditors.remove(editor);
     }
 
     //// Document actions ////
@@ -236,28 +221,29 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
     }
 
     public boolean exportToFile(File file) {
-        // Make sure the file ends with ".pdf".
-        String fullPath = null;
-        try {
-            fullPath = file.getCanonicalPath();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to access file " + file, e);
-        }
-        if (!fullPath.toLowerCase().endsWith(".pdf")) {
-            fullPath = fullPath.concat(".pdf");
-        }
-        file = new File(fullPath);
-
-        // todo: file export only works on grobs.
-        if (activeNetwork == null || activeNetwork.getRenderedChild() == null) return false;
-        Object outputValue = activeNetwork.getRenderedChild().getOutputValue();
-        if (outputValue instanceof Grob) {
-            Grob g = (Grob) outputValue;
-            PDFRenderer.render(g, file);
-            return true;
-        } else {
-            throw new RuntimeException("This type of output cannot be exported " + outputValue);
-        }
+        throw new UnsupportedOperationException("File export is not supported yet.");
+//        // Make sure the file ends with ".pdf".
+//        String fullPath = null;
+//        try {
+//            fullPath = file.getCanonicalPath();
+//        } catch (IOException e) {
+//            throw new RuntimeException("Unable to access file " + file, e);
+//        }
+//        if (!fullPath.toLowerCase().endsWith(".pdf")) {
+//            fullPath = fullPath.concat(".pdf");
+//        }
+//        file = new File(fullPath);
+//
+//        // todo: file export only works on grobs.
+//        if (activeMacro == null || activeMacro.getRenderedChild() == null) return false;
+//        Object outputValue = activeMacro.getRenderedChild().getOutputValue();
+//        if (outputValue instanceof Grob) {
+//            Grob g = (Grob) outputValue;
+//            PDFRenderer.render(g, file);
+//            return true;
+//        } else {
+//            throw new RuntimeException("This type of output cannot be exported " + outputValue);
+//        }
     }
 
 
@@ -374,10 +360,9 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
 
     public void close() {
         if (shouldClose()) {
-            //renderThread.shutdown();
             Application.getInstance().getManager().remove(nodeLibrary);
             Application.getInstance().removeDocument(NodeBoxDocument.this);
-            for (ParameterEditor editor : parameterEditors) {
+            for (PortEditor editor : portEditors) {
                 editor.dispose();
             }
             dispose();
@@ -426,12 +411,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
         if (!(event instanceof NodeDirtyEvent) && !(event instanceof NodeUpdatedEvent)) {
             markChanged();
         }
-        if (event instanceof NodeDirtyEvent && event.getSource() == activeNetwork) {
-            requestActiveNetworkUpdate();
+        if (event instanceof NodeDirtyEvent && event.getSource() == activeMacro) {
+            requestActiveMacroUpdate();
         }
     }
 
-    private void requestActiveNetworkUpdate() {
+    private void requestActiveMacroUpdate() {
         if (!loaded) return;
         addressBar.setProgressVisible(true);
 
@@ -439,9 +424,9 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // If meanwhile the node has been marked clean, ignore the event.
-                if (!activeNetwork.isDirty()) return;
+                // TODO if (!activeMacro.isDirty()) return;
                 try {
-                    activeNetwork.update();
+                    activeMacro.cook(new ProcessingContext());
                 } catch (ProcessingError processingError) {
                     Logger.getLogger("NodeBoxDocument").log(Level.WARNING, "Error while processing", processingError);
                 } finally {

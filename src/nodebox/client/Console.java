@@ -1,6 +1,5 @@
 package nodebox.client;
 
-import nodebox.node.Parameter;
 import org.python.util.PythonInterpreter;
 
 import javax.swing.*;
@@ -71,11 +70,9 @@ public class Console extends JTextPane implements PaneView {
         interpreter.setOut(outputStream);
         interpreter.setErr(errorStream);
         interpreter.set("document", pane.getDocument());
-        interpreter.set("root", pane.getDocument().getActiveNetwork().getRoot());
-        interpreter.set("parent", pane.getDocument().getActiveNetwork());
+        interpreter.set("root", pane.getDocument().getActiveMacro().getRoot());
+        interpreter.set("parent", pane.getDocument().getActiveMacro());
         interpreter.set("node", pane.getDocument().getActiveNode());
-        for (Parameter.Type t : Parameter.Type.values())
-            interpreter.set(t.name(), t);
         Exception pythonException = null;
         try {
             interpreter.exec(lastLine);

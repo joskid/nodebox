@@ -142,7 +142,7 @@ public class DependencyGraphTest extends TestCase {
         dg.addDependency('Z', 'X');
         dg.addDependency('Z', 'Y');
         // We already checked if the dependencies are correct in testRemoveDependencies().
-        // Remove all dependents for Z. This happens when the Z parameter is about to be removed.
+        // Remove all dependents for Z. This happens when the Z port is about to be removed.
         dg.removeDependents('Z');
         assertTrue(dg.hasDependency('A', 'Z'));
         assertTrue(dg.hasDependency('B', 'Z'));

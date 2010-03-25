@@ -461,7 +461,7 @@ public class Path extends AbstractGeometry implements Colorizable {
      * Calculates the coordinates of x and y for a point
      * at t on a straight line.
      * <p/>
-     * The t parameter is a number between 0.0 and 1.0,
+     * The t port is a number between 0.0 and 1.0,
      * x0 and y0 define the starting point of the line,
      * x1 and y1 the ending point of the line,
      *

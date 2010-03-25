@@ -1,15 +1,14 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
-import nodebox.node.polygraph.PolygraphLibrary;
 
 public class NodeTestCase extends TestCase {
 
     protected NodeLibraryManager manager;
     protected NodeLibrary testNodes, polygraphLibrary, testLibrary;
-    protected Node numberNode, negateNode, addNode, addDirectNode, addConstantNode, multiplyNode, multiAddNode,
-            floatNegateNode, convertToUppercaseNode, crashNode, testNetworkNode,
-            polygonNode, rectNode, translateNode;
+    protected Class numberNode, negateNode, addNode, addDirectNode, addConstantNode, multiplyNode, multiAddNode,
+            floatNegateNode, convertToUppercaseNode, crashNode, testNetworkNode;
+    protected Macro rootMacro;
 
     @Override
     protected void setUp() throws Exception {
@@ -17,23 +16,17 @@ public class NodeTestCase extends TestCase {
         manager = new NodeLibraryManager();
         testNodes = new TestNodes();
         testLibrary = new NodeLibrary("test");
-        polygraphLibrary = new PolygraphLibrary();
+        rootMacro = testLibrary.getRootMacro();
         manager.add(testNodes);
-        manager.add(polygraphLibrary);
-        numberNode = manager.getNode("testlib.number");
-        negateNode = manager.getNode("testlib.negate");
-        addNode = manager.getNode("testlib.add");
-        addDirectNode = manager.getNode("testlib.addDirect");
-        addConstantNode = manager.getNode("testlib.addConstant");
-        multiplyNode = manager.getNode("testlib.multiply");
-        multiAddNode = manager.getNode("testlib.multiAdd");
-        floatNegateNode = manager.getNode("testlib.floatNegate");
-        convertToUppercaseNode = manager.getNode("testlib.convertToUppercase");
-        crashNode = manager.getNode("testlib.crash");
-        testNetworkNode = manager.getNode("testlib.testnet");
-        polygonNode = manager.getNode("polygraph.polygon");
-        rectNode = manager.getNode("polygraph.rect");
-        translateNode = manager.getNode("polygraph.translate");
+        numberNode = TestNodes.IntVariable.class;
+        negateNode = TestNodes.Negate.class;
+        addNode = TestNodes.Add.class;
+        multiplyNode = TestNodes.Multiply.class;
+        multiAddNode = TestNodes.MultiAdd.class;
+        floatNegateNode = TestNodes.FloatNegate.class;
+        convertToUppercaseNode = TestNodes.ConvertToUppercase.class;
+        crashNode = TestNodes.Crash.class;
+        testNetworkNode = TestNodes.TestNetwork.class;
     }
 
     public void testDummy() {
@@ -42,17 +35,9 @@ public class NodeTestCase extends TestCase {
 
     //// Custom assertions ////
 
-    public void assertConnectionError(Node inputNode, String inputPort, Node outputNode, String message) {
-        try {
-            inputNode.getPort(inputPort).connect(outputNode);
-            fail(message);
-        } catch (IllegalArgumentException ignored) {
-        }
-    }
-
     public void assertProcessingError(Node node, Class expectedErrorClass) {
         try {
-            node.update();
+            node.cook(new ProcessingContext());
             fail("The node " + node + " should have failed processing.");
         } catch (ProcessingError e) {
             // ProcessingErrors are not wrapped, so check if the expected error is a ProcessingError.
@@ -63,7 +48,7 @@ public class NodeTestCase extends TestCase {
 
     public void assertProcessingError(Node node, String expectedErrorMessage) {
         try {
-            node.update();
+            node.cook(new ProcessingContext());
             fail("The node " + node + " should have failed processing.");
         } catch (ProcessingError e) {
             assertTrue("Was expecting error " + expectedErrorMessage + ", got " + e.toString(),

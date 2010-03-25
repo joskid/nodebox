@@ -93,3 +93,69 @@ class Context(CanvasContext):
             CanvasContext.skew(self, kx)
         else:
             CanvasContext.skew(self, kx, ky)
+            
+    ### Font Commands ###
+    
+    def font(self, fontname=None, fontsize=None):
+        if fontname is not None and fontsize is not None:
+            return CanvasContext.font(self, fontname, fontsize)
+        elif fontname is not None:
+            return CanvasContext.font(self, fontname)
+        elif fontsize is not None:
+            CanvasContext.fontsize(self, fontsize)
+        return CanvasContext.font(self)
+    
+    def fontsize(self, fontsize=None):
+        if fontsize is not None:
+            return CanvasContext.fontsize(self, fontsize)
+        return CanvasContext.fontsize(self)
+            
+    def lineheight(self, lineheight=None):
+        if lineheight is not None:
+            return CanvasContext.lineheight(self, lineheight)
+        return CanvasContext.lineheight(self)
+
+    def align(self, align=None):
+        if align is not None:
+            return CanvasContext.align(self, align)
+        return CanvasContext.align(self)
+    
+    def text(self, txt, x, y, width=0, height=0, outline=False, draw=True, **kwargs):
+        if outline:
+            t = CanvasContext.text(self, txt, x, y, width, height, Boolean(False))
+            p = t.path
+            # todo: handle kwargs
+            if draw:
+                self.addPath(p)
+            return p
+        else:
+            t = CanvasContext.text(self, txt, x, y, width, height, Boolean(draw))
+            # todo: handle kwargs
+            return t
+            
+    def textpath(self, txt, x, y, width=None, height=None, **kwargs):
+        if width is None: width = 0
+        if height is None: height = 0
+        p = CanvasContext.textpath(self, txt, x, y, width, height)
+        # todo: handle kwargs
+        return p
+
+    def textmetrics(self, txt, width=None, height=None, **kwargs):
+        if width is None: width = 0
+        if height is None: height = 0
+        r = CanvasContext.textmetrics(self, txt, width, height)
+        # todo: handle kwargs?
+        return r
+
+    def textwidth(self, txt, width=None, **kwargs):
+        if width is None: width = 0
+        w = CanvasContext.textwidth(self, txt, width)
+        # todo: handle kwargs?
+        return w
+
+    def textheight(self, txt, height=None, **kwargs):
+        if height is None: height = 0
+        h = CanvasContext.textheight(self, txt, height)
+        # todo: handle kwargs?
+        return h
+

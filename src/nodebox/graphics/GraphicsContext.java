@@ -370,11 +370,15 @@ public interface GraphicsContext {
 
     public Text text(String text, float x, float y, float width, float height);
 
+    public Text text(String text, float x, float y, float width, float height, boolean draw);
+
     public Path textpath(String text, float x, float y);
 
     public Path textpath(String text, float x, float y, float width);
 
     public Path textpath(String text, float x, float y, float width, float height);
+
+    public Path textpath(String text, float x, float y, float width, float height, boolean draw);
 
     public Rect textmetrics(String text);
 

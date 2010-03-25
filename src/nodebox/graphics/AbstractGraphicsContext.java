@@ -695,17 +695,22 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Text text(String text, float x, float y) {
-        return text(text, x, y, 0, 0);
+        return text(text, x, y, 0, 0, true);
     }
 
     public Text text(String text, float x, float y, float width) {
-        return text(text, x, y, width, 0);
+        return text(text, x, y, width, 0, true);
     }
 
     public Text text(String text, float x, float y, float width, float height) {
+        return text(text, x, y, width, height, true);
+    }
+
+    public Text text(String text, float x, float y, float width, float height, boolean draw) {
         Text t = new Text(text, x, y, width, height);
         inheritFromContext(t);
-        addText(t);
+        if (draw)
+            addText(t);
         return t;
     }
 

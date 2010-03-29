@@ -20,6 +20,12 @@ package nodebox.graphics;
 
 public class CanvasContext extends AbstractGraphicsContext {
 
+    public enum ImageMode {
+        CORNERS, CORNER, RADIUS, CENTER
+    }
+
+    protected ImageMode imageMode = ImageMode.CORNER;
+
     private Canvas canvas;
 
     //// Initialization ////
@@ -43,6 +49,14 @@ public class CanvasContext extends AbstractGraphicsContext {
         super.resetContext();
         if (resetBackground)
             canvas.setBackground(new Color(1, 1, 1));
+    }
+
+    public ImageMode imagemode() {
+        return imageMode;
+    }
+
+    public ImageMode imagemode(ImageMode m) {
+        return imageMode = m;
     }
 
     //// Setup methods ////
@@ -150,8 +164,17 @@ public class CanvasContext extends AbstractGraphicsContext {
 
     public Image image(String path, float x, float y) {
         Image img = new Image(path);
-        img.setX(x);
-        img.setY(y);
+        switch (imageMode) {
+            case CORNER:
+                float width = img.getWidth();
+                float height = img.getHeight();
+                img.setX(x + width / 2);
+                img.setY(y + height / 2);
+                break;
+            case CENTER:
+                img.setX(x);
+                img.setY(y);
+        }
         inheritFromContext(img);
         canvas.add(img);
         return img;

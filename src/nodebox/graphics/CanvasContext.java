@@ -210,7 +210,17 @@ public class CanvasContext extends AbstractGraphicsContext {
     //// Context inheritance ////
 
     private void inheritFromContext(Image i) {
-        i.setTransform(transform.clone());
+        if (transformMode == Transform.Mode.CENTER) {
+            Transform t = new Transform();
+            Rect bounds = i.getBounds();
+            float dx = bounds.getX() + bounds.getWidth() / 2;
+            float dy = bounds.getY() + bounds.getHeight() / 2;
+            t.translate(dx, dy);
+            t.append(transform.clone());
+            t.translate(-dx, -dy);
+            i.setTransform(t);
+        } else {
+            i.setTransform(transform.clone());
+        }
     }
-
 }

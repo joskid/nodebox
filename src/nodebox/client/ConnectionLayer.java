@@ -120,7 +120,7 @@ public class ConnectionLayer extends PLayer {
      */
     public void deleteSelected() {
         if (selection == null) return;
-        networkView.getMacro().disconnect(selection);
+        networkView.getMacro().disconnect(selection.getInput());
     }
 
     /**

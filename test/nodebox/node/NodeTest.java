@@ -99,7 +99,7 @@ public class NodeTest extends NodeTestCase {
      * Test the run mode for nodes.
      */
     public void testMode() {
-        Node add = rootMacro.createChild(TestNodes.Add.class);
+        Node add = rootMacro.createChild(addNode);
         add.setValue("v1", 10);
         add.setValue("v2", 7);
         // The default mode is consumer.
@@ -244,7 +244,7 @@ public class NodeTest extends NodeTestCase {
      * Test basic node execution.
      */
     public void testBasicUsage() {
-        Node add = rootMacro.createChild(TestNodes.Add.class);
+        Node add = rootMacro.createChild(addNode);
 
         // Check default values
         assertEquals(0, add.getValue("v1"));

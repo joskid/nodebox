@@ -1,6 +1,7 @@
 package nodebox.node;
 
-import nodebox.node.event.*;
+import nodebox.node.event.ChildAddedEvent;
+import nodebox.node.event.ChildRemovedEvent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -9,54 +10,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class MacroTest extends NodeTestCase {
 
-    class TestDataListener implements NodeEventListener {
-        public Node source;
-        public int dirtyCounter = 0;
-        public int updatedCounter = 0;
+    /**
+     * A node that has a constructor with an extra argument, which the macro cannot instantiate.
+     */
+    public static class BadConstructorNode extends Node {
 
-        TestDataListener(Node source) {
-            this.source = source;
+        public BadConstructorNode(Macro parent, Object otherArgument) {
+            super(parent);
         }
 
-        public void receive(NodeEvent event) {
-            if (event.getSource() != source) return;
-            if (event instanceof NodeDirtyEvent) {
-                dirtyCounter++;
-            } else if (event instanceof NodeUpdatedEvent) {
-                updatedCounter++;
-            }
-        }
     }
 
-    class TestChildListener implements NodeEventListener {
-        public Node source;
-        public int childAddedCounter = 0;
-        public int childRemovedCounter = 0;
-        public int connectionAddedCounter = 0;
-        public int connectionRemovedCounter = 0;
-        public int renderedChildChangedCounter = 0;
-        public int childAttributeChangedCounter = 0;
-
-        TestChildListener(Node source) {
-            this.source = source;
-        }
-
-        public void receive(NodeEvent event) {
-            if (event.getSource() != this.source) return;
-            if (event instanceof ChildAddedEvent) {
-                childAddedCounter++;
-            } else if (event instanceof ChildRemovedEvent) {
-                childRemovedCounter++;
-            } else if (event instanceof ConnectionAddedEvent) {
-                connectionAddedCounter++;
-            } else if (event instanceof ConnectionRemovedEvent) {
-                connectionRemovedCounter++;
-            } else if (event instanceof RenderedChildChangedEvent) {
-                renderedChildChangedCounter++;
-            }
-        }
-    }
-
+    /**
+     * Test creating child nodes.
+     */
     public void testCreate() {
         Macro grandParent = (Macro) testLibrary.getRootMacro().createChild(Macro.class, "grandParent");
         Macro parent = (Macro) grandParent.createChild(Macro.class, "parent");
@@ -74,118 +41,130 @@ public class MacroTest extends NodeTestCase {
         assertEquals(parent, child.getParent());
     }
 
-    public void testRenameChild() {
-        Macro parent = (Macro) testLibrary.getRootMacro().createChild(Macro.class);
-        Node n1 = parent.createChild(Node.class, "n1");
-        assertTrue(parent.hasChild(n1));
-        assertTrue(parent.hasChild("n1"));
-        assertFalse(parent.hasChild("n2"));
-        n1.setName("n2");
-        assertTrue(parent.hasChild(n1));
-        assertFalse(parent.hasChild("n1"));
-        assertTrue(parent.hasChild("n2"));
-    }
-
-    public void testDataEvent() {
-//        Node net = testNetworkNode.newInstance(testLibrary, "net");
-//        TestDataListener l = new TestDataListener(net);
-//        testLibrary.addListener(l);
-//        Node n1 = net.create(numberNode);
-//        Node n2 = net.create(numberNode);
-//        assertEquals(0, l.dirtyCounter);
-//        assertEquals(0, l.updatedCounter);
-//        n1.setRendered();
-//        // Network was already dirty from the start, counter is not updated.
-//        assertEquals(0, l.dirtyCounter);
-//        assertEquals(0, l.updatedCounter);
-//        net.update();
-//        assertEquals(0, l.dirtyCounter);
-//        assertEquals(1, l.updatedCounter);
-//        n2.setRendered();
-//        assertEquals(1, l.dirtyCounter);
-//        assertEquals(1, l.updatedCounter);
-//        net.update();
-//        assertEquals(1, l.dirtyCounter);
-//        assertEquals(2, l.updatedCounter);
+    /**
+     * Test what happens if invoking createChild with a bad class.
+     */
+    public void testCreateError() {
+        try {
+            rootMacro.createChild(BadConstructorNode.class);
+            fail("The child should not have been created. Bad constructor.");
+        } catch (Exception ignored) {
+        }
+        // You can still construct the node using its constructor.
+        Node n = new BadConstructorNode(rootMacro, null);
+        n.setName("bad");
+        assertTrue(rootMacro.hasChild("bad"));
     }
 
     /**
-     * Test if changes to the child data marks the parent as dirty.
+     * Test if renaming a child works.
      */
-    public void testChildDataPropagation() {
-//        Node net = testNetworkNode.newInstance(testLibrary, "net", Integer.class);
-//        Node n1 = net.create(numberNode);
-//        n1.setRendered();
-//        net.update();
-//        assertEquals(0, net.getOutputValue());
-//        // This should mark the net as dirty.
-//        n1.setValue("value", 42);
-//        assertTrue(net.isDirty());
-//        net.update();
-//        assertEquals(42, net.getOutputValue());
-//        n1.setExpression("value", "10 + 1");
-//        assertTrue(net.isDirty());
-//        net.update();
-//        assertEquals(11, net.getOutputValue());
-//        n1.clearExpression("value");
-//        n1.setValue("value", 33);
-//        assertTrue(net.isDirty());
-//        net.update();
-//        assertEquals(33, net.getOutputValue());
+    public void testRenameChild() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node n1 = parent.createChild(Node.class, "n1");
+        Node x = parent.createChild(Node.class, "x");
+        assertTrue(parent.hasChild(n1));
+        assertTrue(parent.hasChild(x));
+        assertTrue(parent.hasChild("n1"));
+        assertTrue(parent.hasChild("x"));
+        assertFalse(parent.hasChild("n2"));
+        n1.setName("n2");
+        assertTrue(parent.hasChild(n1));
+        assertTrue(parent.hasChild(x));
+        assertFalse(parent.hasChild("n1"));
+        assertTrue(parent.hasChild("n2"));
+        assertTrue(parent.hasChild("x"));
+    }
+
+    /**
+     * Test creating, retrieving and removing child nodes.
+     */
+    public void testChildren() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        // You can create a child using createChild...
+        Node child1 = parent.createChild(Node.class, "child1");
+        // ...or by using the constructor, which will also add it to the parent macro.
+        Node child2 = new Node(parent);
+        child2.setName("child2");
+        assertTrue(parent.hasChild(child1));
+        assertTrue(parent.hasChild(child2));
+        assertFalse(parent.hasChild(rootMacro));
+        assertTrue(parent.hasChild("child1"));
+        assertTrue(parent.hasChild("child2"));
+        assertFalse(parent.hasChild("xxx"));
+        assertEquals(child1, parent.getChild("child1"));
+        assertEquals(child2, parent.getChild("child2"));
+        try {
+            parent.getChild(null);
+            fail("getChild should not accept null.");
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            parent.getChild("xxx");
+            fail("Child xxx should not be found.");
+        } catch (ChildNotFoundException e) {
+            assertEquals(parent, e.getParent());
+            assertEquals("xxx", e.getName());
+        }
+        assertTrue(parent.getChildren().contains(child1));
+        assertTrue(parent.getChildren().contains(child2));
     }
 
     public void testChildEvent() {
-//        Node parent1 = Node.ROOT_NODE.newInstance(testLibrary, "parent1");
-//        Node parent2 = Node.ROOT_NODE.newInstance(testLibrary, "parent2");
-//        TestChildListener l1 = new TestChildListener(parent1);
-//        TestChildListener l2 = new TestChildListener(parent2);
-//        testLibrary.addListener(l1);
-//        testLibrary.addListener(l2);
-//        Node n1 = parent1.create(numberNode);
-//        assertEquals(1, l1.childAddedCounter);
-//        n1.setParent(parent2);
-//        assertEquals(1, l1.childAddedCounter);
-//        assertEquals(1, l2.childAddedCounter);
-//        assertEquals(1, l1.childRemovedCounter);
+        MockNodeEventListener l = new MockNodeEventListener();
+        testLibrary.addListener(l);
+
+        // Try creating a child with a bad constructor.
+        // This will fail, so the event should not fire.
+        try {
+            rootMacro.createChild(BadConstructorNode.class);
+        } catch (Exception ignored) {
+        }
+        assertNull(l.event);
+
+        Node n1 = rootMacro.createChild(Node.class);
+        assertEquals(ChildAddedEvent.class, l.event.getClass());
+        assertEquals(n1, ((ChildAddedEvent) l.event).getChild());
+
+        l.reset();
+        Node n2 = rootMacro.createChild(Node.class);
+        assertEquals(ChildAddedEvent.class, l.event.getClass());
+        assertEquals(n2, ((ChildAddedEvent) l.event).getChild());
+
+        // Try removing a child that does not exist.
+        // We'll use the rootMacro, which is not a child of itself.
+        l.reset();
+        boolean success = rootMacro.removeChild(rootMacro);
+        assertFalse(success);
+        assertNull(l.event);
+
+        success = rootMacro.removeChild(n1);
+        assertTrue(success);
+        assertEquals(ChildRemovedEvent.class, l.event.getClass());
+        assertEquals(n1, ((ChildRemovedEvent) l.event).getChild());
     }
 
     public void testBasicProcessing() {
-//        Node net = testNetworkNode.newInstance(testLibrary, "net");
-//        Node v1 = net.create(numberNode);
-//        v1.setValue("value", 42);
-//        assertProcessingError(net, "no child node to render");
-//        assertEquals(null, net.getOutputValue());
-//        v1.setRendered();
-//        net.update();
-//        assertEquals(42, net.getOutputValue());
-    }
+        Macro parent = (Macro) rootMacro.createChild(Macro.class, "parent");
+        Node intVariable = parent.createChild(numberNode);
+        intVariable.setValue("value", 42);
+        Node negate1 = parent.createChild(negateNode);
+        Node negate2 = parent.createChild(negateNode);
+        // Negate2's mode is changed to check if it is executed.
+        negate2.setMode(Node.Mode.PRODUCER);
+        parent.connect(negate1.getPort("value"), intVariable.getPort("result"));
+        parent.connect(negate2.getPort("value"), intVariable.getPort("result"));
 
+        parent.execute(new CookContext());
+        assertEquals(-42, negate1.getValue("result"));
+        // Because negate2 is set to producer, it is not executed.
+        assertEquals(0, negate2.getValue("result"));
 
-    public void testMacro() {
-        /*
-        NodeType vectorNetworkType = manager.getNodeType("nodebox.node.vector.network");
-        NodeType towerType = vectorNetworkType.clone();
-        towerType.setDescription("Gets an image and makes points out of it.");
-        Parameter pFloorHeight = towerType.addParameter("floorHeight", Parameter.Type.FLOAT);
-        pFloorHeight.setLabel("Height of Floor");
-        Parameter pSize = towerType.addParameter("buildingHeight", Parameter.Type.INT);
-        pSize.setLabel("Building Height (in floors)");
-        // Inner nodes
-        Node rect1 = towerType.create(RectNode.class);
-        Node copy1 = towerType.create(CopyType.class);
-        rect1.getPort("width").set(50.0);
-        rect1.getPort("height").setExpression("network.floorHeight");
-        copy1.getPort("shape").connect(rect1);
-        copy1.getPort("copies").setExpression("network.buildingHeight");
-        copy1.getPort("ty").setExpression("network.floorHeight");
-        copy1.setRendered();
-        // Execute the macro.
-        towerType.setValue("floorHeight", 20.0);
-        towerType.setValue("buildingHeight", 8);
-        towerType.update();
-        Grob g = (Grob) towerType.getOutputValue();
-        assertEquals(new Rect(0, 0, 50.0, 160.0), g.getBounds());
-        */
+        negate2.setMode(Node.Mode.CONSUMER);
+        intVariable.setValue("value", 12);
+        parent.execute(new CookContext());
+        assertEquals(-12, negate1.getValue("result"));
+        assertEquals(-12, negate2.getValue("result"));
     }
 
     public void testPersistence() {
@@ -299,90 +278,153 @@ public class MacroTest extends NodeTestCase {
 //        assertTrue(net1.getOutputValue() == rect1.getOutputValue());
     }
 
-    public void testCycles() {
-//        Node net = testNetworkNode.newInstance(testLibrary, "net1");
-//        Node n1 = net.create(numberNode);
-//        Node n2 = net.create(numberNode);
-//        Node n3 = net.create(numberNode);
-//        assertFalse(n2.isConnected());
-//        assertValidConnect(n2, "valuePort", n1);
-//        assertTrue(n2.isConnected());
-//        assertTrue(n2.isInputConnectedTo(n1));
-//        assertTrue(n1.isOutputConnectedTo(n2));
-//        assertValidConnect(n3, "valuePort", n2);
-//        assertTrue(n3.isConnected());
-//        assertTrue(n3.isInputConnectedTo(n2));
-//        assertTrue(n2.isOutputConnectedTo(n3));
-//        // Try creating a 2-node cycle.
-//        assertInvalidConnect(n1, "valuePort", n2);
-//        // The connection didn't go through, so n1's input is not connected to n2.
-//        assertFalse(n1.isInputConnectedTo(n2));
-//        // However the output of n2 is still connected to n1.
-//        assertTrue(n2.isInputConnectedTo(n1));
-//        assertTrue(n1.isConnected());
-//        assertTrue(n2.isConnected());
-//        // Try creating a 3-node cycle.
-//        assertInvalidConnect(n1, "valuePort", n3);
-//        // Test multi-input connections.
-//        Node n4 = net.create(multiAddNode);
-//        assertValidConnect(n4, "values", n1);
-//        assertValidConnect(n4, "values", n2);
-//        assertValidConnect(n4, "values", n3);
-//        assertInvalidConnect(n4, "values", n4);
-//        assertInvalidConnect(n1, "valuePort", n4);
+    /**
+     * Test all possible connection errors.
+     */
+    public void testConnectionErrors() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node n1 = parent.createChild(numberNode);
+        Node n2 = parent.createChild(numberNode);
+        Node stringNode = parent.createChild(convertToUppercaseNode);
+        Node outsider = rootMacro.createChild(numberNode);
+
+        // Swap inputs and outputs
+        assertInvalidConnect(n1.getPort("result"), n2.getPort("value"));
+        // Connect to self
+        assertInvalidConnect(n1.getPort("value"), n1.getPort("result"));
+        // Connect to wrong type
+        assertInvalidConnect(n1.getPort("value"), stringNode.getPort("result"));
+        assertInvalidConnect(stringNode.getPort("value"), n1.getPort("result"));
+        // Connect to outsider
+        assertInvalidConnect(n1.getPort("value"), outsider.getPort("result"));
+        assertInvalidConnect(outsider.getPort("value"), n1.getPort("result"));
+        // Connect to parent
+        parent.createPort("value", Integer.class, Port.Direction.IN);
+        parent.createPort("result", Integer.class, Port.Direction.OUT);
+        assertInvalidConnect(n1.getPort("value"), parent.getPort("result"));
+        assertInvalidConnect(parent.getPort("value"), n1.getPort("result"));
+
+        // Finally a valid connection
+        assertValidConnect(n2.getPort("value"), n1.getPort("result"));
+
+        // Creating the exact same connection again is legal: it replaces the old connection.
+        assertValidConnect(n2.getPort("value"), n1.getPort("result"));
+        assertEquals(1, parent.getConnections().size());
     }
 
-    public void testReparenting() {
-//        Node net1 = Node.ROOT_NODE.newInstance(testLibrary, "net1");
-//        Node net2 = Node.ROOT_NODE.newInstance(testLibrary, "net2");
-//        Node number1 = net1.create(numberNode);
-//        Node negate1 = net1.create(negateNode);
-//        Node addConstant1 = net1.create(addConstantNode);
-//        number1.setValue("value", 5);
-//        negate1.getPort("value").connect(number1);
-//        addConstant1.getPort("value").connect(negate1);
-//        addConstant1.setValue("constant", -3);
-//        addConstant1.setRendered();
-//        assertTrue(negate1.isConnected());
-//        assertTrue(number1.isConnected());
-//        assertTrue(addConstant1.isConnected());
-//        net1.update();
-//        assertEquals(-8, net1.getOutputValue());
-//        negate1.setParent(net2);
-//        assertFalse(negate1.isConnected());
-//        assertFalse(number1.isConnected());
-//        assertFalse(addConstant1.isConnected());
+    public void testBasicConnecting() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node number1 = parent.createChild(numberNode);
+        Port number1Output = number1.getPort("result");
+        Node number2 = parent.createChild(numberNode);
+        Port number2Output = number2.getPort("result");
+        Node negate1 = parent.createChild(negateNode);
+        Port negate1Input = negate1.getPort("value");
+        Node negate2 = parent.createChild(negateNode);
+        Port negate2Input = negate2.getPort("value");
+
+        parent.connect(negate1Input, number1Output);
+        parent.connect(negate2Input, number1Output);
+
+        assertTrue(parent.isConnected(number1));
+        assertTrue(parent.isConnected(negate1));
+        assertTrue(parent.isConnected(negate2));
+        assertFalse(parent.isConnected(number2));
+        assertTrue(parent.isConnectedTo(negate1Input, number1Output));
+        assertTrue(parent.isConnectedTo(negate2Input, number1Output));
+        assertFalse(parent.isConnectedTo(negate1Input, number2Output));
+        assertFalse(parent.isConnectedTo(negate1Input, number2Output));
+
+        // Replace negate1's input with number 2.
+        parent.connect(negate1Input, number2Output);
+        assertTrue(parent.isConnected(number2));
+        assertTrue(parent.isConnected(number1)); // Still connected to negate2
+        assertTrue(parent.isConnected(negate1));
+        assertTrue(parent.isConnectedTo(negate1Input, number2Output));
+        assertFalse(parent.isConnectedTo(negate1Input, number1Output));
+
+        // Macro.disconnect(Port) only works on an input port.
+        try {
+            parent.disconnect(number1Output);
+            fail("Should have thrown an error.");
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("not an input port"));
+        }
+
+        // Remove connection number1 <- negate2
+        parent.disconnect(negate2Input);
+        assertFalse(parent.isConnected(negate2));
+        assertFalse(parent.isConnected(number1));
+        assertFalse(parent.isConnectedTo(negate2Input, number1Output));
+        assertTrue(parent.isConnected(negate1));
+    }
+
+    public void testCycles() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node n1 = parent.createChild(numberNode);
+        Node n2 = parent.createChild(numberNode);
+        Node n3 = parent.createChild(numberNode);
+        Port n1Input = n1.getPort("value");
+        Port n1Output = n1.getPort("result");
+        Port n2Input = n2.getPort("value");
+        Port n2Output = n2.getPort("result");
+        Port n3Input = n3.getPort("value");
+        Port n3Output = n3.getPort("result");
+        assertFalse(parent.isConnected(n2));
+        assertValidConnect(n2Input, n1Output);
+        assertTrue(parent.isConnected(n2));
+        assertTrue(parent.isConnectedTo(n2Input, n1Output));
+        assertTrue(parent.isConnected(n1Output));
+        assertValidConnect(n3Input, n2Output);
+        assertTrue(parent.isConnected(n3));
+        assertTrue(parent.isConnectedTo(n3Input, n2Output));
+        assertTrue(parent.isConnected(n2Output));
+        // Try creating a single-node cycle.
+        assertInvalidConnect(n1Input, n1Output);
+        // Try creating a 2-node cycle.
+        assertInvalidConnect(n1Input, n2Output);
+        // The connection didn't go through, so n1's input is not connected to n2.
+        assertFalse(parent.isConnectedTo(n1Input, n2Output));
+        // However the input of n2 is still connected to n1's output.
+        assertTrue(parent.isConnectedTo(n2Input, n1Output));
+        assertTrue(parent.isConnected(n1));
+        assertTrue(parent.isConnected(n2));
+        // Try creating a 3-node cycle.
+        assertInvalidConnect(n1Input, n3Output);
     }
 
     /**
      * Test if errors occur in the right level, for the parent or children.
      */
     public void testErrorPropagation() {
-//        Node net = Node.ROOT_NODE.newInstance(testLibrary, "net", Integer.class);
-//        Node number1 = net.create(numberNode);
-//        // Set an invalid expression. This error is caused by a port on the number1 node,
-//        // therefore the number1 node should have its error flag set.
-//        number1.setExpression("value", "***");
-//        number1.setRendered();
-//        try {
-//            net.update();
-//            fail("Update should have thrown an error.");
-//        } catch (ExecuteException e) {
-//            // The network also has its error flag set since errors propagate.
-//            assertTrue(net.hasError());
-//            assertTrue(number1.hasError());
-//            assertFalse(net.isDirty());
-//            assertFalse(number1.isDirty());
-//        }
-//        // Fix the error by clearing the expression and setting a regular value.
-//        number1.clearExpression("value");
-//        number1.setValue("value", 42);
-//        assertTrue(net.isDirty());
-//        net.update();
-//        assertFalse(net.hasError());
-//        assertFalse(number1.hasError());
-//        assertEquals(42, number1.getOutputValue());
-//        assertEquals(42, net.getOutputValue());
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node crash = parent.createChild(crashNode);
+        crash.setMode(Node.Mode.PRODUCER); // So crash does not execute by itself.
+        Node negate = parent.createChild(negateNode);
+        parent.connect(negate.getPort("value"), crash.getPort("result"));
+        try {
+            parent.execute(new CookContext());
+            fail("Should have thrown an execute exception.");
+        } catch (ExecuteException e) {
+            assertEquals(parent, e.getNode());
+            assertErrorMessage(e, "error while updating child node crash1");
+            assertEquals(ExecuteException.class, e.getCause().getClass());
+            ExecuteException innerException = (ExecuteException) e.getCause();
+            assertErrorMessage(innerException, "/ by zero");
+            assertEquals(ArithmeticException.class, innerException.getCause().getClass());
+            assertEquals(crash, innerException.getNode());
+            Throwable t = parent.getError();
+            assertEquals(ExecuteException.class, t.getClass());
+            Throwable crashError = crash.getError();
+            assertNotNull(crashError);
+            assertEquals(ArithmeticException.class, crashError.getClass());
+        }
+
+        // Remove the connection, so crash no longer executes.
+        parent.disconnect(negate);
+        negate.setValue("value", 42);
+        parent.execute(new CookContext());
+        assertEquals(-42, negate.getValue("result"));
     }
 
     /**
@@ -414,7 +456,7 @@ public class MacroTest extends NodeTestCase {
         try {
             macro.connect(input, output);
             fail("Should have thrown IllegalArgumentException.");
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalStateException ignored) {
         }
     }
 

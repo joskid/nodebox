@@ -6,7 +6,7 @@ public class NodeTestCase extends TestCase {
 
     protected NodeLibraryManager manager;
     protected NodeLibrary testNodes, polygraphLibrary, testLibrary;
-    protected Class numberNode, negateNode, addNode, addDirectNode, addConstantNode, multiplyNode, multiAddNode,
+    protected Class<? extends Node> numberNode, negateNode, addNode, addDirectNode, addConstantNode, multiplyNode, multiAddNode,
             floatNegateNode, convertToUppercaseNode, crashNode, testNetworkNode;
     protected Macro rootMacro;
 
@@ -51,9 +51,13 @@ public class NodeTestCase extends TestCase {
             node.execute(new CookContext());
             fail("The node " + node + " should have failed processing.");
         } catch (ExecuteException e) {
-            assertTrue("Was expecting error " + expectedErrorMessage + ", got " + e.toString(),
-                    e.toString().toLowerCase().contains(expectedErrorMessage.toLowerCase()));
+            assertErrorMessage(e, expectedErrorMessage);
         }
+    }
+
+    public void assertErrorMessage(Exception e, String expectedErrorMessage) {
+        assertTrue(String.format("Was expecting error '%s', got '%s'", expectedErrorMessage, e.toString()),
+                e.toString().toLowerCase().contains(expectedErrorMessage.toLowerCase()));
     }
 
     //// Custom listeners ////

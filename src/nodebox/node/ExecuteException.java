@@ -18,34 +18,40 @@
  */
 package nodebox.node;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- *
- * @author Frederik
+ * Thrown when an error happened during the execution of a node.
  */
 public class ExecuteException extends RuntimeException {
 
-    private Node node;
+    private final Node node;
 
     public ExecuteException(Node node) {
+        checkNotNull(node);
         this.node = node;
     }
 
     public ExecuteException(Node node, String message) {
         super(message);
+        checkNotNull(node);
         this.node = node;
     }
 
     public ExecuteException(Node node, Throwable cause) {
         super(cause);
+        checkNotNull(node);
         this.node = node;
     }
 
     public ExecuteException(Node node, String message, Throwable cause) {
         super(message, cause);
+        checkNotNull(node);
         this.node = node;
     }
 
     public Node getNode() {
         return node;
     }
+
 }

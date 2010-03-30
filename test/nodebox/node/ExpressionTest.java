@@ -21,7 +21,7 @@ package nodebox.node;
 public class ExpressionTest extends NodeTestCase {
 
     public void testSimple() throws ExpressionError {
-        Node n =  rootMacro.createChild(TestNodes.IntVariable.class);
+        Node n = rootMacro.createChild(numberNode);
         Port pValue = n.getPort("value");
         Expression e = new Expression(pValue, "1 + 2");
         assertEquals(3, e.asInt());

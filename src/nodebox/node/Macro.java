@@ -8,6 +8,8 @@ import com.google.common.collect.Iterables;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,7 +49,7 @@ public class Macro extends Node {
      * @param childClass the node class for this child
      * @return the new child node
      */
-    public Node createChild(Class childClass) {
+    public Node createChild(Class<? extends Node> childClass) {
         return createChild(childClass, null);
     }
 
@@ -103,6 +105,7 @@ public class Macro extends Node {
             }
         }
         children = b.build();
+        getLibrary().fireChildRemoved(this, child);
         return true;
     }
 
@@ -130,8 +133,14 @@ public class Macro extends Node {
         return children.containsValue(node);
     }
 
-    public Node getChild(String nodeName) {
-        return children.get(nodeName);
+    public Node getChild(String nodeName) throws ChildNotFoundException {
+        checkNotNull(nodeName);
+        Node n = children.get(nodeName);
+        if (n == null) {
+            throw new ChildNotFoundException(this, nodeName);
+        } else {
+            return n;
+        }
     }
 
     public Node getExportedChild(String nodeName) {
@@ -196,8 +205,11 @@ public class Macro extends Node {
         checkState(input.canConnectTo(output), "The input cannot be connected to the output: the data types are incompatible.");
         disconnect(input);
         Connection c = new Connection(input, output);
-        connections = ImmutableSet.<Connection>builder().addAll(connections).add(c).build();
-        getLibrary().fireNodePortsChangedEvent(this);
+        ImmutableSet<Connection> newConnections = ImmutableSet.<Connection>builder().addAll(connections).add(c).build();
+        CycleDetector detector = new CycleDetector(newConnections);
+        checkState(!detector.hasCycles(), "Creating this connection would cause a cyclic dependency.");
+        connections = newConnections;
+        getLibrary().fireConnectionAdded(this, c);
         return c;
     }
 
@@ -224,43 +236,23 @@ public class Macro extends Node {
     }
 
     /**
-     * Removes all connections on the given (input or output) child port.
+     * Removes all connections on the given input child port.
      *
-     * @param port the (input or output) port on this node.
+     * @param input the child input port on a child node of this macro.
      * @return true if a connection was removed.
      */
-    public boolean disconnect(Port port) {
-        checkNotNull(port);
-        Node node = port.getNode();
+    public boolean disconnect(Port input) {
+        checkNotNull(input);
+        checkState(input.isInputPort(), "The given port is not an input port.");
+        Node node = input.getNode();
         checkState(hasChild(node), "The given node is not a child of this macro.");
         boolean removedSomething = false;
         ImmutableSet.Builder<Connection> builder = ImmutableSet.builder();
         for (Connection c : connections) {
-            if (c.getInput() == port || c.getOutput() == port) {
+            if (c.getInput() == input || c.getOutput() == input) {
                 removedSomething = true;
-                if (port.isInputPort())
-                    port.revertToDefault();
-            } else {
-                builder.add(c);
-            }
-        }
-        connections = builder.build();
-        return removedSomething;
-    }
-
-    /**
-     * Remove the given connection.
-     *
-     * @param conn the connection to remove
-     * @return true if the connection was removed.
-     */
-    public boolean disconnect(Connection conn) {
-        checkNotNull(conn);
-        boolean removedSomething = false;
-        ImmutableSet.Builder<Connection> builder = ImmutableSet.builder();
-        for (Connection c : connections) {
-            if (c == conn) {
-                removedSomething = true;
+                if (input.isInputPort())
+                    input.revertToDefault();
             } else {
                 builder.add(c);
             }
@@ -360,18 +352,25 @@ public class Macro extends Node {
      * For a macro node, this means rendering all consumers, making sure their dependencies are executed first.
      * Every node in the macro is only executed once. The processing context keeps a record of which nodes
      * have executed.
+     * <p/>
+     * If an error occurs during execution, this method will throw an ExecuteException with the node set to itself,
+     * and the cause of the child exception.
      *
      * @param context the processing context
      * @throws RuntimeException whenever an error occurs during executing.
      */
     @Override
     public void cook(CookContext context) throws RuntimeException {
-        for (Node child : getChildren()) {
-            if (child.getMode() == Mode.CONSUMER) {
-                updateChildDependencies(child, context);
-                CookContext childContext = new CookContext(context);
-                child.execute(childContext);
+        try {
+            for (Node child : getChildren()) {
+                if (child.getMode() == Mode.CONSUMER) {
+                    updateChildDependencies(child, context);
+                    CookContext childContext = new CookContext(context);
+                    child.execute(childContext);
+                }
             }
+        } catch (ExecuteException e) {
+            throw new ExecuteException(this, "Error while updating child node " + e.getNode().getName(), e);
         }
     }
 
@@ -393,6 +392,68 @@ public class Macro extends Node {
             }
             c.getInput().setValue(c.getOutput().getValue());
         }
+    }
+
+    /**
+     * Colors are used for the cycle detector
+     */
+    private enum Color {
+        WHITE, GRAY, BLACK
+    }
+
+    /**
+     * Check for cyclic connections.
+     */
+    private class CycleDetector {
+
+        private ImmutableSet<Connection> connections;
+
+        /**
+         * Mark which nodes we have encountered.
+         */
+        private Map<Node, Color> marks;
+
+        private CycleDetector(ImmutableSet<Connection> connections) {
+            this.connections = connections;
+        }
+
+        private boolean hasCycles() {
+            marks = new HashMap<Node, Color>(connections.size());
+            for (Connection c : connections) {
+                marks.put(c.getOutputNode(), Color.WHITE);
+            }
+            for (Connection c : connections) {
+                if (marks.get(c.getOutputNode()) == Color.WHITE) {
+                    if (visit(c.getOutputNode())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private boolean visit(Node node) {
+            marks.put(node, Color.GRAY);
+            for (Connection c : connections) {
+                Node outputNode = c.getOutputNode();
+                // Only use the ones I'm the input for (downstream connections for this node).
+                if (c.getInputNode() != node) continue;
+                if (!marks.containsKey(outputNode)) continue;
+                if (marks.get(outputNode) == Color.GRAY) {
+                    return true;
+                } else if (marks.get(outputNode) == Color.WHITE) {
+                    if (visit(outputNode)) {
+                        return true;
+                    }
+                } else {
+                    // Visiting black vertices is okay.
+                }
+            }
+            marks.put(node, Color.BLACK);
+            return false;
+        }
+
     }
 
 }

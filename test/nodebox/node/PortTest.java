@@ -274,8 +274,8 @@ public class PortTest extends NodeTestCase {
      * Test creating connections.
      */
     public void testConnecting() {
-        Node int1 = rootMacro.createChild(TestNodes.IntVariable.class, "int1");
-        Node negate1 = rootMacro.createChild(TestNodes.Negate.class, "negate1");
+        Node int1 = rootMacro.createChild(numberNode, "int1");
+        Node negate1 = rootMacro.createChild(negateNode, "negate1");
         assertFalse(rootMacro.isConnected(int1));
         assertFalse(rootMacro.isConnected(negate1));
         rootMacro.connect(negate1.getPort("value"), int1.getPort("result"));

@@ -164,20 +164,50 @@ public class CanvasContext extends AbstractGraphicsContext {
 
     @Override
     public Image image(String path, float x, float y) {
+        return image(path, x, y, null, null, 1.0f, true);
+    }
+
+    @Override
+    public Image image(String path, float x, float y, Float width) {
+        return image(path, x, y, width, null, 1.0f, true);
+    }
+
+    @Override
+    public Image image(String path, float x, float y, Float width, Float height) {
+        return image(path, x, y, width, height, 1.0f, true);
+    }
+
+    @Override
+    public Image image(String path, float x, float y, Float width, Float height, float alpha) {
+        return image(path, x, y, width, height, alpha, true);
+    }
+
+    @Override
+    public Image image(String path, float x, float y, Float width, Float height, boolean draw) {
+        return image(path, x, y, width, height, 1.0f, draw);
+    }
+
+    @Override
+    public Image image(String path, float x, float y, Float width, Float height, float alpha, boolean draw) {
         Image img = new Image(path);
+        if (width != null) img.setWidth(width);
+        if (height != null) img.setHeight(height);
         switch (imageMode) {
             case CORNER:
-                float width = img.getWidth();
-                float height = img.getHeight();
-                img.setX(x + width / 2);
-                img.setY(y + height / 2);
+                float w = img.getWidth();
+                float h = img.getHeight();
+                img.setX(x + w / 2);
+                img.setY(y + h / 2);
                 break;
             case CENTER:
                 img.setX(x);
                 img.setY(y);
         }
         inheritFromContext(img);
-        canvas.add(img);
+        if (alpha != 1.0)
+            img.setAlpha(alpha);
+        if (draw)
+            canvas.add(img);
         return img;
     }
 

@@ -366,6 +366,16 @@ public interface GraphicsContext {
 
     public Image image(String path, float x, float y);
 
+    public Image image(String path, float x, float y, Float width);
+
+    public Image image(String path, float x, float y, Float width, Float height);
+
+    public Image image(String path, float x, float y, Float width, Float height, float alpha);
+
+    public Image image(String path, float x, float y, Float width, Float height, boolean draw);
+
+    public Image image(String path, float x, float y, Float width, Float height, float alpha, boolean draw);
+
     public Size imagesize(String path);
 
     public Text text(String text, float x, float y);

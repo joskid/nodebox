@@ -174,6 +174,18 @@ class Context(CanvasContext):
         # todo: handle kwargs?
         return h
     
+    ### Image commands ###
+
+    def image(self, path, x, y, width=None, height=None, alpha=1.0, data=None, draw=True, **kwargs):
+        img = CanvasContext.image(self, path, x, y, width, height, alpha, Boolean(draw))
+        # todo: handle data and kwargs
+        return img
+
+    def imagesize(self, path, data=None):
+        # todo: handle data
+        return CanvasContext.imagesize(self, path)
+
+    
     def _setAttributesFromKwargs(self, item, **kwargs):
         keys = kwargs.keys()
         if isinstance(item, Path):

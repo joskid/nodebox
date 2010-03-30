@@ -658,6 +658,26 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
     }
 
+    public Image image(String path, float x, float y, Float width) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
+    public Image image(String path, float x, float y, Float width, Float height) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
+    public Image image(String path, float x, float y, Float width, Float height, float alpha) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
+    public Image image(String path, float x, float y, Float width, Float height, boolean draw) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
+    public Image image(String path, float x, float y, Float width, Float height, float alpha, boolean draw) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
     public Size imagesize(String path) {
         throw new RuntimeException("'imagesize' is not applicable to this type of GrqphicsContext.");
     }

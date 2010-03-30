@@ -364,6 +364,10 @@ public interface GraphicsContext {
 
     public void align(Text.Align align);
 
+    public Image image(String path, float x, float y);
+
+    public Size imagesize(String path);
+
     public Text text(String text, float x, float y);
 
     public Text text(String text, float x, float y, float width);

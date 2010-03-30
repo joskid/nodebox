@@ -652,6 +652,16 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return strokeWidth = w;
     }
 
+    //// Image commands ////
+
+    public Image image(String path, float x, float y) {
+        throw new RuntimeException("'image' is not applicable to this type of GraphicsContext.");
+    }
+
+    public Size imagesize(String path) {
+        throw new RuntimeException("'imagesize' is not applicable to this type of GrqphicsContext.");
+    }
+
     //// Font commands ////
 
     public String font() {

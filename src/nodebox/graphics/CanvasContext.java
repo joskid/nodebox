@@ -162,6 +162,7 @@ public class CanvasContext extends AbstractGraphicsContext {
 
     //// Image methods ////
 
+    @Override
     public Image image(String path, float x, float y) {
         Image img = new Image(path);
         switch (imageMode) {
@@ -180,6 +181,7 @@ public class CanvasContext extends AbstractGraphicsContext {
         return img;
     }
 
+    @Override
     public Size imagesize(String path) {
         Image img = new Image(path);
         return img.getSize();

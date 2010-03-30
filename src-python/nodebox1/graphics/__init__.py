@@ -1,5 +1,6 @@
 from java.lang import Boolean
 from nodebox.graphics import CanvasContext, Path, NodeBoxError
+from random import choice
 
 class Context(CanvasContext):
     def __init__(self, canvas=None, ns=None):
@@ -196,3 +197,38 @@ class Context(CanvasContext):
         remaining = kwargs.keys()
         if remaining:
             raise NodeBoxError, "Unknown argument(s) '%s'" % ", ".join(remaining)
+
+    #### util ####
+
+    def random(self, v1=None, v2=None):
+        """Returns a random value.
+
+        This function does a lot of things depending on the parameters:
+        - If one or more floats is given, the random value will be a float.
+        - If all values are ints, the random value will be an integer.
+
+        - If one value is given, random returns a value from 0 to the given value.
+          This value is not inclusive.
+        - If two values are given, random returns a value between the two; if two
+          integers are given, the two boundaries are inclusive.
+        """
+        import random
+        if v1 != None and v2 == None: # One value means 0 -> v1
+            if isinstance(v1, float):
+                return random.random() * v1
+            else:
+                return int(random.random() * v1)
+        elif v1 != None and v2 != None: # v1 -> v2
+            if isinstance(v1, float) or isinstance(v2, float):
+                start = min(v1, v2)
+                end = max(v1, v2)
+                return start + random.random() * (end-start)
+            else:
+                start = min(v1, v2)
+                end = max(v1, v2) + 1
+                return int(start + random.random() * (end-start))
+        else: # No values means 0.0 -> 1.0
+            return random.random()
+
+    def choice(self, *args):
+        return choice(*args)

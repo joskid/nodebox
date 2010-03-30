@@ -21,7 +21,7 @@ import java.util.Locale;
  * that has no or invalid "cook" function will throw an IllegalArgumentException.
  * <p/>
  * The cook method on this class executes the Python "cook" function with the self reference. It also sets a number
- * of global parameters based on the ProcessingContext.
+ * of global parameters based on the CookContext.
  */
 public class PythonCode implements NodeCode {
 
@@ -52,7 +52,7 @@ public class PythonCode implements NodeCode {
         // If the function has more arguments, this will throw an error when cooking.
     }
 
-    public Object cook(Node node, ProcessingContext context) throws RuntimeException {
+    public Object cook(Node node, CookContext context) throws RuntimeException {
         if (cookFunction == null) preCook();
 
         // Add globals into the function namespace.

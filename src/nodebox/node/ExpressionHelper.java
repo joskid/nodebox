@@ -12,7 +12,7 @@ import java.util.Random;
 public class ExpressionHelper {
 
     // TODO: Expression system is not thread-safe.
-    public static ProcessingContext currentContext;
+    public static CookContext currentContext;
     public static Port currentPort;
 
     public static Random randomGenerator = new Random();

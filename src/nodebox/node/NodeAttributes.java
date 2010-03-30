@@ -36,6 +36,11 @@ public final class NodeAttributes {
         }
     }
 
+    public NodeAttributes() {
+        description = "";
+        image = IMAGE_GENERIC;
+    }
+
     public NodeAttributes(Builder b) {
         description = b.description;
         image = b.image;

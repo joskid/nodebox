@@ -5,7 +5,7 @@ package nodebox.node;
  */
 public interface NodeCode {
 
-    public Object cook(Node node, ProcessingContext context);
+    public Object cook(Node node, CookContext context);
 
     public String getSource();
 

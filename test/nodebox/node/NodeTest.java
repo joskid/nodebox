@@ -18,7 +18,10 @@
  */
 package nodebox.node;
 
-import nodebox.node.event.*;
+import nodebox.node.event.NodeAttributesChangedEvent;
+import nodebox.node.event.NodeDirtyEvent;
+import nodebox.node.event.NodePositionChangedEvent;
+import nodebox.node.event.NodeUpdatedEvent;
 
 public class NodeTest extends NodeTestCase {
 
@@ -33,6 +36,9 @@ public class NodeTest extends NodeTestCase {
 
     }
 
+    /**
+     * A listener that counts dirty and updated events.
+     */
     private class TestDirtyListener implements NodeEventListener {
 
         public Node source;
@@ -53,7 +59,10 @@ public class NodeTest extends NodeTestCase {
 
     }
 
-     private class MockNodeEventListener implements NodeEventListener {
+    /**
+     * A listener that stores the last received event.
+     */
+    private class MockNodeEventListener implements NodeEventListener {
 
         NodeEvent event;
 
@@ -67,83 +76,100 @@ public class NodeTest extends NodeTestCase {
 
     }
 
-    private class AddPortNode extends Node {
+    /**
+     * A node that dynamically creates a new port on cook.
+     */
+    public static class AddPortNode extends Node {
 
-        private AddPortNode(NodeLibrary library) {
-            super(library);
+        public AddPortNode(Macro parent) {
+            super(parent);
         }
 
         @Override
-        public void cook(ProcessingContext context) throws RuntimeException {
-            addPort("test", Integer.class, Port.Direction.IN);
+        public void cook(CookContext context) throws RuntimeException {
+            createPort("test", Integer.class, Port.Direction.IN);
         }
+
     }
 
-    private class N extends Node {
-        private N(NodeLibrary library) {
-            super(library);
+    /**
+     * An empty node with a short class name.
+     */
+    public static class N extends Node {
+
+        public N(Macro parent) {
+            super(parent);
         }
+
     }
 
+    /**
+     * Test the attributes of the base Node class.
+     */
     public void testBaseNode() {
-        Node baseNode = new Node(testLibrary);
+        Node baseNode = rootMacro.createChild(Node.class);
         assertEquals("", baseNode.getDescription());
         assertEquals(0, baseNode.getPorts().size());
-        assertEquals(Node.Mode.PRODUCER, baseNode.getMode());
+        assertEquals(Node.Mode.CONSUMER, baseNode.getMode());
         // Check if cooking throws an exception.
-        baseNode.cook(new ProcessingContext());
+        baseNode.cook(new CookContext());
     }
 
-    public void testBasicClone() {
-        Node n = new AddPortNode(testLibrary);
-        n.cook(new ProcessingContext());
-        assertTrue(n.hasPort("test"));
-        assertProcessingError(n, "already a port named test");
-    }
-
+    /**
+     * Test the automatically created type name.
+     */
     public void testTypeName() {
-        Node n1 = new Node(testLibrary);
+        Node n1 = rootMacro.createChild(Node.class);
         assertEquals("node", n1.getTypeName());
-        Node n2 = new AddPortNode(testLibrary);
+        Node n2 = rootMacro.createChild(AddPortNode.class);
         assertEquals("addPortNode", n2.getTypeName());
-        Node n3 = new N(testLibrary);
+        Node n3 = rootMacro.createChild(N.class);
         assertEquals("n", n3.getTypeName());
     }
 
+    /**
+     * Test the node attributes.
+     */
     public void testAttributes() {
-                Node n = new Node(testLibrary);
-                        MockNodeEventListener l = new MockNodeEventListener();
+        Node n = rootMacro.createChild(Node.class);
+        assertEquals("", n.getDescription());
+        assertEquals(NodeAttributes.IMAGE_GENERIC, n.getImage());
+        MockNodeEventListener l = new MockNodeEventListener();
         testLibrary.addListener(l);
         n.setAttributes(NodeAttributes.builder().description("hello").image("test.png").build());
-                assertEquals(NodeAttributesChangedEvent.class, l.event.getClass());
+        assertEquals(NodeAttributesChangedEvent.class, l.event.getClass());
         assertEquals("hello", n.getDescription());
         assertEquals("test.png", n.getImage());
     }
 
+    /**
+     * Test the parent and root attribute.
+     */
     public void testParent() {
-        Macro root = testLibrary.getRootMacro();
-        // Create a node without a parent.
-        // Since this node is not added to the test library, it has no parent.
-        Node n = new Node(testLibrary);
-        assertFalse(n.hasParent());
-        assertNull(n.getParent());
-        assertNull(n.getRoot());
+        // Creating a node with the Node constructor does not add it to the children.
+        Node n = new Node(rootMacro);
+        assertTrue(n.hasParent());
+        assertEquals(rootMacro, n.getParent());
+        assertEquals(rootMacro, n.getRootMacro());
+        assertTrue(rootMacro.hasChild(n));
+        assertTrue(rootMacro.hasChild(n.getName()));
+        assertFalse(rootMacro.hasChild("xxx"));
 
-        Macro m = new Macro(testLibrary);
-        assertFalse(n.hasParent());
-        assertNull(n.getParent());
-        assertNull(n.getRoot());
-
-        Macro parent = (Macro) root.createChild(Macro.class, "parent");
+        Macro parent = (Macro) rootMacro.createChild(Macro.class, "parent");
         Node child = parent.createChild(Macro.class, "child");
-        assertEquals(root, root.getRoot());
-        assertEquals(root, parent.getRoot());
-        assertEquals(root, child.getRoot());
-        assertNull(root.getParent());
-        assertEquals(root, parent.getParent());
+        assertEquals(rootMacro, rootMacro.getRootMacro());
+        assertEquals(rootMacro, parent.getRootMacro());
+        assertEquals(rootMacro, child.getRootMacro());
+        assertNull(rootMacro.getParent());
+        assertEquals(rootMacro, parent.getParent());
         assertEquals(parent, child.getParent());
+        assertTrue(rootMacro.hasChild(parent));
+        assertTrue(rootMacro.hasChild("parent"));
     }
 
+    /**
+     * Test the absolute path of a node.
+     */
     public void testAbsolutePath() {
         Macro root = testLibrary.getRootMacro();
         Macro parent = (Macro) root.createChild(Macro.class, "parent");
@@ -153,46 +179,67 @@ public class NodeTest extends NodeTestCase {
         assertEquals("/parent/child", child.getAbsolutePath());
     }
 
+    /**
+     * Test the position attribute.
+     */
     public void testPosition() {
-        Macro root = testLibrary.getRootMacro();
-                MockNodeEventListener l = new MockNodeEventListener();
+        MockNodeEventListener l = new MockNodeEventListener();
         testLibrary.addListener(l);
-        root.setPosition(50, 20);
+        rootMacro.setPosition(50, 20);
         assertEquals(NodePositionChangedEvent.class, l.event.getClass());
-        assertEquals(50, root.getX());
-        assertEquals(20, root.getY());
+        assertEquals(50.0, rootMacro.getX());
+        assertEquals(20.0, rootMacro.getY());
     }
 
+    /**
+     * Test creating and removing ports.
+     */
+    public void testPorts() {
+        Node n = rootMacro.createChild(Node.class);
+        assertFalse(n.hasPort("p"));
+        try {
+            n.getPort(null);
+            fail("Should have failed precondition check.");
+        } catch (Exception e) {
+        }
+        try {
+            assertNull(n.getPort("p"));
+            fail("Should have thrown PortNotFoundException.");
+        } catch (PortNotFoundException e) {
+        }
+
+        Port p = n.createPort("p", Integer.class, Port.Direction.IN);
+        assertNotNull(p);
+        assertTrue(n.hasPort("p"));
+        assertEquals(p, n.getPort("p"));
+        assertEquals(Integer.class, p.getDataClass());
+        assertEquals(Port.Direction.IN, p.getDirection());
+
+        boolean success = n.removePort(p);
+        assertTrue(success);
+        assertFalse(n.hasPort("p"));
+    }
+
+    /**
+     * Test basic node execution.
+     */
     public void testBasicUsage() {
-//        Node dotNode = Node.ROOT_NODE.newInstance(testLibrary, "dotNode");
-//        dotNode.addPort("x", Port.Type.FLOAT);
-//        dotNode.addPort("y", Port.Type.FLOAT);
-//        dotNode.addPort("_output", Port.Type.STRING);
-//
-//        // Check default values
-//        assertEquals(0F, dotNode.getValue("x"));
-//        assertEquals(0F, dotNode.getValue("y"));
-//        assertEquals("", dotNode.getValue("_output"));
-//
-//        // Process
-//        dotNode.update();
-//        assertEquals("dot(0.0,0.0)", dotNode.getOutputValue());
-//
-//        // Create instance and change values
-//        Node dotInstance = dotNode.newInstance(testLibrary, "dotInstance");
-//        dotInstance.setValue("x", 25F);
-//        dotInstance.setValue("y", 42F);
-//        dotInstance.update();
-//        assertEquals("dot(25.0,42.0)", dotInstance.getOutputValue());
-//
-//        // Check that original hasn't changed
-//        assertEquals(0F, dotNode.asFloat("x"));
-//        assertEquals(0F, dotNode.asFloat("y"));
-//        assertEquals("dot(0.0,0.0)", dotNode.getOutputValue());
-//
-//        // Now let the instance use its own code
-//        dotInstance.update();
-//        assertEquals("dot2(25.0,42.0)", dotInstance.getOutputValue());
+        Node add = rootMacro.createChild(TestNodes.Add.class);
+
+        // Check default values
+        assertEquals(0, add.getValue("v1"));
+        assertEquals(0, add.getValue("v2"));
+        assertEquals(0, add.getValue("result"));
+
+        // Execute
+        add.execute(new CookContext());
+        assertEquals(0, add.getValue("result"));
+
+        // Change values and execute
+        add.setValue("v1", 40);
+        add.setValue("v2", 2);
+        add.execute(new CookContext());
+        assertEquals(42, add.getValue("result"));
     }
 
     public void testGetValue() {
@@ -308,19 +355,15 @@ public class NodeTest extends NodeTestCase {
 //        assertTrue(net.contains("rect"));
     }
 
-    public void testPorts() {
-//        Node n = Node.ROOT_NODE;
-//        assertNull(n.getPort("p1"));
-//        assertTrue(n.hasPort("_code"));
-//        assertNotNull(n.getPort("_code"));
-//        assertNull(n.getPort("x"));
-    }
-
     public void testNodeNaming() {
-        Node n = new Node(testLibrary);
-        assertEquals("node", n.getName());
+        Node n = rootMacro.createChild(Node.class);
+        assertEquals("node1", n.getName());
 
         assertInvalidName(n, null, "names cannot be null.");
+        assertInvalidName(n, "", "names cannot be empty.");
+        assertInvalidName(n, "  ", "names cannot contain spaces.");
+        assertInvalidName(n, "  x  ", "names cannot contain spaces.");
+
 
         assertInvalidName(n, "1234", "names cannot start with a digit.");
 
@@ -345,8 +388,8 @@ public class NodeTest extends NodeTestCase {
     }
 
     public void testUniqueName() {
-        Macro macro = new Macro(testLibrary);
-        macro.createChild(Node.class, "node");
+        Macro macro = (Macro) testLibrary.getRootMacro().createChild(Macro.class);
+        macro.createChild(Node.class, "mynode");
         Node node1 = macro.createChild(Node.class);
         assertEquals("node1", node1.getName());
         assertEquals("node2", macro.uniqueName("node"));
@@ -362,7 +405,7 @@ public class NodeTest extends NodeTestCase {
         Node bad = rootMacro.createChild(crashNode, "crash");
         TestDirtyListener listener = new TestDirtyListener(bad);
         testLibrary.addListener(listener);
-        assertProcessingError(bad, "integer division or modulo by zero");
+        assertExecuteException(bad, "/ by zero");
     }
 
     /**
@@ -374,10 +417,10 @@ public class NodeTest extends NodeTestCase {
 //        try {
 //            n.update();
 //            fail("Should have caused an exception.");
-//        } catch (ProcessingError e) {
+//        } catch (ExecuteException e) {
 //            assertTrue(e.getCause().toString().toLowerCase().contains("cannot compile expression"));
 //            assertTrue(n.hasError());
-//            // As stated in Node#update(ProcessingContext), even if an error occurred the node is still marked as clean
+//            // As stated in Node#update(CookContext), even if an error occurred the node is still marked as clean
 //            // and events are fired. It is important to mark the node as clean so that subsequent changes to the node
 //            // mark it as dirty, triggering an event. This allows you to fix the cause of the error in the node.
 //            assertFalse(n.isDirty());
@@ -395,19 +438,20 @@ public class NodeTest extends NodeTestCase {
      * Test if errors with dependencies fail fast, and have the correct error behaviour.
      */
     public void testDependencyError() {
-//        Node net = testNetworkNode.newInstance(testLibrary, "net");
-//        Node negate1 = net.create(negateNode);
-//        Node crash1 = net.create(crashNode);
-//        negate1.getPort("value").connect(crash1);
-//        try {
-//            negate1.update();
-//        } catch (ProcessingError e) {
-//            // The error flag is limited to the dependency that caused the error.
-//            // The crash node caused the error, so it has the error flag,
-//            // but the dependent node, negate1, doesn't get the error flag.
-//            assertTrue(crash1.hasError());
-//            assertFalse(negate1.hasError());
-//        }
+        Macro root = testLibrary.getRootMacro();
+        Node negate1 = root.createChild(negateNode);
+        Node crash1 = root.createChild(crashNode);
+        root.connect(negate1.getPort("value"), crash1.getPort("result"));
+        try {
+            root.execute(new CookContext());
+            fail("Should have raised an ExecuteException.");
+        } catch (ExecuteException e) {
+            // The error flag is limited to the dependency that caused the error.
+            // The crash node caused the error, so it has the error flag,
+            // but the dependent node, negate1, doesn't get the error flag.
+            assertTrue(crash1.hasError());
+            assertFalse(negate1.hasError());
+        }
     }
 
     /**
@@ -425,12 +469,22 @@ public class NodeTest extends NodeTestCase {
 //        try {
 //            net.update();
 //            fail();
-//        } catch (ProcessingError e) {
+//        } catch (ExecuteException e) {
 //            assertTrue(e.getCause().getMessage().toLowerCase().contains("cannot evaluate expression"));
 //        }
 //        assertTrue(net.hasError());
 //        assertTrue(number1.hasError());
 //        assertNull(net.getOutputValue());
+    }
+
+    /**
+     * Test if a node can dynamically create ports.
+     */
+    public void testDynamicPortCreation() {
+        Node n = testLibrary.getRootMacro().createChild(AddPortNode.class);
+        n.execute(new CookContext());
+        assertTrue(n.hasPort("test"));
+        assertExecuteException(n, "already a port named test");
     }
 
     public void testCopyWithUpstream() {
@@ -685,11 +739,11 @@ public class NodeTest extends NodeTestCase {
      * Test if print messages get output.
      */
     public void testOutput() {
-//        ProcessingContext ctx;
+//        CookContext ctx;
 //        PythonCode helloCode = new PythonCode("def cook(self): print 'hello'");
 //        Node test = Node.ROOT_NODE.newInstance(testLibrary, "test");
 //        test.setValue("_code", helloCode);
-//        ctx = new ProcessingContext();
+//        ctx = new CookContext();
 //        test.update(ctx);
 //        assertEquals("hello\n", ctx.getOutput());
 //
@@ -698,7 +752,7 @@ public class NodeTest extends NodeTestCase {
 //        Node child = parent.create(Node.ROOT_NODE, "child");
 //        child.setValue("_code", helloCode);
 //        child.setRendered();
-//        ctx = new ProcessingContext();
+//        ctx = new CookContext();
 //        parent.update(ctx);
 //        assertEquals("hello\n", ctx.getOutput());
     }

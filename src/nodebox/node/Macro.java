@@ -1,8 +1,11 @@
 package nodebox.node;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Set;
@@ -19,13 +22,21 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class Macro extends Node {
 
+    public static Macro createRootMacro(NodeLibrary library) {
+        return new Macro(library);
+    }
+
     private static final Pattern NUMBER_AT_THE_END = Pattern.compile("^(.*?)(\\d*)$");
 
     private ImmutableMap<String, Node> children = ImmutableMap.of();
     private ImmutableSet<Connection> connections = ImmutableSet.of();
 
-    public Macro(NodeLibrary library) {
+    private Macro(NodeLibrary library) {
         super(library);
+    }
+
+    public Macro(Macro parent) {
+        super(parent);
     }
 
     /**
@@ -49,60 +60,41 @@ public class Macro extends Node {
      */
     public Node createChild(Class childClass, String name) {
         checkNotNull(childClass);
+
+        // Create the child
+        Node child;
         try {
-            Constructor c = childClass.getConstructor(NodeLibrary.class);
-            Node child = (Node) c.newInstance(getLibrary());
-            if (name == null) {
-                name = uniqueName(child.getTypeName());
-            }
-            child.setName(name);
-            addChild(child);
-            return child;
+            Constructor c = childClass.getConstructor(Macro.class);
+            child = (Node) c.newInstance(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        // Set the child name
+        if (name != null) {
+            child.setName(name);
+        }
+
+        return child;
     }
 
-    public void addChild(Node child) {
-        checkNotNull(child);
-        if (child.getParent() == this) return;
-        if (child.getParent() != null)
-            child.getParent().removeChild(child);
+    /**
+     * Add the child to the collection.
+     *
+     * This method is called from the node constructor, and cannot be used to move a child to a different parent.
+     * @param child the child node
+     */
+    protected void addChild(Node child) {
+        checkState(child.getParent() == this, "The given child should have its parent already set to this macro.");
         children = ImmutableMap.<String, Node>builder()
                 .putAll(children)
                 .put(child.getName(), child)
                 .build();
-        child.parent = this;
         getLibrary().fireChildAdded(this, child);
-//        // This method is called indirectly by newInstance.
-//        // newInstance has set the parent, but has not added it to
-//        // the library yet. Therefore, we cannot do this.parent == parent,
-//        // but need to check parent.contains()
-//        if (parent != null && parent.contains(this)) return;
-//        if (parent != null && parent.hasChild(name))
-//            throw new InvalidNameException(this, name, "There is already a node named \"" + name + "\" in " + parent);
-//        // Since this node will reside under a different parent, it can no longer maintain connections within
-//        // the previous parent. Break all connections. We need to do this before the parent changes.
-//        disconnect();
-//        if (this.parent != null)
-//            this.parent.remove(this);
-//        this.parent = parent;
-//        if (parent != null) {
-//            parent.children.put(name, this);
-//            for (Port p : ports.values()) {
-//                if (parent.childGraph == null)
-//                    parent.childGraph = new DependencyGraph<Port, Connection>();
-//                parent.childGraph.addDependency(p, outputPort);
-//            }
-//            // We're on the child node, so we need to fire the child added event
-//            // on the parent with this child as the argument.
-//            getLibrary().fireChildAdded(parent, this);
-//        }
     }
 
     public boolean removeChild(Node child) {
         if (!children.containsValue(child)) return false;
-        child.parent = null;
         ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
         for (Node c : children.values()) {
             if (c != child) {
@@ -121,11 +113,9 @@ public class Macro extends Node {
         return children.isEmpty();
     }
 
-    /* package private */
-
     void _renameChild(Node child, String newName) {
         checkNotNull(child);
-        checkState(hasChild(child));
+        checkState(child.getParent() == this);
         checkNotNull(newName);
         String oldName = child.getName();
         ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
@@ -310,6 +300,20 @@ public class Macro extends Node {
     }
 
     /**
+     * Get a list of all connections where the child node is the input.
+     *
+     * @param child the child node
+     * @return an iterable of connections
+     */
+    public Iterable<Connection> getInputConnections(final Node child) {
+        return Iterables.filter(connections, new Predicate<Connection>() {
+            public boolean apply(@Nullable Connection connection) {
+                return connection != null && connection.getInputNode() == child;
+            }
+        });
+    }
+
+    /**
      * Checks if the child node is connected.
      * <p/>
      * This method checks both input and output connections.
@@ -366,6 +370,50 @@ public class Macro extends Node {
             }
         }
         return false;
+    }
+
+    //// Cooking ////
+
+
+    /**
+     * Perform the actual function of the node.
+     * <p/>
+     * For a macro node, this means rendering all consumers, making sure their dependencies are executed first.
+     * Every node in the macro is only executed once. The processing context keeps a record of which nodes
+     * have executed.
+     *
+     * @param context the processing context
+     * @throws RuntimeException whenever an error occurs during executing.
+     */
+    @Override
+    public void cook(CookContext context) throws RuntimeException {
+        for (Node child : getChildren()) {
+            if (child.getMode() == Mode.CONSUMER) {
+                updateChildDependencies(child, context);
+                CookContext childContext = new CookContext(context);
+                child.execute(childContext);
+            }
+        }
+    }
+
+    /**
+     * Update the dependencies for a child, recursively.
+     *
+     * @param child   the child node to update
+     * @param context the processing context
+     * @throws ExecuteException if executing a dependency failed
+     */
+    private void updateChildDependencies(Node child, CookContext context) throws ExecuteException {
+        for (Connection c : getInputConnections(child)) {
+            Node n = c.getOutputNode();
+            if (!context.hasExecuted(n)) {
+                context.addToExecutedNodes(n);
+                updateChildDependencies(n, context);
+                // The next line can throw an execute exception.
+                n.execute(context);
+            }
+            c.getInput().setValue(c.getOutput().getValue());
+        }
     }
 
 }

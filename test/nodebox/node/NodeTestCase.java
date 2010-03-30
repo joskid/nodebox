@@ -35,22 +35,22 @@ public class NodeTestCase extends TestCase {
 
     //// Custom assertions ////
 
-    public void assertProcessingError(Node node, Class expectedErrorClass) {
+    public void assertExecuteException(Node node, Class expectedErrorClass) {
         try {
-            node.cook(new ProcessingContext());
+            node.execute(new CookContext());
             fail("The node " + node + " should have failed processing.");
-        } catch (ProcessingError e) {
-            // ProcessingErrors are not wrapped, so check if the expected error is a ProcessingError.
-            if (expectedErrorClass == ProcessingError.class) return;
+        } catch (ExecuteException e) {
+            // ProcessingErrors are not wrapped, so check if the expected error is a ExecuteException.
+            if (expectedErrorClass == ExecuteException.class) return;
             assertEquals(expectedErrorClass, e.getCause().getClass());
         }
     }
 
-    public void assertProcessingError(Node node, String expectedErrorMessage) {
+    public void assertExecuteException(Node node, String expectedErrorMessage) {
         try {
-            node.cook(new ProcessingContext());
+            node.execute(new CookContext());
             fail("The node " + node + " should have failed processing.");
-        } catch (ProcessingError e) {
+        } catch (ExecuteException e) {
             assertTrue("Was expecting error " + expectedErrorMessage + ", got " + e.toString(),
                     e.toString().toLowerCase().contains(expectedErrorMessage.toLowerCase()));
         }

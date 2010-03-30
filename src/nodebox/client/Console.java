@@ -70,7 +70,7 @@ public class Console extends JTextPane implements PaneView {
         interpreter.setOut(outputStream);
         interpreter.setErr(errorStream);
         interpreter.set("document", pane.getDocument());
-        interpreter.set("root", pane.getDocument().getActiveMacro().getRoot());
+        interpreter.set("root", pane.getDocument().getActiveMacro().getRootMacro());
         interpreter.set("parent", pane.getDocument().getActiveMacro());
         interpreter.set("node", pane.getDocument().getActiveNode());
         Exception pythonException = null;

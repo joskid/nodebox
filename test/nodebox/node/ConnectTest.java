@@ -21,11 +21,6 @@ package nodebox.node;
 import nodebox.node.event.ConnectionAddedEvent;
 import nodebox.node.event.ConnectionRemovedEvent;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 public class ConnectTest extends NodeTestCase {
 
     private class ConnectListener implements NodeEventListener {
@@ -113,11 +108,10 @@ public class ConnectTest extends NodeTestCase {
         Node m = rootMacro.createChild(multiplyNode, "multiply1");
         rootMacro.connect(m.getPort("v1"), number1.getPort("result"));
         rootMacro.connect(m.getPort("v2"), number2.getPort("result"));
-        // TODO This will become zero.
-        assertNull(m.getPort("result"));
+        assertNotNull(m.getPort("result"));
+        assertNull(m.getValue("result"));
+        
         // TODO implement rest of test
-//        m.getPort("v1").connect(number1);
-//        m.getPort("v2").connect(number2);
 //        assertNull(m.getOutputValue());
 //        number1.setValue("value", 3);
 //        number2.setValue("value", 2);
@@ -167,7 +161,7 @@ public class ConnectTest extends NodeTestCase {
 //        assertNull(m.getPort("v1").getConnection());
 //        // The value of the input port is set to null after disconnection.
 //        // Since our simple multiply node doesn't handle null, it throws
-//        // a NullPointerException, which gets wrapped in a ProcessingError.
+//        // a NullPointerException, which gets wrapped in a ExecuteException.
 //        assertProcessingError(m, NullPointerException.class);
 //        assertNull(m.getOutputValue());
     }
@@ -233,7 +227,7 @@ public class ConnectTest extends NodeTestCase {
 //        net.remove(number1);
 //        assertNull(net.getRenderedChild());
 //        // This should cause the network to complain that there is no node to render.
-//        assertProcessingError(net, ProcessingError.class);
+//        assertProcessingError(net, ExecuteException.class);
 //        // The output value should revert to null.
 //        assertEquals(null, net.getOutputValue());
     }
@@ -343,7 +337,7 @@ public class ConnectTest extends NodeTestCase {
             Port output = outputNode.getPort(outputPort);
             macro.connect(input, output);
             fail(message);
-        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
         }
     }
 

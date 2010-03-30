@@ -47,7 +47,7 @@ public class PythonCodeTest extends TestCase {
 //     * Test if the code can access context globals.
 //     */
 //    public void testGlobals() {
-//        assertSnippetEquals(11, "FRAME + 10", null, new ProcessingContext());
+//        assertSnippetEquals(11, "FRAME + 10", null, new CookContext());
 //    }
 //
 //    /**
@@ -83,7 +83,7 @@ public class PythonCodeTest extends TestCase {
 //     * @param node     the node to operate on
 //     */
 //    private void assertSnippetEquals(Object expected, String snippet, Node node) {
-//        assertSnippetEquals(expected, snippet, node, new ProcessingContext());
+//        assertSnippetEquals(expected, snippet, node, new CookContext());
 //    }
 //
 //    /**
@@ -96,7 +96,7 @@ public class PythonCodeTest extends TestCase {
 //     * @param node     the node to operate on
 //     * @param context  the context to operate in
 //     */
-//    private void assertSnippetEquals(Object expected, String snippet, Node node, ProcessingContext context) {
+//    private void assertSnippetEquals(Object expected, String snippet, Node node, CookContext context) {
 //        String source = snippetToCode(snippet);
 //        PythonCode code = new PythonCode(source);
 //        Object obj = code.cook(node, context);
@@ -104,18 +104,18 @@ public class PythonCodeTest extends TestCase {
 //    }
 //
 //    private void assertSnippetFails(String snippet, Node node, String expectedMessage) {
-//        assertSnippetFails(snippet, node, new ProcessingContext(), expectedMessage);
+//        assertSnippetFails(snippet, node, new CookContext(), expectedMessage);
 //    }
 //
-//    private void assertSnippetFails(String snippet, Node node, ProcessingContext context, String expectedMessage) {
+//    private void assertSnippetFails(String snippet, Node node, CookContext context, String expectedMessage) {
 //        assertCodeFails(snippetToCode(snippet), node, context, expectedMessage);
 //    }
 //
 //    private void assertCodeFails(String source, Node node, String expectedMessage) {
-//        assertCodeFails(source, node, new ProcessingContext(), expectedMessage);
+//        assertCodeFails(source, node, new CookContext(), expectedMessage);
 //    }
 //
-//    private void assertCodeFails(String source, Node node, ProcessingContext context, String expectedMessage) {
+//    private void assertCodeFails(String source, Node node, CookContext context, String expectedMessage) {
 //        PythonCode code = new PythonCode(source);
 //        try {
 //            code.cook(node, context);

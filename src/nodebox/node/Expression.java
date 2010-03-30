@@ -184,7 +184,7 @@ public class Expression {
      * @throws ExpressionError if an error occurs whilst evaluating the expression.
      */
     public Object evaluate() throws ExpressionError {
-        return evaluate(new ProcessingContext());
+        return evaluate(new CookContext());
     }
 
     /**
@@ -197,7 +197,7 @@ public class Expression {
      * @throws ExpressionError if an error occurs whilst evaluating the expression.
      * @see #getError()
      */
-    public Object evaluate(ProcessingContext context) throws ExpressionError {
+    public Object evaluate(CookContext context) throws ExpressionError {
         // If there was an error with the expression, throw it before doing anything.
         if (hasError()) {
             throw new ExpressionError("Cannot compile expression '" + expression + "' on " + getPort().getAbsolutePath() + ": " + getError().getMessage(), getError());
@@ -252,15 +252,15 @@ public class Expression {
 
         private Node node;
         private NodeAccessProxy proxy;
-        private ProcessingContext context;
+        private CookContext context;
 
-        public ProxyResolverFactory(Node node, ProcessingContext context) {
+        public ProxyResolverFactory(Node node, CookContext context) {
             this.node = node;
             proxy = new NodeAccessProxy(node);
             this.context = context;
         }
 
-        public ProxyResolverFactory(Node node, ProcessingContext context, Set<WeakReference<Port>> markedPortReferences) {
+        public ProxyResolverFactory(Node node, CookContext context, Set<WeakReference<Port>> markedPortReferences) {
             this.node = node;
             proxy = new NodeAccessProxy(node, markedPortReferences);
             this.context = context;
@@ -369,9 +369,9 @@ public class Expression {
     class ProcessingContextResolver implements VariableResolver {
 
         private String name;
-        private ProcessingContext context;
+        private CookContext context;
 
-        ProcessingContextResolver(ProcessingContext context, String name) {
+        ProcessingContextResolver(CookContext context, String name) {
             this.context = context;
             this.name = name;
         }

@@ -1,20 +1,20 @@
 package nodebox.node.event;
 
+import nodebox.node.CookContext;
 import nodebox.node.Node;
 import nodebox.node.NodeEvent;
-import nodebox.node.ProcessingContext;
 
 public class NodeUpdatedEvent extends NodeEvent {
 
-    private ProcessingContext context;
+    private CookContext context;
 
 
-    public NodeUpdatedEvent(Node source, ProcessingContext context) {
+    public NodeUpdatedEvent(Node source, CookContext context) {
         super(source);
         this.context = context;
     }
 
-    public ProcessingContext getContext() {
+    public CookContext getContext() {
         return context;
     }
 

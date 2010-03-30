@@ -22,25 +22,25 @@ package nodebox.node;
  *
  * @author Frederik
  */
-public class ProcessingError extends RuntimeException {
+public class ExecuteException extends RuntimeException {
 
     private Node node;
 
-    public ProcessingError(Node node) {
+    public ExecuteException(Node node) {
         this.node = node;
     }
 
-    public ProcessingError(Node node, String message) {
+    public ExecuteException(Node node, String message) {
         super(message);
         this.node = node;
     }
 
-    public ProcessingError(Node node, Throwable cause) {
+    public ExecuteException(Node node, Throwable cause) {
         super(cause);
         this.node = node;
     }
 
-    public ProcessingError(Node node, String message, Throwable cause) {
+    public ExecuteException(Node node, String message, Throwable cause) {
         super(message, cause);
         this.node = node;
     }

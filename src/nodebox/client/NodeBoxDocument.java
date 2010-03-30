@@ -426,9 +426,9 @@ public class NodeBoxDocument extends JFrame implements WindowListener, NodeEvent
                 // If meanwhile the node has been marked clean, ignore the event.
                 // TODO if (!activeMacro.isDirty()) return;
                 try {
-                    activeMacro.cook(new ProcessingContext());
-                } catch (ProcessingError processingError) {
-                    Logger.getLogger("NodeBoxDocument").log(Level.WARNING, "Error while processing", processingError);
+                    activeMacro.cook(new CookContext());
+                } catch (ExecuteException executeException) {
+                    Logger.getLogger("NodeBoxDocument").log(Level.WARNING, "Error while processing", executeException);
                 } finally {
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {

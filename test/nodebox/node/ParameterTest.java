@@ -491,7 +491,7 @@ public class ParameterTest extends NodeTestCase {
 //        assertEquals(Parameter.emptyCode, pGamma.getValue());
 //        NodeCode code = (NodeCode) pGamma.getValue();
 //        assertEquals("", code.getSource());
-//        assertNull(code.cook(n, new ProcessingContext()));
+//        assertNull(code.cook(n, new CookContext()));
 //    }
 //
 //    /**
@@ -690,7 +690,7 @@ public class ParameterTest extends NodeTestCase {
 //            return n;
 //        }
 //
-//        public Object cook(Node node, ProcessingContext context) {
+//        public Object cook(Node node, CookContext context) {
 //            return 42;
 //        }
 //

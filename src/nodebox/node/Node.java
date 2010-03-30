@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A Node is a building block in a network and encapsulates specific functionality.
@@ -59,21 +60,32 @@ public class Node {
     }
 
     private final NodeLibrary library;
-    Macro parent;
-    private Mode mode = Mode.PRODUCER;
-    private NodeAttributes attributes;
+    private final Macro parent;
+    private Mode mode = Mode.CONSUMER;
     private String name;
     private double x, y;
-    private boolean exported;
+    private boolean exported = false;
+    private NodeAttributes attributes = new NodeAttributes();
     private ImmutableMap<String, Port> ports = ImmutableMap.of();
     private Throwable error;
 
     //// Constructors ////
 
-    public Node(NodeLibrary library) {
+    protected Node(NodeLibrary library) {
         checkNotNull(library);
+        checkState(library.getRootMacro() == null, "This method can only be used to create the root macro.");
         this.library = library;
-        this.name = getTypeName();
+        this.parent = null;
+        this.name = "root";
+    }
+
+    public Node(Macro parent) {
+        checkNotNull(parent);
+        checkNotNull(parent.getLibrary());
+        this.parent = parent;
+        this.library = parent.getLibrary();
+        this.name = this.parent.uniqueName(getTypeName());
+        this.parent.addChild(this);
     }
 
     //// Library ////
@@ -194,6 +206,7 @@ public class Node {
      * @throws InvalidNameException if the name was invalid.
      */
     public static void validateName(String name) throws InvalidNameException {
+        if (name == null) throw new InvalidNameException(null, "", "Name cannot be null.");
         Matcher m1 = NODE_NAME_PATTERN.matcher(name);
         Matcher m2 = DOUBLE_UNDERSCORE_PATTERN.matcher(name);
         Matcher m3 = RESERVED_WORD_PATTERN.matcher(name);
@@ -224,7 +237,7 @@ public class Node {
      *
      * @return the root macro or null if this node has no parent
      */
-    public Macro getRoot() {
+    public Macro getRootMacro() {
         Macro root = getLibrary().getRootMacro();
         if (parent != null || this == root) {
             return root;
@@ -273,7 +286,7 @@ public class Node {
     public String getAbsolutePath() {
         StringBuffer name = new StringBuffer("/");
         Macro parent = getParent();
-        Macro root = getRoot();
+        Macro root = getRootMacro();
         while (parent != null && parent != root) {
             name.insert(1, parent.getName() + "/");
             parent = parent.getParent();
@@ -329,23 +342,20 @@ public class Node {
 
     //// Ports ////
 
-    public Port addPort(Port p) {
+    public Port createPort(String name, Class dataClass, Port.Direction direction) {
+        return new Port(this, name, dataClass, direction);
+    }
+
+    protected void addPort(Port p) {
         ImmutableMap.Builder<String, Port> builder = ImmutableMap.builder();
         builder.putAll(ports);
         builder.put(p.getName(), p);
         ports = builder.build();
         getLibrary().fireNodePortsChangedEvent(this);
-        return p;
-    }
-
-    public Port addPort(String name, Class dataClass, Port.Direction direction) {
-        Port p = new Port(this, name, dataClass, direction);
-        addPort(p);
-        return p;
     }
 
     public boolean removePort(Port port) {
-        if (ports.containsValue(port)) return false;
+        if (!ports.containsValue(port)) return false;
         // TODO Remove connections to port
         ImmutableMap.Builder<String, Port> builder = ImmutableMap.builder();
         for (Port p : ports.values()) {
@@ -358,9 +368,14 @@ public class Node {
         return true;
     }
 
-    public Port getPort(String name) {
-        // TODO Test for null
-        return ports.get(name);
+    public Port getPort(String name) throws PortNotFoundException {
+        checkNotNull(name);
+        Port p = ports.get(name);
+        if (p == null) {
+            throw new PortNotFoundException(this, name);
+        } else {
+            return p;
+        }
     }
 
     public boolean hasPort(String portName) {
@@ -373,7 +388,7 @@ public class Node {
 
     //// Port values ////
 
-    public Object getValue(String portName) {
+    public Object getValue(String portName) throws PortNotFoundException {
         Port p = getPort(portName);
         if (p == null) return null;
         return p.getValue();
@@ -383,26 +398,25 @@ public class Node {
         checkNotNull(portName);
         checkNotNull(c);
         Port p = getPort(portName);
-        if (p == null) throw new PortNotFoundException(this, portName);
         if (p.getDataClass() != c.getClass()) {
             throw new RuntimeException("Port " + portName + " is not a " + c.getSimpleName());
         }
         return p.getValue();
     }
 
-    public int asInt(String portName) {
+    public int asInt(String portName) throws PortNotFoundException {
         return (Integer) getValueAs(portName, Integer.class);
     }
 
-    public float asFloat(String portName) {
+    public float asFloat(String portName) throws PortNotFoundException {
         return (Float) getValueAs(portName, Float.class);
     }
 
-    public String asString(String portName) {
+    public String asString(String portName) throws PortNotFoundException {
         return (String) getValueAs(portName, String.class);
     }
 
-    public Color asColor(String portName) {
+    public Color asColor(String portName) throws PortNotFoundException {
         return (Color) getValueAs(portName, Color.class);
     }
 
@@ -410,11 +424,17 @@ public class Node {
         checkNotNull(portName);
         checkNotNull(value);
         Port p = getPort(portName);
-        if (p == null)
-            throw new IllegalArgumentException("Port " + portName + " does not exist.");
         p.setValue(value);
     }
 
+    /**
+     * Set the given port to the given value.
+     * <p/>
+     * This method fails silently if the port does not exist or the value is not accepted.
+     *
+     * @param portName the name of the port
+     * @param value the new value
+     */
     public void silentSet(String portName, Object value) {
         try {
             setValue(portName, value);
@@ -442,17 +462,43 @@ public class Node {
     //// Processing ////
 
     /**
+     * Execute the node code.
+     * <p/>
+     * This method calls the cook method and wraps any exceptions in an ExecuteException.
+     * <p/>
+     * This is the preferred method to call when executing the node.
+     *
+     * @param context the processing context
+     * @throws ExecuteException if an error occurs during cooking
+     */
+    public void execute(CookContext context) throws ExecuteException {
+        try {
+            cook(context);
+        } catch (ExecuteException e) {
+            error = e;
+            throw e;
+        } catch (Exception e) {
+            error = e;
+            throw new ExecuteException(this, e);
+        }
+    }
+
+    /**
      * This is the default cook implementation of the node.
      * <p/>
      * If this node has children, it will look up the rendered child and update it. The return value will be the
      * return value of the rendered child.
      * <p/>
      * If the node doesn't have children, this method returns null.
+     * <p/>
+     * Although you can call this method directly, you'll probably want to call execute, which wraps any
+     * exceptions in an ExecuteException.
      *
      * @param context the processing context
      * @throws RuntimeException if an error occurred during processing.
+     * @see #execute(CookContext)
      */
-    public void cook(ProcessingContext context) throws RuntimeException {
+    public void cook(CookContext context) throws RuntimeException {
     }
 
     /**

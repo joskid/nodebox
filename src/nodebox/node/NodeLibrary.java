@@ -124,7 +124,7 @@ public class NodeLibrary {
         checkNotNull(name);
         this.name = name;
         this.file = file;
-        this.rootMacro = new Macro(this);
+        this.rootMacro = Macro.createRootMacro(this);
         this.variables = new HashMap<String, String>();
     }
 
@@ -151,11 +151,6 @@ public class NodeLibrary {
             }
         }
         return exportedChildren;
-    }
-
-    public void add(Node node) {
-        if (node.getLibrary() != this) throw new AssertionError("This node is already added to another library.");
-        rootMacro.addChild(node);
     }
 
     /**
@@ -250,7 +245,7 @@ public class NodeLibrary {
         eventBus.send(new NodeDirtyEvent(source));
     }
 
-    public void fireNodeUpdated(Node source, ProcessingContext context) {
+    public void fireNodeUpdated(Node source, CookContext context) {
         eventBus.send(new NodeUpdatedEvent(source, context));
     }
 

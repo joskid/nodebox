@@ -1,6 +1,5 @@
 package nodebox.node;
 
-import nodebox.graphics.Color;
 import nodebox.node.event.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -76,9 +75,8 @@ public class MacroTest extends NodeTestCase {
     }
 
     public void testRenameChild() {
-        Macro parent = new Macro(testLibrary);
+        Macro parent = (Macro) testLibrary.getRootMacro().createChild(Macro.class);
         Node n1 = parent.createChild(Node.class, "n1");
-        parent.addChild(n1);
         assertTrue(parent.hasChild(n1));
         assertTrue(parent.hasChild("n1"));
         assertFalse(parent.hasChild("n2"));
@@ -369,7 +367,7 @@ public class MacroTest extends NodeTestCase {
 //        try {
 //            net.update();
 //            fail("Update should have thrown an error.");
-//        } catch (ProcessingError e) {
+//        } catch (ExecuteException e) {
 //            // The network also has its error flag set since errors propagate.
 //            assertTrue(net.hasError());
 //            assertTrue(number1.hasError());

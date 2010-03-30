@@ -21,7 +21,7 @@ package nodebox.node;
 public class ExpressionTest extends NodeTestCase {
 
     public void testSimple() throws ExpressionError {
-        Node n = new TestNodes.IntVariable(testLibrary);
+        Node n =  rootMacro.createChild(TestNodes.IntVariable.class);
         Port pValue = n.getPort("value");
         Expression e = new Expression(pValue, "1 + 2");
         assertEquals(3, e.asInt());
@@ -122,7 +122,7 @@ public class ExpressionTest extends NodeTestCase {
 //        assertTrue(alpha.isDirty());
 //        try {
 //            alpha.update();
-//        } catch (ProcessingError e) {
+//        } catch (ExecuteException e) {
 //            assertTrue(e.getMessage().toLowerCase().contains("cannot compile expression"));
 //        }
 //        assertEquals(42, aValue.getValue());
@@ -140,13 +140,13 @@ public class ExpressionTest extends NodeTestCase {
 //        Port pY = test.addPort("y", Port.Type.INT, 5);
 //        pX.setExpression("y");
 //        assertTrue(pX.dependsOn(pY));
-//        pX.update(new ProcessingContext());
+//        pX.update(new CookContext());
 //        assertEquals(5, pX.getValue());
 //        test.removePort("y");
 //        // At this point, the port dependency should no longer exist.
 //        assertFalse(pX.getDependencies().contains(pY));
 //        try {
-//            pX.update(new ProcessingContext());
+//            pX.update(new CookContext());
 //            fail();
 //        } catch (ExpressionError e) {
 //            // update throws an error since the expression references a port that cannot be found.
@@ -431,7 +431,7 @@ public class ExpressionTest extends NodeTestCase {
     public void assertExpressionEquals(Object expected, Port p, String expression) throws ExpressionError {
 //        // We don't catch the ExpressionError but let it bubble up.
 //        p.setExpression(expression);
-//        p.update(new ProcessingContext());
+//        p.update(new CookContext());
 //        assertEquals(expected, p.getValue());
     }
 
@@ -449,7 +449,7 @@ public class ExpressionTest extends NodeTestCase {
     private void assertUpdateError(Port p, String expression, String expectedMessage) throws ExpressionError {
 //        p.setExpression(expression);
 //        try {
-//            p.update(new ProcessingContext());
+//            p.update(new CookContext());
 //        } catch (IllegalArgumentException e) {
 //            assertTrue("Expected message \"" + expectedMessage + "\", got \"" + e.getMessage() + "\"",
 //                    e.getMessage().toLowerCase().contains(expectedMessage.toLowerCase()));

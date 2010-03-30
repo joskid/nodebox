@@ -42,11 +42,10 @@ public class TextWindow extends AbstractPortEditor {
 
     public static void main(String[] args) {
         NodeLibrary testLibrary = new NodeLibrary("test");
-        Node node = new Node(testLibrary);
-        Port pText = node.addPort("text", String.class, Port.Direction.IN);
+        Node node = testLibrary.getRootMacro().createChild(Node.class);
+        Port pText = node.createPort("text", String.class, Port.Direction.IN);
         PortAttributes attributes = PortAttributes.builder().widget(PortAttributes.Widget.TEXT).build();
         pText.setAttributes(attributes);
-        node.addPort(pText);
         AbstractPortEditor win = new TextWindow(pText);
         win.setVisible(true);
     }

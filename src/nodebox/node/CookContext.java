@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The processing context contains metadata about the processing operation.
- * <p/>
- * Note: the context is currently empty. Later on, we will add the frame number etc.
+ * The cook context contains metadata about the cooking operation.
+ *
+ * It has a list of executed nodes.
  */
-public class ProcessingContext {
+public class CookContext {
 
     private long frame;
     private Set<Node> executedNodes = new HashSet<Node>();
@@ -22,7 +22,7 @@ public class ProcessingContext {
     private PrintStream outputStream;
     private PrintStream errorStream;
 
-    public ProcessingContext() {
+    public CookContext() {
         frame = 1;
         outputBytes = new ByteArrayOutputStream();
         outputStream = new PrintStream(outputBytes);
@@ -30,7 +30,7 @@ public class ProcessingContext {
         errorStream = new PrintStream(errorBytes);
     }
 
-    public ProcessingContext(ProcessingContext parentContext) {
+    public CookContext(CookContext parentContext) {
         nodeValues = new HashMap<Node, HashMap<String, Object>>(parentContext.nodeValues);
     }
 

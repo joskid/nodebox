@@ -157,7 +157,7 @@ public class EditorPane extends Pane implements ComponentListener, CaretListener
         }
     }
 
-    private void updateMessages(Node node, ProcessingContext context) {
+    private void updateMessages(Node node, CookContext context) {
         StringBuffer sb = new StringBuffer();
 
         if (node != null) {

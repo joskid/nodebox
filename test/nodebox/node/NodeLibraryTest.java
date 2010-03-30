@@ -3,10 +3,7 @@ package nodebox.node;
 import junit.framework.TestCase;
 import nodebox.node.event.ChildAddedEvent;
 
-import java.io.File;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class NodeLibraryTest extends TestCase {
 
@@ -305,34 +302,35 @@ public class NodeLibraryTest extends TestCase {
      * Test if only nodes with the export flags show up in the manager.
      */
     public void testExportFlag() {
-//        NodeLibrary library = new NodeLibrary("test");
-//        Node exportMe = Node.ROOT_NODE.newInstance(library, "exportMe");
-//        exportMe.setExported(true);
-//        Node hideMe = Node.ROOT_NODE.newInstance(library, "hideMe");
-//        List<Node> exportedNodes = library.getExportedNodes();
-//        assertEquals(1, exportedNodes.size());
-//        assertEquals(exportMe, exportedNodes.get(0));
-//        assertTrue(exportMe.isExported());
-//        assertFalse(hideMe.isExported());
-//
-//        // Test if the exported flag is persisted.
-//        String xml = library.toXml();
-//        NodeLibraryManager manager = new NodeLibraryManager();
-//        NodeLibrary newLibrary = NodeLibrary.fromXml("test", xml, manager);
-//        List<Node> newExportedNodes = newLibrary.getExportedNodes();
-//        assertEquals(1, newExportedNodes.size());
-//        Node newExportMe = newExportedNodes.get(0);
-//        assertEquals("exportMe", newExportMe.getName());
-//        assertTrue(newExportMe.isExported());
-//        // You can still access the non-exported nodes using getRootMacro().getChildren()
-//        Node newHideMe = newLibrary.getRootMacro().getChild("hideMe");
-//        assertEquals("hideMe", newHideMe.getName());
-//        assertFalse(newHideMe.isExported());
-//        // Try accessing through the library
-//        assertEquals(newExportMe, newLibrary.get("exportMe"));
-//        assertNull(newLibrary.get("hideMe"));
-//
-//
+        NodeLibrary library = new NodeLibrary("test");
+        Macro root = library.getRootMacro();
+        Node exportMe = root.createChild(Node.class, "exportMe");
+        exportMe.setExported(true);
+        Node hideMe = root.createChild(Node.class, "hideMe");
+        List<Node> exportedNodes = library.getExportedNodes();
+        assertEquals(1, exportedNodes.size());
+        assertEquals(exportMe, exportedNodes.get(0));
+        assertTrue(exportMe.isExported());
+        assertFalse(hideMe.isExported());
+
+        // Test if the exported flag is persisted.
+        String xml = library.toXml();
+        NodeLibraryManager manager = new NodeLibraryManager();
+        NodeLibrary newLibrary = NodeLibrary.fromXml("test", xml, manager);
+        List<Node> newExportedNodes = newLibrary.getExportedNodes();
+        assertEquals(1, newExportedNodes.size());
+        Node newExportMe = newExportedNodes.get(0);
+        assertEquals("exportMe", newExportMe.getName());
+        assertTrue(newExportMe.isExported());
+        // You can still access the non-exported nodes using getRootMacro().getChildren()
+        Node newHideMe = newLibrary.getRootMacro().getChild("hideMe");
+        assertEquals("hideMe", newHideMe.getName());
+        assertFalse(newHideMe.isExported());
+        // Try accessing through the library
+        assertEquals(newExportMe, newLibrary.get("exportMe"));
+        assertNull(newLibrary.get("hideMe"));
+
+
 //        // Test if a new instance based on this prototype loses the flag.
 //        NodeLibrary doc = new NodeLibrary("doc");
 //        Node myExportInstance = exportMe.newInstance(doc, "myExportInstance");
@@ -364,7 +362,7 @@ public class NodeLibraryTest extends TestCase {
     public void testEvents() {
         NodeLibrary library = new NodeLibrary("test");
         Macro root = library.getRootMacro();
-        MockNodeEventListener l = new MockNodeEventListener(); 
+        MockNodeEventListener l = new MockNodeEventListener();
         library.addListener(l);
         root.createChild(Node.class);
         assertEquals(ChildAddedEvent.class, l.event.getClass());

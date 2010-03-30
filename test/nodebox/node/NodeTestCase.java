@@ -56,4 +56,23 @@ public class NodeTestCase extends TestCase {
         }
     }
 
+    //// Custom listeners ////
+
+    /**
+     * A listener that stores the last received event.
+     */
+    public static class MockNodeEventListener implements NodeEventListener {
+
+        NodeEvent event;
+
+        public void receive(NodeEvent event) {
+            this.event = event;
+        }
+
+        public void reset() {
+            this.event = null;
+        }
+
+    }
+
 }

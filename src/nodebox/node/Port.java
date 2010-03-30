@@ -29,7 +29,7 @@ public final class Port {
     private final String name;
     private final Class dataClass;
     private final Direction direction;
-    private PortAttributes attributes;
+    private PortAttributes attributes = PortAttributes.DEFAULT;
     private Object value;
 
     Port(Node node, String name, Class dataClass, Direction direction) {
@@ -153,6 +153,7 @@ public final class Port {
      * @throws IllegalArgumentException if the value is not of the required data class.
      */
     public void setValue(@Nullable Object value) throws IllegalArgumentException {
+        if (this.value == value) return;
         validate(value);
         // As a special exception, a float port can accept integer values.
         if (value != null && value.getClass() == Integer.class && dataClass == Float.class) {
@@ -160,6 +161,7 @@ public final class Port {
         } else {
             this.value = value;
         }
+        getLibrary().fireValueChanged(node, this);
     }
 
     /**
@@ -323,19 +325,20 @@ public final class Port {
         }
     }
 
-    //// Cloning ////
+    //// Copying ////
 
     /**
-     * Create a clone of this port.
-     * This new port is not added to any node, and the node attribute will probably be need to be changed.
+     * Copy this port onto another node.
      * <p/>
      * The value of this port is not cloned, since values cannot be cloned.
      *
+     * @param node the node to copy the port onto
      * @return a new Port object
      */
-    @Override
-    public Port clone() {
-        return new Port(node, name, dataClass, direction);
+    public Port copyOnto(Node node) {
+        Port p = new Port(node, name, dataClass, direction);
+        p.value = value;
+        return p;
     }
 
     @Override

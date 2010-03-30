@@ -18,10 +18,7 @@
  */
 package nodebox.node;
 
-import nodebox.node.event.NodeAttributesChangedEvent;
-import nodebox.node.event.NodeDirtyEvent;
-import nodebox.node.event.NodePositionChangedEvent;
-import nodebox.node.event.NodeUpdatedEvent;
+import nodebox.node.event.*;
 
 public class NodeTest extends NodeTestCase {
 
@@ -55,23 +52,6 @@ public class NodeTest extends NodeTestCase {
             } else if (event instanceof NodeUpdatedEvent) {
                 updatedCounter++;
             }
-        }
-
-    }
-
-    /**
-     * A listener that stores the last received event.
-     */
-    private class MockNodeEventListener implements NodeEventListener {
-
-        NodeEvent event;
-
-        public void receive(NodeEvent event) {
-            this.event = event;
-        }
-
-        public void reset() {
-            this.event = null;
         }
 
     }
@@ -116,6 +96,25 @@ public class NodeTest extends NodeTestCase {
     }
 
     /**
+     * Test the run mode for nodes.
+     */
+    public void testMode() {
+        Node add = rootMacro.createChild(TestNodes.Add.class);
+        add.setValue("v1", 10);
+        add.setValue("v2", 7);
+        // The default mode is consumer.
+        assertEquals(Node.Mode.CONSUMER, add.getMode());
+        add.setMode(Node.Mode.PRODUCER);
+        rootMacro.execute(new CookContext());
+        // Only nodes with mode consumer are cooked from the macro.
+        // The add node has a different mode, so it is not executed.
+        assertEquals(0, add.getValue("result"));
+        add.setMode(Node.Mode.CONSUMER);
+        rootMacro.execute(new CookContext());
+        assertEquals(17, add.getValue("result"));
+    }
+
+    /**
      * Test the automatically created type name.
      */
     public void testTypeName() {
@@ -140,6 +139,7 @@ public class NodeTest extends NodeTestCase {
         assertEquals(NodeAttributesChangedEvent.class, l.event.getClass());
         assertEquals("hello", n.getDescription());
         assertEquals("test.png", n.getImage());
+        assertNotSame(NodeAttributes.DEFAULT, n.getAttributes());
     }
 
     /**
@@ -189,6 +189,11 @@ public class NodeTest extends NodeTestCase {
         assertEquals(NodePositionChangedEvent.class, l.event.getClass());
         assertEquals(50.0, rootMacro.getX());
         assertEquals(20.0, rootMacro.getY());
+
+        // Set the same position. The event should not fire.
+        l.reset();
+        rootMacro.setPosition(50, 20);
+        assertNull(l.event);
     }
 
     /**
@@ -196,28 +201,43 @@ public class NodeTest extends NodeTestCase {
      */
     public void testPorts() {
         Node n = rootMacro.createChild(Node.class);
-        assertFalse(n.hasPort("p"));
+        assertFalse(n.hasPort("p1"));
         try {
             n.getPort(null);
             fail("Should have failed precondition check.");
         } catch (Exception e) {
         }
         try {
-            assertNull(n.getPort("p"));
+            assertNull(n.getPort("p1"));
             fail("Should have thrown PortNotFoundException.");
         } catch (PortNotFoundException e) {
         }
 
-        Port p = n.createPort("p", Integer.class, Port.Direction.IN);
-        assertNotNull(p);
-        assertTrue(n.hasPort("p"));
-        assertEquals(p, n.getPort("p"));
-        assertEquals(Integer.class, p.getDataClass());
-        assertEquals(Port.Direction.IN, p.getDirection());
+        Port p1 = n.createPort("p1", Integer.class, Port.Direction.IN);
+        Port p2 = n.createPort("p2", Integer.class, Port.Direction.IN);
+        assertNotNull(p1);
+        assertTrue(n.hasPort("p1"));
+        assertTrue(n.hasPort("p2"));
+        assertEquals(p1, n.getPort("p1"));
+        assertEquals(p2, n.getPort("p2"));
+        assertEquals(Integer.class, p1.getDataClass());
+        assertEquals(Port.Direction.IN, p1.getDirection());
 
-        boolean success = n.removePort(p);
+        boolean success = n.removePort(p1);
         assertTrue(success);
-        assertFalse(n.hasPort("p"));
+        assertFalse(n.hasPort("p1"));
+        assertTrue(n.hasPort("p2"));
+        // The port still refers to the node.
+        assertEquals(n, p1.getNode());
+
+        Node n2 = rootMacro.createChild(Node.class);
+        Port p3 = n2.createPort("p3", Integer.class, Port.Direction.IN);
+        // Remove p2 port from n, although it is on n2.
+        try {
+            n.removePort(p3);
+            fail("Port p3 is not on node n.");
+        } catch (IllegalStateException e) {
+        }
     }
 
     /**
@@ -240,6 +260,18 @@ public class NodeTest extends NodeTestCase {
         add.setValue("v2", 2);
         add.execute(new CookContext());
         assertEquals(42, add.getValue("result"));
+    }
+
+    /**
+     * Test the silent set method.
+     */
+    public void testSilentSet() {
+        Node n = rootMacro.createChild(Node.class);
+        Port pInt = n.createPort("int", Integer.class, Port.Direction.IN);
+        assertSilentSetSucceeded(pInt, 12);
+        assertSilentSetSucceeded(pInt, -99);
+        assertSilentSetFailed(pInt, "xxx");
+        assertSilentSetFailed(pInt, 100.3f);
     }
 
     public void testGetValue() {
@@ -450,6 +482,7 @@ public class NodeTest extends NodeTestCase {
             // The crash node caused the error, so it has the error flag,
             // but the dependent node, negate1, doesn't get the error flag.
             assertTrue(crash1.hasError());
+            assertEquals(ArithmeticException.class, crash1.getError().getClass());
             assertFalse(negate1.hasError());
         }
     }
@@ -757,121 +790,14 @@ public class NodeTest extends NodeTestCase {
 //        assertEquals("hello\n", ctx.getOutput());
     }
 
-    /**
-     * Test the hasStampExpression on the node.
-     * <p/>
-     * This method is used to determine if parameters/nodes should be marked as dirty when re-evaluating upstream,
-     * which is what happens in the copy node.
-     */
-    public void testHasStampExpression() {
-//        Node n = Node.ROOT_NODE.newInstance(testLibrary, "test");
-//        Port pAlpha = n.addPort("alpha", Port.Type.FLOAT);
-//        Port pBeta = n.addPort("beta", Port.Type.FLOAT);
-//        assertFalse(n.hasStampExpression());
-//        // Set the parameters to expressions that do not use the stamp function.
-//        pAlpha.setExpression(" 12 + 5");
-//        pBeta.setExpression("random(1, 5, 10)");
-//        assertFalse(n.hasStampExpression());
-//        // Set one of the parameters to the stamp function.
-//        pBeta.setExpression("stamp(\"mybeta\", 42)");
-//        assertTrue(n.hasStampExpression());
-//        // Set the other port expression to a stamp function as well.
-//        pAlpha.setExpression("stamp(\"myalpha\", 0) * 5");
-//        assertTrue(n.hasStampExpression());
-//        // Clear out the expressions one by one.
-//        pAlpha.clearExpression();
-//        assertTrue(n.hasStampExpression());
-//        // Change the beta port to some other expression.
-//        pBeta.setExpression("85 - 6");
-//        assertFalse(n.hasStampExpression());
-    }
-
-    /**
-     * Test if setting a stamp expressions marks the correct nodes as dirty.
-     */
-    public void testStampExpression() {
-//        Node number1 = numberNode.newInstance(testLibrary, "number1");
-//        Node stamp1 = Node.ROOT_NODE.newInstance(testLibrary, "stamp1", Integer.class);
-//        stamp1.addPort("value");
-//        stamp1.getPort("value").connect(number1);
-//        // The code prepares upstream dependencies for stamping, processes them and negates the output.
-//        String stampCode = "def cook(self):\n" +
-//                "  context.put('my_a', 99)\n" +
-//                "  self.node.stampDirty()\n" +
-//                "  self.node.updateDependencies(context)\n" +
-//                "  return -self.value # Negate the output";
-//        stamp1.setValue("_code", new PythonCode(stampCode));
-//        Port pValue = number1.getPort("value");
-//        // Set number1 to a regular value. This should not influence the stamp operation.
-//        pValue.set(12);
-//        stamp1.update();
-//        assertEquals(-12, stamp1.getOutputValue());
-//        // Set number1 to an expression. Since we're not using stamp, nothing strange should happen to the output.
-//        pValue.setExpression("2 + 1");
-//        stamp1.update();
-//        assertEquals(-3, stamp1.getOutputValue());
-//        // Set number1 to an unknown stamp expression. The default value will be picked.
-//        pValue.setExpression("stamp(\"xxx\", 19)");
-//        stamp1.update();
-//        assertEquals(-19, stamp1.getOutputValue());
-//        // Set number1 to the my_a stamp expression. The expression will be picked up.
-//        pValue.setExpression("stamp(\"my_a\", 33)");
-//        stamp1.update();
-//        assertEquals(-99, stamp1.getOutputValue());
-    }
-
-    /**
-     * Test the behaviour of {@link Node#stampDirty()}.
-     *
-     * @throws ExpressionError if the expression causes an error. This indicates a regression.
-     */
-    public void testMarkStampedDirty() throws ExpressionError {
-//        // Setup a graph where a <- b <- c.
-//        Node a = Node.ROOT_NODE.newInstance(testLibrary, "a", Integer.class);
-//        Node b = Node.ROOT_NODE.newInstance(testLibrary, "b", Integer.class);
-//        Node c = Node.ROOT_NODE.newInstance(testLibrary, "c", Integer.class);
-//        a.addPort("a", Port.Type.INT);
-//        b.addPort("b", Port.Type.INT);
-//        Port bIn = b.addPort("in");
-//        Port cIn = c.addPort("in");
-//        bIn.connect(a);
-//        cIn.connect(b);
-//        // Update the graph. This will make a, b and c clean.
-//        c.update();
-//        assertFalse(a.isDirty());
-//        assertFalse(b.isDirty());
-//        assertFalse(c.isDirty());
-//        // Set b to a stamped expression. This will make node b, and all of its dependencies, dirty.
-//        b.setExpression("b", "stamp(\"my_b\", 55)");
-//        assertTrue(b.hasStampExpression());
-//        assertFalse(a.isDirty());
-//        assertTrue(b.isDirty());
-//        assertTrue(c.isDirty());
-//        // Update the graph, cleaning all of the nodes.
-//        c.update();
-//        assertFalse(a.isDirty());
-//        assertFalse(b.isDirty());
-//        assertFalse(c.isDirty());
-//        // Mark only stamped upstream nodes as dirty. This will make b dirty, and all of its dependencies.
-//        c.stampDirty();
-//        assertFalse(a.isDirty());
-//        assertTrue(b.isDirty());
-//        assertTrue(c.isDirty());
-//        // Remove the expression and update. This will make all nodes clean again.
-//        b.clearExpression("b");
-//        c.update();
-//        // Node b will not be dirty, since everything was updated.
-//        assertFalse(b.isDirty());
-//        // Since there are no nodes with stamp expressions, marking the stamped upstream nodes will have no effect.
-//        c.stampDirty();
-//        assertFalse(a.isDirty());
-//        assertFalse(b.isDirty());
-//        assertFalse(c.isDirty());
-    }
-
     //// Helper functions ////
 
     private void assertInvalidName(Node n, String newName, String reason) {
+        try {
+            Node.validateName(newName);
+            fail("the following condition was not met: " + reason);
+        } catch (Exception ignored) {
+        }
         try {
             n.setName(newName);
             fail("the following condition was not met: " + reason);
@@ -881,10 +807,50 @@ public class NodeTest extends NodeTestCase {
 
     private void assertValidName(Node n, String newName) {
         try {
+            Node.validateName(newName);
+        } catch (InvalidNameException e) {
+            fail("The name \"" + newName + "\" should have been accepted.");
+        }
+        try {
             n.setName(newName);
         } catch (InvalidNameException e) {
             fail("The name \"" + newName + "\" should have been accepted.");
         }
+    }
+
+    /**
+     * Assert that using silentSet actually has changed the value on the given port.
+     *
+     * @param p     the port
+     * @param value the value to set
+     */
+    private void assertSilentSetSucceeded(Port p, Object value) {
+        Node n = p.getNode();
+        String portName = p.getName();
+        MockNodeEventListener l = new MockNodeEventListener();
+        n.getLibrary().addListener(l);
+        n.silentSet(portName, value);
+        assertEquals(value, n.getValue(portName));
+        assertEquals(ValueChangedEvent.class, l.event.getClass());
+        n.getLibrary().removeListener(l);
+    }
+
+    /**
+     * Assert that silentSet has failed silently and that the value was not changed.
+     *
+     * @param p     the port
+     * @param value the value to set
+     */
+    private void assertSilentSetFailed(Port p, Object value) {
+        Node n = p.getNode();
+        String portName = p.getName();
+        MockNodeEventListener l = new MockNodeEventListener();
+        n.getLibrary().addListener(l);
+        Object originalValue = n.getValue(portName);
+        n.silentSet(portName, value);
+        assertEquals(originalValue, n.getValue(portName));
+        assertNull(l.event);
+        n.getLibrary().removeListener(l);
     }
 
 }

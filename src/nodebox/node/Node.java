@@ -65,7 +65,7 @@ public class Node {
     private String name;
     private double x, y;
     private boolean exported = false;
-    private NodeAttributes attributes = new NodeAttributes();
+    private NodeAttributes attributes = NodeAttributes.DEFAULT;
     private ImmutableMap<String, Port> ports = ImmutableMap.of();
     private Throwable error;
 
@@ -239,11 +239,8 @@ public class Node {
      */
     public Macro getRootMacro() {
         Macro root = getLibrary().getRootMacro();
-        if (parent != null || this == root) {
-            return root;
-        } else {
-            return null;
-        }
+        checkState(parent != null || this == root, "Parent is null and this node is not root.");
+        return root;
     }
 
     /**
@@ -253,26 +250,6 @@ public class Node {
      */
     public boolean hasParent() {
         return parent != null;
-    }
-
-    /**
-     * Check if the node is the deepest element in the hierarchy.
-     * <p/>
-     * The default node implementation always returns true.
-     *
-     * @return true if this node has no children
-     * @see Macro#isLeaf()
-     */
-    public boolean isLeaf() {
-        return true;
-    }
-
-    public boolean isEmpty() {
-        return true;
-    }
-
-    public int size() {
-        return 0;
     }
 
     //// Path ////
@@ -355,12 +332,12 @@ public class Node {
     }
 
     public boolean removePort(Port port) {
-        if (!ports.containsValue(port)) return false;
+        checkState(ports.containsValue(port));
         // TODO Remove connections to port
         ImmutableMap.Builder<String, Port> builder = ImmutableMap.builder();
         for (Port p : ports.values()) {
             if (p != port) {
-                builder.put(port.getName(), p);
+                builder.put(p.getName(), p);
             }
         }
         ports = builder.build();
@@ -390,34 +367,24 @@ public class Node {
 
     public Object getValue(String portName) throws PortNotFoundException {
         Port p = getPort(portName);
-        if (p == null) return null;
-        return p.getValue();
-    }
-
-    private Object getValueAs(String portName, Class c) throws PortNotFoundException {
-        checkNotNull(portName);
-        checkNotNull(c);
-        Port p = getPort(portName);
-        if (p.getDataClass() != c.getClass()) {
-            throw new RuntimeException("Port " + portName + " is not a " + c.getSimpleName());
-        }
+        checkNotNull(p);
         return p.getValue();
     }
 
     public int asInt(String portName) throws PortNotFoundException {
-        return (Integer) getValueAs(portName, Integer.class);
+        return getPort(portName).asInt();
     }
 
     public float asFloat(String portName) throws PortNotFoundException {
-        return (Float) getValueAs(portName, Float.class);
+        return getPort(portName).asFloat();
     }
 
     public String asString(String portName) throws PortNotFoundException {
-        return (String) getValueAs(portName, String.class);
+        return getPort(portName).asString();
     }
 
     public Color asColor(String portName) throws PortNotFoundException {
-        return (Color) getValueAs(portName, Color.class);
+        return getPort(portName).asColor();
     }
 
     public void setValue(String portName, Object value) throws PortNotFoundException {
@@ -433,7 +400,7 @@ public class Node {
      * This method fails silently if the port does not exist or the value is not accepted.
      *
      * @param portName the name of the port
-     * @param value the new value
+     * @param value    the new value
      */
     public void silentSet(String portName, Object value) {
         try {
@@ -533,21 +500,6 @@ public class Node {
      */
     public Handle createHandle() {
         return null;
-    }
-
-    @Override
-    public Node clone() {
-        try {
-            Node result = (Node) super.clone();
-            // TODO Clone all attributes
-            //result.parent = parent;
-            //result.mode = mode;
-            //result.attributes = attributes;
-            //result.ports = ports.clone();
-            return result;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
-        }
     }
 
     /**

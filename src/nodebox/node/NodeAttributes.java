@@ -5,6 +5,8 @@ package nodebox.node;
  */
 public final class NodeAttributes {
 
+    public static final NodeAttributes DEFAULT = new NodeAttributes();
+
     public static final String IMAGE_GENERIC = "__generic";
 
     private final String description;

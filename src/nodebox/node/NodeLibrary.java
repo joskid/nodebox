@@ -177,10 +177,6 @@ public class NodeLibrary {
         return rootMacro.removeChild(node);
     }
 
-    public int size() {
-        return rootMacro.size();
-    }
-
     public boolean contains(String nodeName) {
         return rootMacro.hasChild(nodeName);
     }

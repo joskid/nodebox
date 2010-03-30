@@ -80,8 +80,9 @@ public class Macro extends Node {
 
     /**
      * Add the child to the collection.
-     *
+     * <p/>
      * This method is called from the node constructor, and cannot be used to move a child to a different parent.
+     *
      * @param child the child node
      */
     protected void addChild(Node child) {
@@ -103,14 +104,6 @@ public class Macro extends Node {
         }
         children = b.build();
         return true;
-    }
-
-    public boolean isLeaf() {
-        return isEmpty();
-    }
-
-    public boolean isEmpty() {
-        return children.isEmpty();
     }
 
     void _renameChild(Node child, String newName) {
@@ -149,20 +142,6 @@ public class Macro extends Node {
         } else {
             return null;
         }
-    }
-
-    public Node getChildAt(int index) {
-        Collection c = children.values();
-        if (index >= c.size()) return null;
-        return (Node) c.toArray()[index];
-    }
-
-    public int getChildCount() {
-        return children.size();
-    }
-
-    public boolean hasChildren() {
-        return !children.isEmpty();
     }
 
     public Collection<Node> getChildren() {

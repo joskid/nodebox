@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 
 public final class PortAttributes {
 
+    public static final PortAttributes DEFAULT = new PortAttributes();
+
     /**
      * The UI control for this port. This defines how the port is represented in the user interface.
      */
@@ -88,6 +90,17 @@ public final class PortAttributes {
         public PortAttributes build() {
             return new PortAttributes(this);
         }
+    }
+
+    public PortAttributes() {
+        this.label = "";
+        this.helpText = "";
+        this.widget = null;
+        this.visible = true;
+        this.boundingMethod = BoundingMethod.NONE;
+        this.minimumValue = null;
+        this.maximumValue = null;
+        this.menuItems = ImmutableList.of();
     }
 
     public PortAttributes(Builder b) {

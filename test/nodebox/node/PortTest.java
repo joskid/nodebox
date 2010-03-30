@@ -1,6 +1,10 @@
 package nodebox.node;
 
 import nodebox.graphics.*;
+import nodebox.node.event.ValueChangedEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PortTest extends NodeTestCase {
 
@@ -9,6 +13,7 @@ public class PortTest extends NodeTestCase {
      */
     public void testNaming() {
         Node n = rootMacro.createChild(Node.class);
+        assertInvalidName(n, null, "names cannot be null.");
         assertInvalidName(n, "", "names cannot be empty.");
         assertInvalidName(n, "  ", "names cannot contain spaces.");
         assertInvalidName(n, "  x  ", "names cannot contain spaces.");
@@ -90,11 +95,36 @@ public class PortTest extends NodeTestCase {
         assertTrue(grobIn.canConnectTo(imageOut));
         assertTrue(grobIn.canConnectTo(pathOut));
         assertTrue(grobIn.canConnectTo(textOut));
+        assertTrue(canvasOut.canConnectTo(grobIn));
         assertFalse(grobIn.canConnectTo(grobOut)); // Cannot connect to port on the same node
 
         assertFalse(canvasIn.canConnectTo(canvasOut));
         assertFalse(canvasIn.canConnectTo(grobOut));
         assertFalse(canvasIn.canConnectTo(imageOut));
+        assertFalse(grobOut.canConnectTo(canvasIn));
+
+        assertFalse(grobIn.canConnectTo(grobIn));
+        assertFalse(grobIn.canConnectTo(grobOut));
+    }
+
+    /**
+     * Test where the value null can be used.
+     */
+    public void testNullValue() {
+        Node n = rootMacro.createChild(Node.class);
+
+        Port pInt = n.createPort("int", Integer.class, Port.Direction.IN);
+        assertValidValue(pInt, 12);
+        assertInvalidValue(pInt, null);
+
+        Port pList = n.createPort("list", List.class, Port.Direction.IN);
+        assertValidValue(pList, new ArrayList());
+        assertInvalidValue(pList, null);
+
+
+        Port pObject = n.createPort("object", Object.class, Port.Direction.IN);
+        assertValidValue(pObject, 12);
+        assertValidValue(pObject, null);
     }
 
     /**
@@ -140,7 +170,7 @@ public class PortTest extends NodeTestCase {
         pInteger.setValue(12);
         assertValues(pInteger, 12, 12, 12f, "12", new Color());
 
-        Port pFloat  = n.createPort("float", Float.class, Port.Direction.IN);
+        Port pFloat = n.createPort("float", Float.class, Port.Direction.IN);
         assertValues(pFloat, 0f, 0, 0f, "0.0", new Color());
         pFloat.setValue(33);
         assertValues(pFloat, 33f, 33, 33f, "33.0", new Color(1, 1, 1));
@@ -159,6 +189,11 @@ public class PortTest extends NodeTestCase {
         Color red = new Color(0.9, 0.2, 0.1);
         pColor.setValue(red);
         assertValues(pColor, red, 0, 0f, "#e6331aff", red);
+
+        Port pObject = n.createPort("object", Object.class, Port.Direction.IN);
+        assertValues(pObject, null, 0, 0f, "", new Color());
+        pObject.setValue("object");
+        assertValues(pObject, "object", 0, 0f, "object", new Color());
     }
 
     /**
@@ -167,7 +202,7 @@ public class PortTest extends NodeTestCase {
     public void testParseValue() {
         Node n = rootMacro.createChild(Node.class);
         Port pInteger = n.createPort("integer", Integer.class, Port.Direction.IN);
-        Port pFloat  = n.createPort("float", Float.class, Port.Direction.IN);
+        Port pFloat = n.createPort("float", Float.class, Port.Direction.IN);
         Port pString = n.createPort("string", String.class, Port.Direction.IN);
         Port pColor = n.createPort("color", Color.class, Port.Direction.IN);
         Port pObject = n.createPort("object", Object.class, Port.Direction.IN);
@@ -211,7 +246,7 @@ public class PortTest extends NodeTestCase {
     public void testRevertToDefault() {
         Node n = rootMacro.createChild(Node.class);
         Port pInteger = n.createPort("integer", Integer.class, Port.Direction.IN);
-        Port pFloat  = n.createPort("float", Float.class, Port.Direction.IN);
+        Port pFloat = n.createPort("float", Float.class, Port.Direction.IN);
         Port pString = n.createPort("string", String.class, Port.Direction.IN);
         Port pColor = n.createPort("color", Color.class, Port.Direction.IN);
         Port pObject = n.createPort("object", Object.class, Port.Direction.IN);
@@ -250,6 +285,43 @@ public class PortTest extends NodeTestCase {
         assertEquals(negate1, c.getInputNode());
     }
 
+    /**
+     * Test copying a port onto another node.
+     */
+    public void testCopyOnto() {
+        Node n1 = rootMacro.createChild(Node.class);
+        Port p1 = n1.createPort("p1", Integer.class, Port.Direction.IN);
+        p1.setValue(42);
+
+        Node n2 = rootMacro.createChild(Node.class);
+        p1.copyOnto(n2);
+        assertTrue(n2.hasPort("p1"));
+        assertEquals(42, n2.getValue("p1"));
+
+        // Copying again on the same node will cause a name clash.
+        try {
+            p1.copyOnto(n2);
+            fail("Should have failed with name exception.");
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     * Test for the value changed event.
+     */
+    public void testValueChangedEvent() {
+        Node n = rootMacro.createChild(Node.class);
+        Port pInt = n.createPort("port", Integer.class, Port.Direction.IN);
+        MockNodeEventListener l = new MockNodeEventListener();
+        testLibrary.addListener(l);
+        // Set the value to the one it already has.
+        pInt.setValue(0);
+        assertNull(l.event);
+        // Set the value to a new value.
+        pInt.setValue(50);
+        assertEquals(ValueChangedEvent.class, l.event.getClass());
+    }
+
     //// Custom assertions ////
 
     private Node nodeWithDataClass(String name, Class dataClass) {
@@ -260,22 +332,47 @@ public class PortTest extends NodeTestCase {
     }
 
     private void assertValues(Port p, Object oValue, int iValue, float fValue, String sValue, Color cValue) {
+        Node n = p.getNode();
+        String portName = p.getName();
         assertEquals(oValue, p.getValue());
+        assertEquals(oValue, n.getValue(portName));
         assertEquals(iValue, p.asInt());
+        assertEquals(iValue, n.asInt(portName));
         assertEquals(fValue, p.asFloat());
+        assertEquals(fValue, n.asFloat(portName));
         assertEquals(sValue, p.asString());
+        assertEquals(sValue, n.asString(portName));
         assertEquals(cValue, p.asColor());
+        assertEquals(cValue, n.asColor(portName));
     }
 
     private void assertInvalidName(Node n, String newName, String reason) {
+        Port p = n.createPort("temporaryPort", Integer.class, Port.Direction.IN);
+        try {
+            p.validateName(newName);
+            fail("the following condition was not met: " + reason);
+        } catch (InvalidNameException ignored) {
+        } finally {
+            n.removePort(p);
+        }
         try {
             n.createPort(newName, Integer.class, Port.Direction.IN);
             fail("the following condition was not met: " + reason);
         } catch (InvalidNameException ignored) {
         }
+        catch (NullPointerException ignored) {
+        }
     }
 
     private void assertValidName(Node n, String newName) {
+        Port p = n.createPort("temporaryPort", Integer.class, Port.Direction.IN);
+        try {
+            p.validateName(newName);
+        } catch (InvalidNameException e) {
+            fail("The name \"" + newName + "\" should have been accepted.");
+        } finally {
+            n.removePort(p);
+        }
         try {
             n.createPort(newName, Integer.class, Port.Direction.IN);
         } catch (InvalidNameException e) {
@@ -284,17 +381,34 @@ public class PortTest extends NodeTestCase {
     }
 
     private void assertValidValue(Node n, Object value) {
+        assertValidValue(n.getPort("in"), value);
+    }
+
+    private void assertValidValue(Port p, Object value) {
         try {
-            n.getPort("in").validate(value);
+            p.validate(value);
         } catch (IllegalArgumentException e) {
             fail("The value '" + value + "' should have been accepted: " + e);
         }
-
+        try {
+            p.setValue(value);
+        } catch (IllegalArgumentException e) {
+            fail("The value '" + value + "' should have been accepted: " + e);
+        }
     }
 
     private void assertInvalidValue(Node n, Object value) {
+        assertInvalidValue(n.getPort("in"), value);
+    }
+
+    private void assertInvalidValue(Port p, Object value) {
         try {
-            n.getPort("in").validate(value);
+            p.validate(value);
+            fail("The value '" + value + "' should not have been accepted.");
+        } catch (IllegalArgumentException ignored) {
+        }
+        try {
+            p.setValue(value);
             fail("The value '" + value + "' should not have been accepted.");
         } catch (IllegalArgumentException ignored) {
         }

@@ -203,9 +203,18 @@ public class Text extends AbstractGrob {
         // TODO: Implement
     }
 
+    //// Transformations ////
+
+    protected void setupTransform(Graphics2D g) {
+        saveTransform(g);
+        AffineTransform trans = g.getTransform();
+        trans.concatenate(getTransform().getAffineTransform());
+        g.setTransform(trans);
+    }
+    
     public void draw(Graphics2D g) {
         if (fillColor == null) return;
-        saveTransform(g);
+        setupTransform(g);
         if (text == null || text.length() == 0) return;
         TextLayoutIterator iterator = new TextLayoutIterator();
         while (iterator.hasNext()) {

@@ -725,10 +725,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     public Path textpath(String text, float x, float y, float width, float height) {
         Text t = new Text(text, x, y, width, height);
         inheritFromContext(t);
-        Path p = new Path();
-        p.text(t);
-        inheritFromContext(p);
-        return p;
+        return t.getPath();
     }
 
     public Rect textmetrics(String text) {
@@ -910,6 +907,18 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         t.setFontSize(fontSize);
         t.setLineHeight(lineHeight);
         t.setAlign(align);
+        Rect r = t.getBounds();
+        float dx = r.getX() + r.getWidth() / 2;
+        float dy = r.getY() + r.getHeight() / 2;
+        if (transformMode == Transform.Mode.CENTER) {
+            Transform trans = new Transform();
+            trans.translate(dx, dy);
+            trans.append(transform);
+            trans.translate(-dx, -dy);
+            t.setTransform(trans);
+        } else {
+            t.setTransform(transform);
+        }
     }
 
 

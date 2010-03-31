@@ -11,6 +11,10 @@ public class PythonCodeTest extends TestCase {
 //        testLibrary = new NodeLibrary("test");
 //    }
 //
+
+    public void testEmpty() {
+    }
+
 //    /**
 //     * Test if basic expressions return the correct type.
 //     */

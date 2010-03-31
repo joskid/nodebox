@@ -1,10 +1,6 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
-import nodebox.util.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 
 public class NodeManagerTest extends TestCase {
 
@@ -17,6 +13,9 @@ public class NodeManagerTest extends TestCase {
 //        testLibrary = new NodeLibrary("test");
 //        // TODO: manager.add(testLibrary);
 //    }
+
+    public void testEmpty() {
+    }
 //
 //    public void testLoad() {
 //        // The example.ndbx references polygraph nodes,

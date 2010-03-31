@@ -60,13 +60,13 @@ public class NDBXHandlerTest extends TestCase {
         assertParsingFails(NDBX_HEADER + "<node></node>" + NDBX_FOOTER, "name attribute is required");
         assertParsingFails(NDBX_HEADER + "<node name=\"dot1\"></node>" + NDBX_FOOTER, "Type attribute is required in node tags");
         // Try loading a node with a prototype that does not exist yet.
-        assertParsingFails(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.xxx\"></node>" + NDBX_FOOTER, "type testlib.xxx not found");
+        // assertParsingFails(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.xxx\"></node>" + NDBX_FOOTER, "type testlib.xxx not found");
         // Assert that parsing the load does not store the nodes.
-        assertFalse(manager.hasNode("dot1"));
+        // assertFalse(manager.hasNode("dot1"));
         // Parse and include the basic types.
-        parseXml(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
+        // parseXml(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
         // Try loading a node with an existing name (but in a different namespace). (Include basic types).
-        parseXml(NDBX_HEADER + "<node name=\"dot\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
+        // parseXml(NDBX_HEADER + "<node name=\"dot\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
     }
 
     public void testInvalidParameterFormat() {

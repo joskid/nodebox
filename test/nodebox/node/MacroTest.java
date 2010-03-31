@@ -134,11 +134,15 @@ public class MacroTest extends NodeTestCase {
         // Try removing a child that does not exist.
         // We'll use the rootMacro, which is not a child of itself.
         l.reset();
-        boolean success = rootMacro.removeChild(rootMacro);
-        assertFalse(success);
+        try {
+            rootMacro.removeChild(rootMacro);
+            fail("Cannot be removed.");
+        } catch (IllegalStateException e) {
+            assertErrorMessage(e, "not a child of this macro");
+        }
         assertNull(l.event);
 
-        success = rootMacro.removeChild(n1);
+        boolean success = rootMacro.removeChild(n1);
         assertTrue(success);
         assertEquals(ChildRemovedEvent.class, l.event.getClass());
         assertEquals(n1, ((ChildRemovedEvent) l.event).getChild());
@@ -359,6 +363,29 @@ public class MacroTest extends NodeTestCase {
         assertTrue(parent.isConnected(negate1));
     }
 
+    /**
+     * Test disconnecting a node.
+     */
+    public void testDisconnectNode() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node number1 = parent.createChild(numberNode);
+        Node negate1 = parent.createChild(negateNode);
+        Node number2 = parent.createChild(numberNode);
+        Node add1 = parent.createChild(addNode);
+        parent.connect(negate1.getPort("value"), number1.getPort("result"));
+        parent.connect(add1.getPort("v1"), negate1.getPort("result"));
+        parent.connect(add1.getPort("v2"), number2.getPort("result"));
+        assertEquals(3, parent.getConnections().size());
+
+        parent.disconnect(negate1);
+        assertFalse(parent.isConnected(number1));
+        assertFalse(parent.isConnected(negate1));
+        assertFalse(parent.isConnected(add1.getPort("v1")));
+        assertTrue(parent.isConnected(add1));
+        assertTrue(parent.isConnected(add1.getPort("v2")));
+        assertEquals(1, parent.getConnections().size());
+    }
+
     public void testCycles() {
         Macro parent = (Macro) rootMacro.createChild(Macro.class);
         Node n1 = parent.createChild(numberNode);
@@ -391,6 +418,17 @@ public class MacroTest extends NodeTestCase {
         assertTrue(parent.isConnected(n2));
         // Try creating a 3-node cycle.
         assertInvalidConnect(n1Input, n3Output);
+    }
+
+    /**
+     * Test if you can set a value on a connected port.
+     */
+    public void testSetValueOnConnectedPort() {
+        Macro parent = (Macro) rootMacro.createChild(Macro.class);
+        Node number1 = parent.createChild(numberNode);
+        Node add1 = parent.createChild(addNode);
+        parent.connect(add1.getPort("v1"), number1.getPort("result"));
+
     }
 
     /**

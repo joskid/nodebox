@@ -46,7 +46,7 @@ public class NDBXHandler extends DefaultHandler {
         this.manager = manager;
         this.library = library;
         this.rootNode = library.getRootMacro();
-        currentNode = null;
+        currentNode = rootNode;
     }
 
     public NodeLibrary geNodeLibrary() {
@@ -159,8 +159,12 @@ public class NDBXHandler extends DefaultHandler {
         Node newNode;
         checkNotNull(currentNode, "Current node cannot be null.");
         checkParseState(currentNode instanceof Macro, "Child nodes are only supported for macros.");
-        Macro macro = (Macro) currentNode;
-        newNode = macro.createChild(nodeClass, name);
+        if (currentNode == rootNode) {
+            newNode = currentNode;
+        } else {
+            Macro macro = (Macro) currentNode;
+            newNode = macro.createChild(nodeClass, name);
+        }
         // Parse additional node flags.
         String x = attributes.getValue(ATTR_NODE_X);
         String y = attributes.getValue(ATTR_NODE_Y);

@@ -22,6 +22,11 @@ public class NDBXHandlerTest extends TestCase {
 
     private NodeLibraryManager manager;
 
+    @Override
+    protected void setUp() throws Exception {
+        resetManager();
+    }
+
     /**
      * Test if the formatVersion is required.
      */
@@ -35,6 +40,9 @@ public class NDBXHandlerTest extends TestCase {
         parseXml(xml);
     }
 
+    /**
+     * Test if unknown tags are rejected.
+     */
     public void testUnknownTag() {
         String xml = NDBX_HEADER + "<flower name=\"dandelion\"></flower>" + NDBX_FOOTER;
         assertParsingFails(xml, "unknown start tag 'flower'");
@@ -44,13 +52,13 @@ public class NDBXHandlerTest extends TestCase {
      * Test if node position is persisted.
      */
     public void testPosition() {
-//        NodeLibrary l = new NodeLibrary("test");
-//        Node n = Node.ROOT_NODE.newInstance(l, "test");
-//        n.setPosition(25, 50);
-//        NodeLibrary lib = parseXml(l.toXml());
-//        Node test = lib.getRootMacro().getChild("test");
-//        assertEquals(25.0, test.getX());
-//        assertEquals(50.0, test.getY());
+        NodeLibrary l = new NodeLibrary("test");
+        Node n = l.getRootMacro().createChild(Node.class, "test");
+        n.setPosition(25, 50);
+        NodeLibrary lib = parseXml(l.toXml());
+        Node test = lib.getRootMacro().getChild("test");
+        assertEquals(25.0, test.getX());
+        assertEquals(50.0, test.getY());
     }
 
     /**
@@ -60,46 +68,37 @@ public class NDBXHandlerTest extends TestCase {
         assertParsingFails(NDBX_HEADER + "<node></node>" + NDBX_FOOTER, "name attribute is required");
         assertParsingFails(NDBX_HEADER + "<node name=\"dot1\"></node>" + NDBX_FOOTER, "Type attribute is required in node tags");
         // Try loading a node with a prototype that does not exist yet.
-        // assertParsingFails(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.xxx\"></node>" + NDBX_FOOTER, "type testlib.xxx not found");
+        assertParsingFails(NDBX_HEADER + "<node exported=\"true\" name=\"node1\" type=\"testlib.xxx\"></node>" + NDBX_FOOTER, "type testlib.xxx not found");
         // Assert that parsing the load does not store the nodes.
-        // assertFalse(manager.hasNode("dot1"));
-        // Parse and include the basic types.
-        // parseXml(NDBX_HEADER + "<node name=\"dot1\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
-        // Try loading a node with an existing name (but in a different namespace). (Include basic types).
-        // parseXml(NDBX_HEADER + "<node name=\"dot\" type=\"testlib.dot\"></node>" + NDBX_FOOTER);
+        assertFalse(manager.hasNode("test.node1"));
+        // Parse a node with all required attributes but without exported flag will make the node unavailable.
+        parseXml(NDBX_HEADER + "<node name=\"node1\" type=\"nodebox.node.Node\"></node>" + NDBX_FOOTER);
+        assertFalse(manager.hasNode("test.node1"));
+        // Parse a node with all required attributes.
+        parseXml(NDBX_HEADER + "<node exported=\"true\" name=\"node1\" type=\"nodebox.node.Node\"></node>" + NDBX_FOOTER);
+        assertTrue(manager.hasNode("test.node1"));
     }
 
-    public void testInvalidParameterFormat() {
-//        String NODE_HEADER = NDBX_HEADER + "<node name=\"dot1\" prototype=\"testlib.dot\">";
-//        String NODE_FOOTER = "</node>" + NDBX_FOOTER;
-//        // Name is required
-//        assertParsingFails(NODE_HEADER + "<param></param>" + NODE_FOOTER, "");
-//        // Strictly speaking, mentioning an existing port is not invalid, just useless.
-//        parseXml(NODE_HEADER + "<param name=\"x\"/>" + NODE_FOOTER);
-//        // Unknown name, and no value or type given
-//        assertParsingFails(NODE_HEADER + "<param name=\"test\"></param>" + NODE_FOOTER, "does not exist");
-//        // Unknown name, and no type given
-//        assertParsingFails(NODE_HEADER + "<param name=\"test\"><value>hello</value></param>" + NODE_FOOTER, "does not exist");
-//        // Valid name, but value is of wrong type
-//        assertParsingFails(NODE_HEADER + "<param name=\"x\"><value>hello</value></param>" + NODE_FOOTER, "could not parse");
-//        // Valid name, but value is in invalid tag
-//        assertParsingFails(NODE_HEADER + "<param name=\"x\"><float>hello</float></param>" + NODE_FOOTER, "unknown tag float");
-//        // Type port indicates a new port needs to be created, but a port with this name already exists
-//        assertParsingFails(NODE_HEADER + "<param name=\"x\" type=\"string\"><value>hello</value></param>" + NODE_FOOTER, "already exists");
-//        // Same as above, but type is now the same as prototype's. This should not make a difference though.
-//        assertParsingFails(NODE_HEADER + "<param name=\"x\" type=\"float\"><value>20.0</value></param>" + NODE_FOOTER, "already exists");
-//        // Unknown name, but type and value given, so new port was created.
-//        parseXml(NODE_HEADER + "<param name=\"test\" type=\"string\"><value>hello</value></param>" + NODE_FOOTER);
-    }
-
-    public void testInvalidCode() {
-//        String NODE_HEADER = NDBX_HEADER + "<node name=\"dot1\" prototype=\"testlib.dot\"><param name=\"_code\">";
-//        String NODE_FOOTER = "</param></node>" + NDBX_FOOTER;
-//        // Value tags for code need a type port.
-//        assertParsingFails(NODE_HEADER + "<value>print 'hello'</value>" + NODE_FOOTER, "type attribute is required");
-//        // We do not support Cobol (yet).
-//        assertParsingFails(NODE_HEADER + "<value type=\"cobol\">PROCEDURE DIVISION.\nDisplayPrompt.\n    DISPLAY \"Hello, World!\".\n    STOP RUN.\n</value>" + NODE_FOOTER, "invalid type attribute");
-//        // TODO: Test CDATA formatting.
+    public void testInvalidPortFormat() {
+        // The type refers to the inner class Add on TestNodes.
+        String NODE_HEADER = NDBX_HEADER + "<node name=\"dot1\" type=\"nodebox.node.TestNodes$Add\">";
+        String NODE_FOOTER = "</node>" + NDBX_FOOTER;
+        // Name is required
+        assertParsingFails(NODE_HEADER + "<port></port>" + NODE_FOOTER, "");
+        // Strictly speaking, mentioning an existing port is not invalid, just useless.
+        parseXml(NODE_HEADER + "<port name=\"v1\"/>" + NODE_FOOTER);
+        // Unknown name, and no value or type given
+        assertParsingFails(NODE_HEADER + "<port name=\"test\"></port>" + NODE_FOOTER, "not found");
+        // Unknown name, and no type given
+        assertParsingFails(NODE_HEADER + "<port name=\"test\"><value>hello</value></port>" + NODE_FOOTER, "not found");
+        // Valid name, but value is of wrong type
+        assertParsingFails(NODE_HEADER + "<port name=\"v1\"><value>hello</value></port>" + NODE_FOOTER, "could not parse");
+        // Valid name, but value is in invalid tag
+        assertParsingFails(NODE_HEADER + "<port name=\"v1\"><float>hello</float></port>" + NODE_FOOTER, "unknown start tag 'float'");
+        // Valid name, but invalid value.
+        assertParsingFails(NODE_HEADER + "<port name=\"v1\"><value>hello</value></port>" + NODE_FOOTER, "could not parse value");
+        // Valid name, valid value.
+        parseXml(NODE_HEADER + "<port name=\"v1\"><value>20</value></port>" + NODE_FOOTER);
     }
 
     public void testInvalidConnectionFormat() {
@@ -191,18 +190,7 @@ public class NDBXHandlerTest extends TestCase {
     }
 
     private void loadBasicTypes() {
-//        NodeLibrary testlib = new NodeLibrary("testlib");
-//        Node dot = Node.ROOT_NODE.newInstance(testlib, "dot", Polygon.class);
-//        dot.setExported(true);
-//        testlib.add(dot);
-//        dot.addParameter("x", Parameter.Type.FLOAT, 0F);
-//        dot.addParameter("y", Parameter.Type.FLOAT, 0F);
-//        Node rotate = Node.ROOT_NODE.newInstance(testlib, "rotate", Polygon.class);
-//        rotate.setExported(true);
-//        testlib.add(rotate);
-//        rotate.addPort("shape");
-//        rotate.addParameter("rotation", Parameter.Type.FLOAT, 0F);
-//        manager.add(testlib);
+        manager.add(new TestNodes());
     }
 
     /**
@@ -243,6 +231,7 @@ public class NDBXHandlerTest extends TestCase {
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser parser = spf.newSAXParser();
             NodeLibrary testLibrary = new NodeLibrary("test");
+            manager.add(testLibrary);
             NDBXHandler handler = new NDBXHandler(testLibrary, manager);
             InputStream in = new ByteArrayInputStream(xml.getBytes("UTF8"));
             parser.parse(in, handler);

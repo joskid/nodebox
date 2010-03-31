@@ -155,16 +155,11 @@ public class NDBXHandler extends DefaultHandler {
         } catch (ClassNotFoundException e) {
             throwParseException("Node type %s not found.", type);
         }
-        // Create the child at the root of the node library or the current parent
-        Node newNode;
+        // Create the child under the current parent
         checkNotNull(currentNode, "Current node cannot be null.");
         checkParseState(currentNode instanceof Macro, "Child nodes are only supported for macros.");
-        if (currentNode == rootNode) {
-            newNode = currentNode;
-        } else {
-            Macro macro = (Macro) currentNode;
-            newNode = macro.createChild(nodeClass, name);
-        }
+        Macro macro = (Macro) currentNode;
+        Node newNode = macro.createChild(nodeClass, name);
         // Parse additional node flags.
         String x = attributes.getValue(ATTR_NODE_X);
         String y = attributes.getValue(ATTR_NODE_Y);
@@ -187,8 +182,11 @@ public class NDBXHandler extends DefaultHandler {
     private void startPortTag(Attributes attributes) throws SAXException {
         String name = attributes.getValue(ATTR_PORT_NAME);
         checkNotNull(name, "Name attribute is required in port tags.");
-        currentPort = currentNode.getPort(name);
-        checkNotNull(currentPort, "Port %s on not found.");
+        try {
+            currentPort = currentNode.getPort(name);
+        } catch (PortNotFoundException e) {
+            throwParseException("Port %s on node %s not found.", name, currentNode);
+        }
     }
 
     /**
@@ -215,7 +213,7 @@ public class NDBXHandler extends DefaultHandler {
         try {
             value = currentPort.parseValue(valueAsString);
         } catch (IllegalArgumentException e) {
-            throwParseException("%s: could not parse value '%s'.", currentPort.getAbsolutePath(), valueAsString);
+            throwParseException("%s: could not parse value '%s', was expecting type %s.", currentPort.getAbsolutePath(), valueAsString, currentPort.getDataClass().getSimpleName());
         }
         try {
             currentPort.setValue(value);

@@ -159,11 +159,17 @@ public class NodeLibrary {
      * Only exported nodes are returned. If you want all nodes, use getRootMacro().getChild()
      *
      * @param name the name of the node
-     * @return the node, or null if a node with this name could not be found.
+     * @return the exported child node.
+     * @throws ChildNotFoundException if an exported child node with this name could not be found.
      */
-    public Node get(String name) {
+    public Node get(String name) throws ChildNotFoundException {
         if ("root".equals(name)) return rootMacro;
-        return rootMacro.getExportedChild(name);
+        Node child;
+        child = rootMacro.getChild(name);
+        if (!child.isExported()) {
+            throw new ChildNotFoundException(rootMacro, name);
+        }
+        return child;
     }
 
     public Node remove(String name) {

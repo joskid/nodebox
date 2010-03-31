@@ -153,16 +153,6 @@ public class Macro extends Node {
         }
     }
 
-    public Node getExportedChild(String nodeName) {
-        Node child = getChild(nodeName);
-        if (child == null) return null;
-        if (child.isExported()) {
-            return child;
-        } else {
-            return null;
-        }
-    }
-
     public Collection<Node> getChildren() {
         return children.values();
     }

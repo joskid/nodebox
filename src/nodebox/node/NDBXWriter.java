@@ -53,8 +53,11 @@ public class NDBXWriter {
                 varElement.setAttribute("value", variableValue);
             }
 
-            // Write out the root macro and all its children.
-            writeNode(doc, rootElement, library.getRootMacro());
+            // Write out the all children and connections of the root macro.
+            // The root macro itself is not written.
+            Macro rootMacro = library.getRootMacro();
+            writeChildren(doc, rootElement, rootMacro);
+            writeConnections(doc, rootElement, rootMacro);
 
             // Convert the document to XML.
             DOMSource domSource = new DOMSource(doc);
@@ -102,16 +105,9 @@ public class NDBXWriter {
 
         // A macro contains child nodes and connections.
         if (node instanceof Macro) {
-            // Add all child nodes
             Macro macro = (Macro) node;
-            for (Node child : macro.getChildren()) {
-                writeNode(doc, el, child);
-            }
-
-            // Add all child connections
-            for (Connection c : macro.getConnections()) {
-                writeConnection(doc, el, c);
-            }
+            writeChildren(doc, el, macro);
+            writeConnections(doc, el, macro);
         }
     }
 
@@ -125,6 +121,20 @@ public class NDBXWriter {
         parent.appendChild(value);
         Text valueText = doc.createTextNode(port.getValue().toString());
         valueText.appendChild(valueText);
+    }
+
+
+    private static void writeChildren(Document doc, Element parent, Macro macro) {
+        for (Node child : macro.getChildren()) {
+            writeNode(doc, parent, child);
+        }
+    }
+
+    private static void writeConnections(Document doc, Element parent, Macro macro) {
+        // Add all child connections
+        for (Connection c : macro.getConnections()) {
+            writeConnection(doc, parent, c);
+        }
     }
 
     private static void writeConnection(Document doc, Element parent, Connection conn) {

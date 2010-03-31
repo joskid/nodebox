@@ -94,7 +94,11 @@ public class NodeLibraryManager {
         String name = m.group(3);
         NodeLibrary library = libraries.get(libraryName);
         if (library == null) return null;
-        return library.get(name);
+        try {
+            return library.get(name);
+        } catch (ChildNotFoundException e) {
+            return null;
+        }
     }
 
     public boolean hasNode(String identifier) {

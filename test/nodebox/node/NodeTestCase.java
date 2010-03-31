@@ -6,7 +6,7 @@ public class NodeTestCase extends TestCase {
 
     protected NodeLibraryManager manager;
     protected NodeLibrary testNodes, polygraphLibrary, testLibrary;
-    protected Class<? extends Node> numberNode, negateNode, addNode, addDirectNode, addConstantNode, multiplyNode, multiAddNode,
+    protected Class<? extends Node> numberNode, negateNode, addNode, multiplyNode, multiAddNode,
             floatNegateNode, convertToUppercaseNode, crashNode, testNetworkNode;
     protected Macro rootMacro;
 

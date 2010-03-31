@@ -6,7 +6,7 @@ import nodebox.node.NodeEvent;
 
 public class ConnectionRemovedEvent extends NodeEvent {
 
-    private Connection connection;
+    private final Connection connection;
 
     public ConnectionRemovedEvent(Node source, Connection connection) {
         super(source);

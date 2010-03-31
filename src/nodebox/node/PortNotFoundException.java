@@ -18,4 +18,8 @@ public class PortNotFoundException extends RuntimeException {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return String.format("Port %s on node %s not found", name, node);
+    }
 }

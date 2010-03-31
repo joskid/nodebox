@@ -2,6 +2,7 @@ package nodebox.node;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 
 import javax.annotation.Nullable;
@@ -24,6 +25,9 @@ public final class Port {
             Float.class, 0f,
             String.class, "",
             Color.class, new Color());
+
+    private static final ImmutableSet<Class> standardTypes =
+            ImmutableSet.<Class>of(Integer.class, Float.class, String.class, Color.class);
 
     private final Node node;
     private final String name;
@@ -78,13 +82,22 @@ public final class Port {
     }
 
     public void validate(@Nullable Object value) throws IllegalArgumentException {
-        // Opaque objects are never checked.
-        if (dataClass == Object.class) return;
-        if (value == null) throw new IllegalArgumentException("Value cannot be null.");
+        // Non-standard types can be null.
+        if (value == null) {
+            if (isStandardType()) {
+                throw new IllegalArgumentException("Value cannot be null.");
+            } else {
+                return;
+            }
+        }
         // As a special exception, a float port can accept integer values.
         if (value.getClass() == Integer.class && dataClass == Float.class) return;
         if (!dataClass.isAssignableFrom(value.getClass()))
             throw new IllegalArgumentException("Value is not a " + dataClass);
+    }
+
+    public boolean isStandardType() {
+        return standardTypes.contains(dataClass);
     }
 
     public String getLabel() {

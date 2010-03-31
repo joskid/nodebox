@@ -91,20 +91,19 @@ public class PortTest extends NodeTestCase {
         Port pathOut = pathNode.getPort("out");
         Port textOut = textNode.getPort("out");
 
-        assertTrue(grobIn.canConnectTo(canvasOut));
-        assertTrue(grobIn.canConnectTo(imageOut));
-        assertTrue(grobIn.canConnectTo(pathOut));
-        assertTrue(grobIn.canConnectTo(textOut));
+        assertCanConnectTo(grobIn, canvasOut);
+        assertCanConnectTo(grobIn, imageOut);
+        assertCanConnectTo(grobIn, pathOut);
+        assertCanConnectTo(grobIn, textOut);
         assertTrue(canvasOut.canConnectTo(grobIn));
-        assertFalse(grobIn.canConnectTo(grobOut)); // Cannot connect to port on the same node
+        assertCannotConnectTo(grobIn, grobOut); // Cannot connect to port on the same node
 
-        assertFalse(canvasIn.canConnectTo(canvasOut));
-        assertFalse(canvasIn.canConnectTo(grobOut));
-        assertFalse(canvasIn.canConnectTo(imageOut));
+        assertCannotConnectTo(canvasIn, canvasOut);
+        assertCannotConnectTo(canvasIn, grobOut);
+        assertCannotConnectTo(canvasIn, imageOut);
         assertFalse(grobOut.canConnectTo(canvasIn));
 
         assertFalse(grobIn.canConnectTo(grobIn));
-        assertFalse(grobIn.canConnectTo(grobOut));
     }
 
     /**
@@ -119,8 +118,8 @@ public class PortTest extends NodeTestCase {
 
         Port pList = n.createPort("list", List.class, Port.Direction.IN);
         assertValidValue(pList, new ArrayList());
-        assertInvalidValue(pList, null);
-
+        // Non-standard types accept null.
+        assertValidValue(pList, null);
 
         Port pObject = n.createPort("object", Object.class, Port.Direction.IN);
         assertValidValue(pObject, 12);
@@ -322,6 +321,18 @@ public class PortTest extends NodeTestCase {
         assertEquals(ValueChangedEvent.class, l.event.getClass());
     }
 
+    /**
+     * Test the port attributes.
+     */
+    public void testPortAttributes() {
+        Node n = rootMacro.createChild(Node.class);
+        Port pInt = n.createPort("port", String.class, Port.Direction.IN);
+        PortAttributes attributes = PortAttributes.builder().widget(PortAttributes.Widget.SEED).label("Seed").build();
+        pInt.setAttributes(attributes);
+        assertEquals(PortAttributes.Widget.SEED, pInt.getWidget());
+        assertEquals("Seed", pInt.getLabel());
+    }
+
     //// Custom assertions ////
 
     private Node nodeWithDataClass(String name, Class dataClass) {
@@ -420,6 +431,30 @@ public class PortTest extends NodeTestCase {
             fail("The value " + value + " should not have been accepted.");
         } catch (Exception ignored) {
         }
+    }
+
+    private void assertCanConnectTo(Port input, Port output) {
+        assertTrue(input.canConnectTo(output));
+        Macro macro = input.getNode().getParent();
+        macro.connect(input, output);
+        assertTrue(macro.isConnected(input));
+        assertTrue(macro.isConnected(output));
+        assertTrue(macro.isConnectedTo(input, output));
+        macro.disconnect(input);
+        assertFalse(macro.isConnectedTo(input, output));
+    }
+
+    private void assertCannotConnectTo(Port input, Port output) {
+        assertFalse(input.canConnectTo(output));
+        Macro macro = input.getNode().getParent();
+        try {
+            macro.connect(input, output);
+            fail("Should not be able to connect.");
+        } catch (Exception ignored) {
+        }
+        assertFalse(macro.isConnected(input));
+        assertFalse(macro.isConnected(output));
+        assertFalse(macro.isConnectedTo(input, output));
     }
 
 }

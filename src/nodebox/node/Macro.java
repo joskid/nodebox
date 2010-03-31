@@ -7,10 +7,7 @@ import com.google.common.collect.Iterables;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,8 +93,20 @@ public class Macro extends Node {
         getLibrary().fireChildAdded(this, child);
     }
 
+    /**
+     * Remove a child from the collection.
+     * <p/>
+     * All connections to and from the child are removed.
+     *
+     * @param child the child to remove
+     * @return true if the child was removed.
+     */
     public boolean removeChild(Node child) {
-        if (!children.containsValue(child)) return false;
+        checkNotNull(child);
+        checkState(children.containsValue(child), "The given node is not a child of this macro.");
+
+        disconnect(child);
+
         ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
         for (Node c : children.values()) {
             if (c != child) {
@@ -105,6 +114,7 @@ public class Macro extends Node {
             }
         }
         children = b.build();
+
         getLibrary().fireChildRemoved(this, child);
         return true;
     }
@@ -222,17 +232,20 @@ public class Macro extends Node {
     public boolean disconnect(Node child) {
         checkNotNull(child);
         checkState(hasChild(child), "The given node is not a child of this macro.");
-        boolean removedSomething = false;
+        LinkedList<Connection> removedConnections = new LinkedList<Connection>();
         ImmutableSet.Builder<Connection> builder = ImmutableSet.builder();
         for (Connection c : connections) {
             if (c.getInputNode() == child || c.getOutputNode() == child) {
-                removedSomething = true;
+                removedConnections.add(c);
             } else {
                 builder.add(c);
             }
         }
         connections = builder.build();
-        return removedSomething;
+        for (Connection c : removedConnections) {
+            getLibrary().fireConnectionRemoved(this, c);
+        }
+        return !removedConnections.isEmpty();
     }
 
     /**
@@ -246,11 +259,11 @@ public class Macro extends Node {
         checkState(input.isInputPort(), "The given port is not an input port.");
         Node node = input.getNode();
         checkState(hasChild(node), "The given node is not a child of this macro.");
-        boolean removedSomething = false;
+        Connection removed = null;
         ImmutableSet.Builder<Connection> builder = ImmutableSet.builder();
         for (Connection c : connections) {
             if (c.getInput() == input || c.getOutput() == input) {
-                removedSomething = true;
+                removed = c;
                 if (input.isInputPort())
                     input.revertToDefault();
             } else {
@@ -258,7 +271,11 @@ public class Macro extends Node {
             }
         }
         connections = builder.build();
-        return removedSomething;
+        if (removed != null) {
+            getLibrary().fireConnectionRemoved(this, removed);
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -27,17 +27,6 @@ public class ExecuteException extends RuntimeException {
 
     private final Node node;
 
-    public ExecuteException(Node node) {
-        checkNotNull(node);
-        this.node = node;
-    }
-
-    public ExecuteException(Node node, String message) {
-        super(message);
-        checkNotNull(node);
-        this.node = node;
-    }
-
     public ExecuteException(Node node, Throwable cause) {
         super(cause);
         checkNotNull(node);

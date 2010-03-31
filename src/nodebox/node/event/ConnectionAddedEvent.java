@@ -6,7 +6,7 @@ import nodebox.node.NodeEvent;
 
 public class ConnectionAddedEvent extends NodeEvent {
 
-    private Connection connection;
+    private final Connection connection;
 
     public ConnectionAddedEvent(Node source, Connection connection) {
         super(source);

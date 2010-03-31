@@ -1,8 +1,8 @@
 package nodebox.client;
 
 import nodebox.node.Macro;
-import nodebox.node.NodeEvent;
-import nodebox.node.NodeEventListener;
+import nodebox.node.event.NodeEventListener;
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;

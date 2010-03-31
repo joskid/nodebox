@@ -278,8 +278,12 @@ public class NodeLibrary {
         eventBus.send(new ValueChangedEvent(source, port));
     }
 
-    public void fireNodePortsChangedEvent(Node source) {
-        eventBus.send(new NodePortsChangedEvent(source));
+    public void firePortAddedEvent(Node source, Port port) {
+        eventBus.send(new PortAddedEvent(source, port));
+    }
+
+    public void firePortRemovedEvent(Node source, Port port) {
+        eventBus.send(new PortRemovedEvent(source, port));
     }
 
     public void firePortAttributesChangedEvent(Node source, Port port) {

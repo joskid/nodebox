@@ -2,26 +2,16 @@ package nodebox.node.event;
 
 import nodebox.node.Connection;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 
-public class ConnectionAddedEvent extends NodeEvent {
-
-    private final Connection connection;
+/**
+ * A ConnectionAddedEvent is fired whenever a connection is made.
+ *
+ * @see nodebox.node.Macro#connect(nodebox.node.Port, nodebox.node.Port)
+ */
+public class ConnectionAddedEvent extends AbstractConnectionEvent {
 
     public ConnectionAddedEvent(Node source, Connection connection) {
-        super(source);
-        this.connection = connection;
+        super(source, connection);
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    @Override
-    public String toString() {
-        return "ConnectionAddedEvent{" +
-                "source=" + getSource() +
-                "connection=" + connection +
-                '}';
-    }
 }

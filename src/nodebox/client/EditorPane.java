@@ -1,7 +1,10 @@
 package nodebox.client;
 
 import nodebox.client.editor.SimpleEditor;
-import nodebox.node.*;
+import nodebox.node.CookContext;
+import nodebox.node.Node;
+import nodebox.node.event.NodeEventListener;
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;

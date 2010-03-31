@@ -241,6 +241,24 @@ public class NodeTest extends NodeTestCase {
     }
 
     /**
+     * Test events fired by creating/removing ports.
+     */
+    public void testPortEvents() {
+        MockNodeEventListener l = new MockNodeEventListener();
+        Node n = rootMacro.createChild(Node.class);
+        testLibrary.addListener(l);
+        Port pAlpha = n.createPort("alpha", Integer.class, Port.Direction.IN);
+        assertNotNull(l.event);
+        assertEquals(PortAddedEvent.class, l.event.getClass());
+        assertEquals(pAlpha, ((PortAddedEvent) l.event).getPort());
+        l.reset();
+        n.removePort(pAlpha);
+        assertNotNull(l.event);
+        assertEquals(PortRemovedEvent.class, l.event.getClass());
+        assertEquals(pAlpha, ((PortRemovedEvent) l.event).getPort());
+    }
+
+    /**
      * Test basic node execution.
      */
     public void testBasicUsage() {

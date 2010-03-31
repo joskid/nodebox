@@ -8,8 +8,7 @@ import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
 import nodebox.node.Macro;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
-import nodebox.node.NodeEventListener;
+import nodebox.node.event.NodeEventListener;
 import nodebox.node.event.*;
 
 import javax.swing.*;
@@ -365,7 +364,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
                 childPositionChanged(event.getSource());
             } else if (event instanceof NodeAttributesChangedEvent) {
                 childAttributeChanged(event.getSource());
-            } else if (event instanceof NodePortsChangedEvent) {
+            } else if (event instanceof PortAddedEvent) {
                 childPortsChanged(event.getSource());
             }
         }

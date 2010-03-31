@@ -11,9 +11,9 @@ import nodebox.graphics.IGeometry;
 import nodebox.graphics.Path;
 import nodebox.handle.Handle;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
-import nodebox.node.NodeEventListener;
+import nodebox.node.event.NodeEventListener;
 import nodebox.node.event.NodeAttributesChangedEvent;
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;
@@ -193,9 +193,9 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
 //                viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
 //                viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
 //            } else if (outputValue != null) {
-                resetView();
-                viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
-                viewerLayer.setOffset(5, 5);
+            resetView();
+            viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
+            viewerLayer.setOffset(5, 5);
 //            }
         }
         repaint();

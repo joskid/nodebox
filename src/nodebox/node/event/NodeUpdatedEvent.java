@@ -2,9 +2,8 @@ package nodebox.node.event;
 
 import nodebox.node.CookContext;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 
-public class NodeUpdatedEvent extends NodeEvent {
+public class NodeUpdatedEvent extends AbstractNodeEvent {
 
     private CookContext context;
 

@@ -1,6 +1,8 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
+import nodebox.node.event.NodeEvent;
+import nodebox.node.event.NodeEventListener;
 
 public class NodeTestCase extends TestCase {
 

@@ -1,6 +1,6 @@
 package nodebox.client.port;
 
-import nodebox.node.NodeEventListener;
+import nodebox.node.event.NodeEventListener;
 import nodebox.node.Port;
 
 /**

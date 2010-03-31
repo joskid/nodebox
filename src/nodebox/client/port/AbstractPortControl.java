@@ -1,7 +1,7 @@
 package nodebox.client.port;
 
-import nodebox.node.NodeEvent;
 import nodebox.node.Port;
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.ValueChangedEvent;
 
 import javax.swing.*;

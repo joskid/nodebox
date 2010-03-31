@@ -1,4 +1,4 @@
-package nodebox.node;
+package nodebox.node.event;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -6,6 +6,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * The NodeEventBus passes around events for the node library.
+ * <p/>
+ * Listeners can register themselves for events on the node library.
+ * <p/>
+ * The event bus only holds weak references so it's safe to add temporary objects as listeners
+ * without fear of dangling references.
+ *
+ * @see nodebox.node.NodeLibrary#addListener(NodeEventListener)
+ * @see nodebox.node.NodeLibrary#removeListener(NodeEventListener)
+ */
 public class NodeEventBus {
 
     public List<WeakReference<NodeEventListener>> listeners = new CopyOnWriteArrayList<WeakReference<NodeEventListener>>();

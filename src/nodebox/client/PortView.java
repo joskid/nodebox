@@ -1,8 +1,12 @@
 package nodebox.client;
 
 import nodebox.client.port.*;
-import nodebox.node.*;
+import nodebox.node.Node;
+import nodebox.node.event.NodeEventListener;
+import nodebox.node.Port;
+import nodebox.node.PortAttributes;
 import nodebox.node.event.NodeAttributesChangedEvent;
+import nodebox.node.event.NodeEvent;
 
 import javax.swing.*;
 import java.awt.*;

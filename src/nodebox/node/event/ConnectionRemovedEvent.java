@@ -2,26 +2,21 @@ package nodebox.node.event;
 
 import nodebox.node.Connection;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 
-public class ConnectionRemovedEvent extends NodeEvent {
-
-    private final Connection connection;
+/**
+ * A ConnectionRemovedEvent is fired whenever a connection is made.
+ *
+ * Note that when removing a child node all connections are broken as well,
+ * which can result in multiple ConnectionRemovedEvents
+ *
+ * @see nodebox.node.Macro#disconnect(nodebox.node.Node)
+ * @see nodebox.node.Macro#disconnect(nodebox.node.Port)
+ * @see nodebox.node.Macro#removeChild(nodebox.node.Node)
+ */
+public class ConnectionRemovedEvent extends AbstractConnectionEvent {
 
     public ConnectionRemovedEvent(Node source, Connection connection) {
-        super(source);
-        this.connection = connection;
+        super(source, connection);
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    @Override
-    public String toString() {
-        return "ConnectionRemovedEvent{" +
-                "source=" + getSource() +
-                "connection=" + connection +
-                '}';
-    }
 }

@@ -1,9 +1,8 @@
 package nodebox.node.event;
 
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 
-public class RenderedChildChangedEvent extends NodeEvent {
+public class RenderedChildChangedEvent extends AbstractNodeEvent {
 
     public Node renderedChild;
 

@@ -1,7 +1,10 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.ChildAddedEvent;
+import nodebox.node.event.NodeEvent;
+import nodebox.node.event.NodeEventListener;
 
 public class NodeLibraryTest extends TestCase {
 

@@ -18,8 +18,10 @@
  */
 package nodebox.node;
 
+import nodebox.node.event.NodeEvent;
 import nodebox.node.event.ConnectionAddedEvent;
 import nodebox.node.event.ConnectionRemovedEvent;
+import nodebox.node.event.NodeEventListener;
 
 public class ConnectTest extends NodeTestCase {
 

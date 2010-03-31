@@ -328,7 +328,7 @@ public class Node {
         builder.putAll(ports);
         builder.put(p.getName(), p);
         ports = builder.build();
-        getLibrary().fireNodePortsChangedEvent(this);
+        getLibrary().firePortAddedEvent(this, p);
     }
 
     public boolean removePort(Port port) {
@@ -341,7 +341,7 @@ public class Node {
             }
         }
         ports = builder.build();
-        getLibrary().fireNodePortsChangedEvent(this);
+        getLibrary().firePortRemovedEvent(this, port);
         return true;
     }
 

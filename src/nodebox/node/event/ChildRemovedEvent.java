@@ -2,11 +2,15 @@ package nodebox.node.event;
 
 import nodebox.node.Macro;
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class ChildRemovedEvent extends NodeEvent {
+/**
+ * A ChildRemovedEvent is fired whenever a child node is removed.
+ *
+ * @see Macro#removeChild(nodebox.node.Node)
+ */
+public class ChildRemovedEvent extends AbstractNodeEvent {
 
     private Node child;
 

@@ -1,19 +1,17 @@
 package nodebox.node.event;
 
 import nodebox.node.Node;
-import nodebox.node.NodeEvent;
 import nodebox.node.Port;
 
-public class PortAttributesChangedEvent extends NodeEvent {
-
-    private final Port port;
+/**
+ * A PortAttributesChangedEvent is fired whenever attributes on the port are modified.
+ *
+ * @see Port#setAttributes(nodebox.node.PortAttributes)
+ */
+public class PortAttributesChangedEvent extends AbstractPortEvent {
 
     public PortAttributesChangedEvent(Node source, Port port) {
-        super(source);
-        this.port = port;
+        super(source, port);
     }
 
-    public Port getPort() {
-        return port;
-    }
 }

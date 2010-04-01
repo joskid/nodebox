@@ -47,7 +47,7 @@ public class ParameterTest extends NodeTestCase {
 //        public int changeCounter = 0;
 //
 //        public void receive(NodeEvent event) {
-//            if (event instanceof NodeAttributesChangedEvent) {
+//            if (event instanceof NodeInfoChangedEvent) {
 //                changeCounter++;
 //            }
 //        }
@@ -750,7 +750,7 @@ public class ParameterTest extends NodeTestCase {
 //        public int count = 0;
 //
 //        public void receive(NodeEvent event) {
-//            if (event instanceof NodeAttributesChangedEvent) {
+//            if (event instanceof NodeInfoChangedEvent) {
 //                count++;
 //            }
 //        }

@@ -65,7 +65,7 @@ public class Node {
     private String name;
     private double x, y;
     private boolean exported = false;
-    private NodeAttributes attributes = NodeAttributes.DEFAULT;
+    private NodeInfo info;
     private ImmutableMap<String, Port> ports = ImmutableMap.of();
     private Throwable error;
 
@@ -86,6 +86,7 @@ public class Node {
         this.library = parent.getLibrary();
         this.name = this.parent.uniqueName(getTypeName());
         this.parent.addChild(this);
+        this.info = NodeInfo.builder(this).build();
     }
 
     //// Library ////
@@ -157,10 +158,29 @@ public class Node {
         this.name = name;
         if (parent != null)
             parent._renameChild(this, name);
-        getLibrary().fireNodeAttributesChanged(this);
+        getLibrary().fireNodeInfoChanged(this);
     }
 
     //// Attributes ////
+
+
+    /**
+     * Get the node label.
+     *
+     * @return the node label
+     */
+    public String getLabel() {
+        return info.getLabel();
+    }
+
+    /**
+     * Get the node's category.
+     *
+     * @return the node category
+     */
+    public String getCategory() {
+        return info.getCategory();
+    }
 
     /**
      * Get the node's description.
@@ -168,7 +188,7 @@ public class Node {
      * @return the node description
      */
     public String getDescription() {
-        return attributes.getDescription();
+        return info.getDescription();
     }
 
     /**
@@ -177,26 +197,26 @@ public class Node {
      * @return the node image
      */
     public String getImage() {
-        return attributes.getImage();
+        return info.getImage();
     }
 
     /**
-     * Get the node attributes. This contains all the metadata about the node, such as its image and description.
+     * Get the node info. This contains all the metadata about the node, such as its image and description.
      *
-     * @return the node attributes
+     * @return the node info
      */
-    public NodeAttributes getAttributes() {
-        return attributes;
+    public NodeInfo getInfo() {
+        return info;
     }
 
     /**
-     * Set the node attributes (metadata).
+     * Set the node info (metadata).
      *
-     * @param attributes the node attributes
+     * @param info the node info
      */
-    public void setAttributes(NodeAttributes attributes) {
-        this.attributes = attributes;
-        getLibrary().fireNodeAttributesChanged(this);
+    public void setInfo(NodeInfo info) {
+        this.info = info;
+        getLibrary().fireNodeInfoChanged(this);
     }
 
     /**

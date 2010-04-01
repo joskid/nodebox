@@ -27,7 +27,7 @@ public class NodeTest extends NodeTestCase {
         public int counter;
 
         public void receive(NodeEvent event) {
-            if (!(event instanceof NodeAttributesChangedEvent)) return;
+            if (!(event instanceof NodeInfoChangedEvent)) return;
             counter++;
         }
 
@@ -127,19 +127,25 @@ public class NodeTest extends NodeTestCase {
     }
 
     /**
-     * Test the node attributes.
+     * Test the node info.
      */
-    public void testAttributes() {
+    public void testNodeInfo() {
         Node n = rootMacro.createChild(Node.class);
         assertEquals("", n.getDescription());
-        assertEquals(NodeAttributes.IMAGE_GENERIC, n.getImage());
+        assertEquals(NodeInfo.IMAGE_GENERIC, n.getImage());
         MockNodeEventListener l = new MockNodeEventListener();
         testLibrary.addListener(l);
-        n.setAttributes(NodeAttributes.builder().description("hello").image("test.png").build());
-        assertEquals(NodeAttributesChangedEvent.class, l.event.getClass());
-        assertEquals("hello", n.getDescription());
-        assertEquals("test.png", n.getImage());
-        assertNotSame(NodeAttributes.DEFAULT, n.getAttributes());
+        n.setInfo(NodeInfo.builder("myLabel")
+                .description("myDescription")
+                .image("myImage")
+                .category("myCategory")
+                .build());
+        assertEquals(NodeInfoChangedEvent.class, l.event.getClass());
+        assertEquals("myLabel", n.getLabel());
+        assertEquals("myDescription", n.getDescription());
+        assertEquals("myCategory", n.getCategory());
+        assertEquals("myImage", n.getImage());
+        assertNotSame(new Node(rootMacro).getInfo(), n.getInfo());
     }
 
     /**

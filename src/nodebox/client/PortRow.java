@@ -1,9 +1,9 @@
 package nodebox.client;
 
-import nodebox.node.event.NodeEventListener;
 import nodebox.node.Port;
 import nodebox.node.event.NodeEvent;
-import nodebox.node.event.NodeAttributesChangedEvent;
+import nodebox.node.event.NodeEventListener;
+import nodebox.node.event.NodeInfoChangedEvent;
 import nodebox.node.event.ValueChangedEvent;
 
 import javax.imageio.ImageIO;
@@ -157,7 +157,7 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
             if (e.getPort() != port) return;
 //            setEnabled(port.isEnabled());
             setExpressionStatus();
-        } else if (event instanceof NodeAttributesChangedEvent) {
+        } else if (event instanceof NodeInfoChangedEvent) {
 //            setEnabled(port.isEnabled());
         }
     }

@@ -8,7 +8,6 @@ import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
 import nodebox.node.Macro;
 import nodebox.node.Node;
-import nodebox.node.event.NodeEventListener;
 import nodebox.node.event.*;
 
 import javax.swing.*;
@@ -362,7 +361,7 @@ public class NetworkView extends PCanvas implements PaneView, NodeEventListener 
             // Check for events on children of the current macro
             if (event instanceof NodePositionChangedEvent) {
                 childPositionChanged(event.getSource());
-            } else if (event instanceof NodeAttributesChangedEvent) {
+            } else if (event instanceof NodeInfoChangedEvent) {
                 childAttributeChanged(event.getSource());
             } else if (event instanceof PortAddedEvent) {
                 childPortsChanged(event.getSource());

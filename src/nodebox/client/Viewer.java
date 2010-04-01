@@ -11,9 +11,9 @@ import nodebox.graphics.IGeometry;
 import nodebox.graphics.Path;
 import nodebox.handle.Handle;
 import nodebox.node.Node;
-import nodebox.node.event.NodeEventListener;
-import nodebox.node.event.NodeAttributesChangedEvent;
 import nodebox.node.event.NodeEvent;
+import nodebox.node.event.NodeEventListener;
+import nodebox.node.event.NodeInfoChangedEvent;
 import nodebox.node.event.NodeUpdatedEvent;
 
 import javax.swing.*;
@@ -170,8 +170,8 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         if (event instanceof NodeUpdatedEvent) {
             if (event.getSource() != node) return;
             nodeUpdated();
-        } else if (event instanceof NodeAttributesChangedEvent) {
-            NodeAttributesChangedEvent e = (NodeAttributesChangedEvent) event;
+        } else if (event instanceof NodeInfoChangedEvent) {
+            NodeInfoChangedEvent e = (NodeInfoChangedEvent) event;
             if (e.getSource() != activeNode) return;
             if (checkIfHandleEnabled()) {
                 repaint();

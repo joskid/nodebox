@@ -256,8 +256,8 @@ public class NodeLibrary {
 
     }
 
-    public void fireNodeAttributesChanged(Node source) {
-        eventBus.send(new NodeAttributesChangedEvent(source));
+    public void fireNodeInfoChanged(Node source) {
+        eventBus.send(new NodeInfoChangedEvent(source));
     }
 
     public void fireChildAdded(Macro source, Node child) {

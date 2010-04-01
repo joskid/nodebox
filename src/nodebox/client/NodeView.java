@@ -85,7 +85,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
      * @return an Image object.
      */
     public static BufferedImage getImageForNode(Node node) {
-        if (node == null || node.getImage() == null || node.getImage().equals(NodeAttributes.IMAGE_GENERIC))
+        if (node == null || node.getImage() == null || node.getImage().equals(NodeInfo.IMAGE_GENERIC))
             return nodeGeneric;
         File libraryFile = node.getLibrary().getFile();
         if (libraryFile != null) {
@@ -381,7 +381,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-                //inputPort.connect(outputNode);
+            //inputPort.connect(outputNode);
         }
     }
 

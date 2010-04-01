@@ -9,6 +9,12 @@ class Context(CanvasContext):
         if ns is None:
             ns = {}
         self._ns = ns
+
+    def ximport(self, libName):
+        lib = __import__(libName)
+        self._ns[libName] = lib
+        lib._ctx = self
+        return lib
         
     def size(self, width, height):
         CanvasContext.size(self, width, height)

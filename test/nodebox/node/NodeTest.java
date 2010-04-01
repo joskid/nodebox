@@ -457,6 +457,20 @@ public class NodeTest extends NodeTestCase {
         assertEquals("node12a1", macro.uniqueName("node12a"));
     }
 
+    public void testSetName() {
+        Node alpha = rootMacro.createChild(Node.class, "alpha");
+        Node bob = rootMacro.createChild(Node.class, "bob");
+        assertTrue(rootMacro.hasChild("bob"));
+        bob.setName("bob");
+        assertTrue(rootMacro.hasChild("bob"));
+        try {
+            bob.setName("alpha");
+            fail("Should have failed.");
+        } catch (InvalidNameException e) {
+            assertErrorMessage(e, "already contains a node called 'alpha'");
+        }
+    }
+
     public void testError() {
         Node bad = rootMacro.createChild(crashNode, "crash");
         TestDirtyListener listener = new TestDirtyListener(bad);
@@ -538,10 +552,69 @@ public class NodeTest extends NodeTestCase {
      * Test if a node can dynamically create ports.
      */
     public void testDynamicPortCreation() {
-        Node n = testLibrary.getRootMacro().createChild(AddPortNode.class);
+        Node n = rootMacro.createChild(AddPortNode.class);
         n.execute(new CookContext());
         assertTrue(n.hasPort("test"));
         assertExecuteException(n, "already a port named test");
+    }
+
+    /**
+     * Test the simple copy method.
+     */
+    public void testCopyOnto() {
+        Macro parent1 = (Macro) rootMacro.createChild(Macro.class, "parent1");
+        Node node1 = parent1.createChild(Node.class);
+        assertEquals("node1", node1.getName());
+
+        // Copy node1 onto a different parent.
+        Macro parent2 = (Macro) rootMacro.createChild(Macro.class, "parent2");
+        Node copyOfNode1 = node1.copyOnto(parent2);
+        assertEquals(parent2, copyOfNode1.getParent());
+        assertEquals(rootMacro, copyOfNode1.getRootMacro());
+        assertEquals(testLibrary, copyOfNode1.getLibrary());
+        // The name should not conflict, and thus should not change.
+        assertEquals(node1.getName(), copyOfNode1.getName());
+
+        // Create a node with a different name than the default and copy that.
+        Node bob = parent1.createChild(Node.class, "bob");
+        Node copyOfBob = bob.copyOnto(parent2);
+        assertEquals(bob.getName(), copyOfBob.getName());
+
+        // Copy the same node into parent2. Since we already have a node called "bob",
+        // the new copy should change its name to "bob1".
+        Node copy2OfBob = bob.copyOnto(parent2);
+        assertEquals("bob1", copy2OfBob.getName());
+    }
+
+    /**
+     * Test if ports and their values are copied.
+     */
+    public void testCopyPorts() {
+        Macro parent1 = (Macro) rootMacro.createChild(Macro.class, "parent1");
+        Macro parent2 = (Macro) rootMacro.createChild(Macro.class, "parent2");
+        Node add1 = parent1.createChild(TestNodes.Add.class);
+        add1.setValue("v1", 15);
+        add1.setValue("v2", 38);
+        add1.setValue("result", 99);
+        add1.createPort("custom", String.class, Port.Direction.IN);
+        add1.setValue("custom", "myValue");
+
+        assertEquals(4, add1.getPorts().size());
+        assertTrue(add1.hasPort("v1"));
+        assertTrue(add1.hasPort("v2"));
+        assertTrue(add1.hasPort("result"));
+        assertTrue(add1.hasPort("custom"));
+
+        Node copyOfAdd1 = add1.copyOnto(parent2);
+        assertEquals(4, copyOfAdd1.getPorts().size());
+        assertTrue(copyOfAdd1.hasPort("v1"));
+        assertTrue(copyOfAdd1.hasPort("v2"));
+        assertTrue(copyOfAdd1.hasPort("result"));
+        assertTrue(copyOfAdd1.hasPort("custom"));
+        assertEquals(15, copyOfAdd1.asInt("v1"));
+        assertEquals(38, copyOfAdd1.asInt("v2"));
+        assertEquals(99, copyOfAdd1.asInt("result"));
+        assertEquals("myValue", copyOfAdd1.asString("custom"));
     }
 
     public void testCopyWithUpstream() {

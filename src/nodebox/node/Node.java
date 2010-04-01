@@ -522,6 +522,36 @@ public class Node {
         return null;
     }
 
+    //// Copying ////
+
+    /**
+     * Copy this node onto another parent.
+     *
+     * @param parent the parent to copy the new node onto.
+     * @return a new Node object
+     */
+    public Node copyOnto(Macro parent) {
+        Node n = parent.createChild(this.getClass());
+        // Try giving the new node the same name as the original.
+        try {
+            n.setName(getName());
+        } catch (InvalidNameException e) {
+            // If that fails, generate a unique name based on the original name.
+            n.setName(parent.uniqueName(getName()));
+        }
+        for (Port p : this.ports.values()) {
+            try {
+                p.copyOnto(n);
+            } catch (InvalidNameException e) {
+                // There is already a port with this name. Just change the value + attributes.
+                Port newPort = n.getPort(p.getName());
+                newPort.setValue(p.getValue());
+                newPort.setAttributes(p.getAttributes());
+            }
+        }
+        return n;
+    }
+
     /**
      * Return a brief description of a node.
      *

@@ -123,6 +123,9 @@ public class Macro extends Node {
         checkNotNull(child);
         checkState(child.getParent() == this);
         checkNotNull(newName);
+        if (hasChild(newName)) {
+            throw new InvalidNameException(child, newName, "This macro already contains a node called '" + newName + "'");
+        }
         String oldName = child.getName();
         ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
         for (Node c : children.values()) {

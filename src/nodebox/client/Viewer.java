@@ -330,6 +330,8 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
             if (getNode() == null) return;
             Object outputValue = getNode().getOutputValue();
             if (outputValue instanceof Grob) {
+                if (outputValue instanceof Canvas)
+                    g2.clip(((Grob) outputValue).getBounds().getRectangle2D());
                 ((Grob) outputValue).draw(g2);
             } else if (outputValue != null) {
                 String s = outputValue.toString();

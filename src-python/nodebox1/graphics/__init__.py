@@ -65,8 +65,7 @@ class Context(CanvasContext):
         self._setAttributesFromKwargs(p, **kwargs)
         return p
     
-    def autoclosepath(self, **kwargs):
-        close = kwargs.get("close")
+    def autoclosepath(self, close=None):
         if close is None:
             return CanvasContext.autoclosepath(self)
         else:

@@ -414,7 +414,7 @@ public class Macro extends Node {
     /**
      * Check for cyclic connections.
      */
-    private class CycleDetector {
+    private static class CycleDetector {
 
         private ImmutableSet<Connection> connections;
 

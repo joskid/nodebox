@@ -68,7 +68,7 @@ public final class Port {
 
     public void validateName(String name) {
         if (name == null)
-            throw new InvalidNameException(this, name, "Name cannot be null.");
+            throw new InvalidNameException(this, "", "Name cannot be null.");
         if (name.trim().length() == 0)
             throw new InvalidNameException(this, name, "Name cannot empty.");
         if (node.hasPort(name))

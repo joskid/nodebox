@@ -450,6 +450,24 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return colorMode = mode;
     }
 
+    public Color.Mode colormode(String mode) {
+        try {
+            Color.Mode newMode = Color.Mode.valueOf(mode.toUpperCase());
+            return colorMode = newMode;
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("colormode: available types for colormode() are RGB, HSB and CMYK\\n\"");
+        }
+    }
+
+    public Color.Mode colormode(int mode) {
+        try {
+            Color.Mode newMode = Color.Mode.values()[mode];
+            return colorMode = newMode;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("colormode: available types for colormode() are RGB, HSB and CMYK\\n\"");
+        }
+    }
+
     /**
      * Create an empty (black) color object.
      *

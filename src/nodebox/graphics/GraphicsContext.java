@@ -39,9 +39,9 @@ public interface GraphicsContext {
     public static String RIGHT = "RIGHT";
     public static String JUSTIFY = "JUSTIFY";
 
-    public static Color.Mode RGB = Color.Mode.RGB;
-    public static Color.Mode HSB = Color.Mode.HSB;
-    public static Color.Mode CMYK = Color.Mode.CMYK;
+    public static String RGB = "RGB";
+    public static String HSB = "HSB";
+    public static String CMYK = "CMYK";
 
     public static VarType NUMBER = VarType.NUMBER;
     public static VarType TEXT = VarType.TEXT;
@@ -168,6 +168,10 @@ public interface GraphicsContext {
     public Color.Mode colormode();
 
     public Color.Mode colormode(Color.Mode mode);
+
+    public Color.Mode colormode(String mode);
+
+    public Color.Mode colormode(int mode);
 
     /**
      * Create an empty (black) color object.

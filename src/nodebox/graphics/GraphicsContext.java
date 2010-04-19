@@ -50,8 +50,8 @@ public interface GraphicsContext {
     public static String BOOLEAN = "BOOLEAN";
     public static String FONT = "FONT";
 
-    public static ArrowType NORMAL = ArrowType.NORMAL;
-    public static ArrowType FORTYFIVE = ArrowType.FORTYFIVE;
+    public static String NORMAL = "NORMAL";
+    public static String FORTYFIVE = "FORTYFIVE";
 
     public RectMode rectmode();
 
@@ -105,13 +105,25 @@ public interface GraphicsContext {
 
     public Path arrow(float x, float y, ArrowType type);
 
+    public Path arrow(float x, float y, String type);
+
+    public Path arrow(float x, float y, int type);
+
     public Path arrow(float x, float y, float width);
 
     public Path arrow(float x, float y, float width, boolean draw);
 
     public Path arrow(float x, float y, float width, ArrowType type);
 
+    public Path arrow(float x, float y, float width, String type);
+
+    public Path arrow(float x, float y, float width, int type);
+
     public Path arrow(float x, float y, float width, ArrowType type, boolean draw);
+
+    public Path arrow(float x, float y, float width, String type, boolean draw);
+
+    public Path arrow(float x, float y, float width, int type, boolean draw);
 
     public void beginpath();
 

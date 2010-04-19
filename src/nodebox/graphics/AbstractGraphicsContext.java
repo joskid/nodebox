@@ -236,6 +236,14 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return arrow(x, y, 100, type, true);
     }
 
+    public Path arrow(float x, float y, String type) {
+        return arrow(x, y, 100, type, true);
+    }
+
+    public Path arrow(float x, float y, int type) {
+        return arrow(x, y, 100, type, true);
+    }
+
     public Path arrow(float x, float y, float width) {
         return arrow(x, y, width, NORMAL, true);
     }
@@ -246,6 +254,32 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Path arrow(float x, float y, float width, ArrowType type) {
         return arrow(x, y, width, type, true);
+    }
+
+    public Path arrow(float x, float y, float width, String type) {
+        return arrow(x, y, width, type, true);
+    }
+
+    public Path arrow(float x, float y, float width, int type) {
+        return arrow(x, y, width, type, true);
+    }
+
+    public Path arrow(float x, float y, float width, String type, boolean draw) {
+        try {
+            ArrowType arrowType = ArrowType.valueOf(type.toUpperCase());
+            return arrow(x, y, width, arrowType, draw);
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("arrow: available types for arrow() are NORMAL and FORTYFIVE\\n\"");
+        }
+    }
+
+    public Path arrow(float x, float y, float width, int type, boolean draw) {
+        try {
+            ArrowType arrowType = ArrowType.values()[type];
+            return arrow(x, y, width, arrowType, draw);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("arrow: available types for arrow() are NORMAL and FORTYFIVE\\n\"");
+        }
     }
 
     public Path arrow(float x, float y, float width, ArrowType type, boolean draw) {

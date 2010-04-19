@@ -283,7 +283,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path arrow(float x, float y, float width, ArrowType type, boolean draw) {
-        if (type == NORMAL)
+        if (type == ArrowType.NORMAL)
             return arrowNormal(x, y, width, draw);
         else
             return arrowFortyFive(x, y, width, draw);

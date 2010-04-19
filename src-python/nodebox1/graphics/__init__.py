@@ -103,10 +103,16 @@ class Context(CanvasContext):
     ### Color Commands ###
 
     def colormode(self, mode=None, range=None):
-        if mode is not None:
-            return CanvasContext.colormode(self, mode)
-        # todo: range
-        return CanvasContext.colormode(self)
+        if mode is None:
+            if range is not None:
+                CanvasContext.colorrange(self, range)
+            return CanvasContext.colormode(self)
+        return CanvasContext.colormode(self, mode, range)
+    
+    def colorrange(self, range=None):
+        if range is not None:
+            return CanvasContext.colorrange(self, range)
+        return CanvasContext.colorrange(self)
 
     # todo: colorrange
 

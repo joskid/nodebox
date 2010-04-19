@@ -98,7 +98,8 @@ public class CanvasContext extends AbstractGraphicsContext {
      * @return the current background color.
      */
     public Color background(float x) {
-        return canvas.setBackground(new Color(x, x, x));
+        float nx = normalize(x);
+        return canvas.setBackground(new Color(nx, nx, nx));
     }
 
     /**
@@ -109,7 +110,8 @@ public class CanvasContext extends AbstractGraphicsContext {
      * @return the current background color.
      */
     public Color background(float x, float y) {
-        return canvas.setBackground(new Color(x, x, x, y));
+        float nx = normalize(x);
+        return canvas.setBackground(new Color(nx, nx, nx, normalize(y)));
     }
 
     /**
@@ -121,7 +123,7 @@ public class CanvasContext extends AbstractGraphicsContext {
      * @return the current background color.
      */
     public Color background(float x, float y, float z) {
-        return canvas.setBackground(new Color(x, y, z, colormode()));
+        return canvas.setBackground(new Color(normalize(x), normalize(y), normalize(z), colormode()));
     }
 
     /**
@@ -134,7 +136,7 @@ public class CanvasContext extends AbstractGraphicsContext {
      * @return the current background color.
      */
     public Color background(float x, float y, float z, float a) {
-        return canvas.setBackground(new Color(x, y, z, a, colormode()));
+        return canvas.setBackground(new Color(normalize(x), normalize(y), normalize(z), normalize(a), colormode()));
     }
 
     /**

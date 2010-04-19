@@ -191,9 +191,19 @@ public interface GraphicsContext {
 
     public Color.Mode colormode(Color.Mode mode);
 
+    public Color.Mode colormode(Color.Mode mode, Float range);
+
     public Color.Mode colormode(String mode);
 
+    public Color.Mode colormode(String mode, Float range);
+
     public Color.Mode colormode(int mode);
+
+    public Color.Mode colormode(int mode, Float range);
+
+    public float colorrange();
+
+    public float colorrange(float range);
 
     /**
      * Create an empty (black) color object.

@@ -13,6 +13,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     // TODO: Support output mode
     protected Color.Mode colorMode;
+    protected float colorRange;
     protected Color fillColor;
     protected Color strokeColor;
     protected float strokeWidth;
@@ -31,6 +32,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public void resetContext() {
         colorMode = Color.Mode.RGB;
+        colorRange = 1f;
         fillColor = new Color();
         strokeColor = null;
         strokeWidth = 1f;
@@ -516,28 +518,48 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Color.Mode colormode(Color.Mode mode) {
-        // TODO: Support color mode
+        return colormode(mode, null);
+    }
+
+    public Color.Mode colormode(Color.Mode mode, Float range) {
+        if (range != null) colorRange = range;
         return colorMode = mode;
     }
 
     public Color.Mode colormode(String mode) {
+        return colormode(mode, null);
+    }
+
+    public Color.Mode colormode(String mode, Float range) {
         try {
             Color.Mode newMode = Color.Mode.valueOf(mode.toUpperCase());
-            return colorMode = newMode;
+            return colormode(newMode, range);
         } catch (IllegalArgumentException e) {
             throw new NodeBoxError("colormode: available types for colormode() are RGB, HSB and CMYK\\n\"");
         }
     }
 
     public Color.Mode colormode(int mode) {
+        return colormode(mode, null);
+    }
+
+    public Color.Mode colormode(int mode, Float range) {
         try {
             Color.Mode newMode = Color.Mode.values()[mode];
-            return colorMode = newMode;
+            return colormode(newMode, range);
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new NodeBoxError("colormode: available types for colormode() are RGB, HSB and CMYK\\n\"");
         }
     }
 
+    public float colorrange() {
+        return colorRange;
+    }
+
+    public float colorrange(float range) {
+        return colorRange = range;
+    }
+     
     /**
      * Create an empty (black) color object.
      *
@@ -554,7 +576,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the new color.
      */
     public Color color(float x) {
-        return new Color(x, x, x);
+        float nx = normalize(x);
+        return new Color(nx, nx, nx);
     }
 
     /**
@@ -565,7 +588,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the new color.
      */
     public Color color(float x, float y) {
-        return new Color(x, x, x, y);
+        float nx = normalize(x);
+        return new Color(nx, nx, nx, normalize(y));
     }
 
     /**
@@ -577,7 +601,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the new color.
      */
     public Color color(float x, float y, float z) {
-        return new Color(x, y, z, colormode());
+        return new Color(normalize(x), normalize(y), normalize(z), colormode());
     }
 
     /**
@@ -590,7 +614,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the new color.
      */
     public Color color(float x, float y, float z, float a) {
-        return new Color(x, y, z, a, colormode());
+        return new Color(normalize(x), normalize(y), normalize(z), normalize(a), colormode());
     }
 
     /**
@@ -622,7 +646,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current fill color.
      */
     public Color fill(float x) {
-        return fillColor = new Color(x, x, x);
+        float nx = normalize(x);
+        return fillColor = new Color(nx, nx, nx);
     }
 
     /**
@@ -633,7 +658,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current fill color.
      */
     public Color fill(float x, float y) {
-        return fillColor = new Color(x, x, x, y);
+        float nx = normalize(x);
+        return fillColor = new Color(nx, nx, nx, normalize(y));
     }
 
     /**
@@ -645,7 +671,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current fill color.
      */
     public Color fill(float x, float y, float z) {
-        return fillColor = new Color(x, y, z, colormode());
+        return fillColor = new Color(normalize(x), normalize(y), normalize(z), colormode());
     }
 
     /**
@@ -658,7 +684,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current fill color.
      */
     public Color fill(float x, float y, float z, float a) {
-        return fillColor = new Color(x, y, z, a, colormode());
+        return fillColor = new Color(normalize(x), normalize(y), normalize(z), normalize(a), colormode());
     }
 
     /**
@@ -694,7 +720,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current stroke color.
      */
     public Color stroke(float x) {
-        return strokeColor = new Color(x, x, x);
+        float nx = normalize(x);
+        return strokeColor = new Color(nx, nx, nx);
     }
 
     /**
@@ -705,7 +732,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current stroke color.
      */
     public Color stroke(float x, float y) {
-        return strokeColor = new Color(x, x, x, y);
+        float nx = normalize(x);
+        return strokeColor = new Color(nx, nx, nx, normalize(y));
     }
 
     /**
@@ -717,7 +745,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current stroke color.
      */
     public Color stroke(float x, float y, float z) {
-        return strokeColor = new Color(x, y, z, colormode());
+        return strokeColor = new Color(normalize(x), normalize(y), normalize(z), colormode());
     }
 
     /**
@@ -730,7 +758,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
      * @return the current stroke color.
      */
     public Color stroke(float x, float y, float z, float a) {
-        return strokeColor = new Color(x, y, z, a, colormode());
+        return strokeColor = new Color(normalize(x), normalize(y), normalize(z), normalize(a), colormode());
     }
 
     /**
@@ -983,6 +1011,13 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
                 p.setMaximumValue(max);
             }
         }
+    }
+
+    protected float normalize(float v) {
+        // Bring the color into the 0-1 scale for the current colorrange
+        if (colorRange == 1f) return v;
+        return v / colorRange;
+        
     }
 
     public double random() {

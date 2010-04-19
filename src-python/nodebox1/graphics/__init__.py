@@ -24,6 +24,11 @@ class Context(CanvasContext):
         self._ns["WIDTH"] = width
         self._ns["HEIGHT"] = height
 
+    def background(self, *args):
+        if len(args) == 1 and isinstance(args[0], tuple):
+            args = args[0]
+        return CanvasContext.background(self, *args)
+
     #### Primitives ####
     
     # todo: rect
@@ -101,6 +106,16 @@ class Context(CanvasContext):
             CanvasContext.skew(self, kx, ky)
     
     ### Color Commands ###
+
+    def fill(self, *args):
+        if len(args) == 1 and isinstance(args[0], tuple):
+            args = args[0]
+        return CanvasContext.fill(self, *args)
+
+    def stroke(self, *args):
+        if len(args) == 1 and isinstance(args[0], tuple):
+            args = args[0]
+        return CanvasContext.stroke(self, *args)
 
     def colormode(self, mode=None, range=None):
         if mode is None:

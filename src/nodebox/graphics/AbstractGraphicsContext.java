@@ -79,11 +79,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path rect(Rect r) {
-        Path p = new Path();
-        p.rect(r);
-        inheritFromContext(p);
-        addPath(p);
-        return p;
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
     }
 
     public Path rect(float x, float y, float width, float height) {
@@ -102,24 +98,21 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path rect(Rect r, float roundness) {
-        Path p = new Path();
-        p.rect(r, roundness);
-        inheritFromContext(p);
-        addPath(p);
-        return p;
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), roundness, roundness);
     }
 
     public Path rect(float x, float y, float width, float height, float roundness) {
-        Path p = new Path();
-        p.rect(x, y, width, height, roundness);
-        inheritFromContext(p);
-        addPath(p);
-        return p;
+        return rect(x, y, width, height, roundness, roundness);
     }
 
     public Path rect(float x, float y, float width, float height, float rx, float ry) {
         Path p = new Path();
-        p.rect(x, y, width, height, rx, ry);
+        float w2 = 0, h2 = 0;
+        if (rectMode == RectMode.CORNER) {
+            w2 = width / 2;
+            h2 = height / 2;
+        }
+        p.rect(x + w2, y + h2, width, height, rx, ry);
         inheritFromContext(p);
         addPath(p);
         return p;

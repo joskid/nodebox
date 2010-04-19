@@ -373,6 +373,24 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return transformMode = mode;
     }
 
+    public Transform.Mode transform(String mode) {
+        try {
+            Transform.Mode newMode = Transform.Mode.valueOf(mode);
+            return transformMode = newMode;
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("transform: available types for transform() are CORNER and CENTER\\n\"");            
+        }
+    }
+
+    public Transform.Mode transform(int mode) {
+        try {
+            Transform.Mode newMode = Transform.Mode.values()[mode];
+            return transformMode = newMode;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("transform: available types for transform() are CORNER and CENTER\\n\"");
+        }
+    }
+
     public void push() {
         transformStack.add(0, transform.clone());
     }

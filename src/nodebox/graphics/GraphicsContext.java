@@ -32,9 +32,11 @@ public interface GraphicsContext {
 
     public enum ArrowType { NORMAL, FORTYFIVE }
 
+    public static String CORNER = "CORNER";
+    public static String CENTER = "CENTER";
+
     public static Text.Align LEFT = Text.Align.LEFT;
     public static Text.Align RIGHT = Text.Align.RIGHT;
-    public static Text.Align CENTER = Text.Align.CENTER;
     public static Text.Align JUSTIFY = Text.Align.JUSTIFY;
 
     public static Color.Mode RGB = Color.Mode.RGB;
@@ -137,6 +139,9 @@ public interface GraphicsContext {
 
     public Transform.Mode transform(Transform.Mode mode);
 
+    public Transform.Mode transform(int mode);
+
+    public Transform.Mode transform(String mode);
 
     public void push();
 

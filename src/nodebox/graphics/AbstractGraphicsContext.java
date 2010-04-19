@@ -375,7 +375,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Transform.Mode transform(String mode) {
         try {
-            Transform.Mode newMode = Transform.Mode.valueOf(mode);
+            Transform.Mode newMode = Transform.Mode.valueOf(mode.toUpperCase());
             return transformMode = newMode;
         } catch (IllegalArgumentException e) {
             throw new NodeBoxError("transform: available types for transform() are CORNER and CENTER\\n\"");            
@@ -744,7 +744,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Text.Align align(String align) {
         try {
-            Text.Align newAlign = Text.Align.valueOf(align);
+            Text.Align newAlign = Text.Align.valueOf(align.toUpperCase());
             return this.align = newAlign;
         } catch (IllegalArgumentException e) {
             throw new NodeBoxError("align: available types for align() are LEFT, RIGHT, CENTER and JUSTIFY\\n\"");

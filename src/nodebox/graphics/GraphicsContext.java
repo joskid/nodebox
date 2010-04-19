@@ -34,6 +34,8 @@ public interface GraphicsContext {
 
     public static String CORNER = "CORNER";
     public static String CENTER = "CENTER";
+    public static String CORNERS = "CORNERS";
+    public static String RADIUS = "RADIUS";
 
     public static String LEFT = "LEFT";
     public static String RIGHT = "RIGHT";
@@ -55,6 +57,10 @@ public interface GraphicsContext {
 
     public RectMode rectmode(RectMode m);
 
+    public RectMode rectmode(String m);
+
+    public RectMode rectmode(int m);
+
     public Path rect(Rect r);
 
     public Path rect(float x, float y, float width, float height);
@@ -68,6 +74,10 @@ public interface GraphicsContext {
     public EllipseMode ellipsemode();
 
     public EllipseMode ellipsemode(EllipseMode m);
+
+    public EllipseMode ellipsemode(String m);
+
+    public EllipseMode ellipsemode(int m);
 
     public Path oval(float x, float y, float width, float height);
 

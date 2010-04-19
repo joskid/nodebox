@@ -58,6 +58,24 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return rectMode = m;
     }
 
+    public RectMode rectmode(String m) {
+        try {
+            RectMode newMode = RectMode.valueOf(m.toUpperCase());
+            return rectMode = newMode;
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("rectmode: available types for rectmode() are CORNER, CENTER, CORNERS and RADIUS\\n\"");
+        }
+    }
+
+    public RectMode rectmode(int m) {
+        try {
+            RectMode newMode = RectMode.values()[m];
+            return rectMode = newMode;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("rectmode: available types for rectmode() are CORNER, CENTER, CORNERS and RADIUS\\n\"");
+        }
+    }
+
     public Path rect(Rect r) {
         Path p = new Path();
         p.rect(r);
@@ -111,6 +129,24 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public EllipseMode ellipsemode(EllipseMode m) {
         return ellipseMode = m;
+    }
+
+    public EllipseMode ellipsemode(String m) {
+        try {
+            EllipseMode newMode = EllipseMode.valueOf(m.toUpperCase());
+            return ellipseMode = newMode;
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("ellipsemode: available types for ellipsemode() are CORNER, CENTER, CORNERS and RADIUS\\n\"");
+        }
+    }
+
+    public EllipseMode ellipsemode(int m) {
+        try {
+            EllipseMode newMode = EllipseMode.values()[m];
+            return ellipseMode = newMode;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("ellipsemode: available types for ellipsemode() are CORNER, CENTER, CORNERS and RADIUS\\n\"");
+        }
     }
 
     public Path oval(float x, float y, float width, float height) {

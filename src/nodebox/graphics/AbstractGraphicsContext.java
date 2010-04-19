@@ -738,8 +738,26 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         return align;
     }
 
-    public void align(Text.Align align) {
-        this.align = align;
+    public Text.Align align(Text.Align align) {
+        return this.align = align;
+    }
+
+    public Text.Align align(String align) {
+        try {
+            Text.Align newAlign = Text.Align.valueOf(align);
+            return this.align = newAlign;
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("align: available types for align() are LEFT, RIGHT, CENTER and JUSTIFY\\n\"");
+        }
+    }
+
+    public Text.Align align(int align) {
+        try {
+            Text.Align newAlign = Text.Align.values()[align];
+            return this.align = newAlign;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("align: available types for align() are LEFT, RIGHT, CENTER and JUSTIFY\\n\"");
+        }
     }
 
     public Text text(String text, float x, float y) {

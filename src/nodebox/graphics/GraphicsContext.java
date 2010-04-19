@@ -35,9 +35,9 @@ public interface GraphicsContext {
     public static String CORNER = "CORNER";
     public static String CENTER = "CENTER";
 
-    public static Text.Align LEFT = Text.Align.LEFT;
-    public static Text.Align RIGHT = Text.Align.RIGHT;
-    public static Text.Align JUSTIFY = Text.Align.JUSTIFY;
+    public static String LEFT = "LEFT";
+    public static String RIGHT = "RIGHT";
+    public static String JUSTIFY = "JUSTIFY";
 
     public static Color.Mode RGB = Color.Mode.RGB;
     public static Color.Mode HSB = Color.Mode.HSB;
@@ -367,7 +367,11 @@ public interface GraphicsContext {
 
     public Text.Align align();
 
-    public void align(Text.Align align);
+    public Text.Align align(Text.Align align);
+
+    public Text.Align align(String align);
+
+    public Text.Align align(int align);
 
     public Image image(String path, float x, float y);
 

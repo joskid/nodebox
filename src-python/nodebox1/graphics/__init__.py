@@ -114,8 +114,6 @@ class Context(CanvasContext):
             return CanvasContext.colorrange(self, range)
         return CanvasContext.colorrange(self)
 
-    # todo: colorrange
-
     def strokewidth(self, width=None):
         if width is not None:
             return CanvasContext.strokewidth(self, width)

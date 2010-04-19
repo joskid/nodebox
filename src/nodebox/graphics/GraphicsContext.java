@@ -7,6 +7,10 @@ import java.util.List;
 
 public interface GraphicsContext {
 
+    public static final float inch = 72;
+    public static final float cm = 28.3465f;
+    public static final float mm = 2.8346f;
+    
     public enum RectMode {
         CORNER, CORNERS, CENTER, RADIUS
     }

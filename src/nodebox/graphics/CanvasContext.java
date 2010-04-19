@@ -20,6 +20,9 @@ package nodebox.graphics;
 
 public class CanvasContext extends AbstractGraphicsContext {
 
+    public static final float DEFAULT_WIDTH = 1000;
+    public static final float DEFAULT_HEIGHT = 1000;
+
     public enum ImageMode {
         CORNERS, CORNER, RADIUS, CENTER
     }
@@ -31,7 +34,7 @@ public class CanvasContext extends AbstractGraphicsContext {
     //// Initialization ////
 
     public CanvasContext() {
-        canvas = new Canvas();
+        canvas = new Canvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         resetContext(true);
     }
 

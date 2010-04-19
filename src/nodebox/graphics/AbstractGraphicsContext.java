@@ -884,8 +884,40 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         var(name, type, null, null, null);
     }
 
+    public void var(String name, String type) {
+        var(name, type, null, null, null);
+    }
+
+    public void var(String name, int type) {
+        var(name, type, null, null, null);
+    }
+
     public void var(String name, VarType type, Object value) {
         var(name, type, value, null, null);
+    }
+
+    public void var(String name, String type, Object value) {
+        var(name, type, value, null, null);
+    }
+
+    public void var(String name, int type, Object value) {
+        var(name, type, value, null, null);
+    }
+
+    public void var(String name, String type, Object value, Float min, Float max) {
+        try {
+            var(name, VarType.valueOf(type.toUpperCase()), value, min, max);
+        } catch (IllegalArgumentException e) {
+            throw new NodeBoxError("var: available types for var() are NUMBER, TEXT, BOOLEAN and FONT \\n\"");
+        }
+    }
+
+    public void var(String name, int type, Object value, Float min, Float max) {
+        try {
+            var(name, VarType.values()[type], value, min, max);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NodeBoxError("var: available types for var() are NUMBER, TEXT, BOOLEAN and FONT \\n\"");
+        }
     }
 
     public void var(String name, VarType type, Object value, Float min, Float max) {

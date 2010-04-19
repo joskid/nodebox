@@ -45,10 +45,10 @@ public interface GraphicsContext {
     public static String HSB = "HSB";
     public static String CMYK = "CMYK";
 
-    public static VarType NUMBER = VarType.NUMBER;
-    public static VarType TEXT = VarType.TEXT;
-    public static VarType BOOLEAN = VarType.BOOLEAN;
-    public static VarType FONT = VarType.FONT;
+    public static String NUMBER = "NUMBER";
+    public static String TEXT = "TEXT";
+    public static String BOOLEAN = "BOOLEAN";
+    public static String FONT = "FONT";
 
     public static ArrowType NORMAL = ArrowType.NORMAL;
     public static ArrowType FORTYFIVE = ArrowType.FORTYFIVE;
@@ -431,9 +431,21 @@ public interface GraphicsContext {
 
     public void var(String name, VarType type);
 
+    public void var(String name, String type);
+
+    public void var(String name, int type);
+
     public void var(String name, VarType type, Object value);
 
+    public void var(String name, String type, Object value);
+
+    public void var(String name, int type, Object value);
+
     public void var(String name, VarType type, Object value, Float min, Float max);
+
+    public void var(String name, String type, Object value, Float min, Float max);
+
+    public void var(String name, int type, Object value, Float min, Float max);
 
     public double random();
 

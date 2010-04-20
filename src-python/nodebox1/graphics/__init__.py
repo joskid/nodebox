@@ -1,5 +1,5 @@
 from java.lang import Boolean
-from nodebox.graphics import CanvasContext, Path, NodeBoxError
+from nodebox.graphics import CanvasContext, Path, Text, NodeBoxError
 from random import choice
 
 class Context(CanvasContext):
@@ -66,9 +66,8 @@ class Context(CanvasContext):
         return CanvasContext.endpath(self, Boolean(draw))
     
     def drawpath(self, path, **kwargs):
-        p = CanvasContext.drawpath(self, path)
-        self._setAttributesFromKwargs(p, **kwargs)
-        return p
+        CanvasContext.drawpath(self, path)
+        self._setAttributesFromKwargs(path, **kwargs)
     
     def autoclosepath(self, close=None):
         if close is None:
@@ -107,6 +106,13 @@ class Context(CanvasContext):
     
     ### Color Commands ###
 
+    def color(self, *args):
+        if len(args) == 1 and isinstance(args[0], tuple):
+            args = args[0]
+        return CanvasContext.color(self, *args)
+
+    Color = color
+    
     def fill(self, *args):
         if len(args) == 1 and isinstance(args[0], tuple):
             args = args[0]
@@ -170,7 +176,7 @@ class Context(CanvasContext):
             return p
         else:
             t = CanvasContext.text(self, txt, x, y, width, height, Boolean(draw))
-            # todo: handle kwargs
+            self._setAttributesFromKwargs(t, **kwargs)
             return t
             
     def textpath(self, txt, x, y, width=None, height=None, **kwargs):
@@ -210,14 +216,23 @@ class Context(CanvasContext):
         # todo: handle data
         return CanvasContext.imagesize(self, path)
 
-    
     def _setAttributesFromKwargs(self, item, **kwargs):
-        keys = kwargs.keys()
         if isinstance(item, Path):
-            for kwarg, attr in (('fill', 'fillColor'), ('stroke', 'strokeColor'), ('strokewidth', 'strokeWidth')):
-                if kwarg in keys:
-                    v = kwargs.pop(kwarg)
-                    setattr(item, attr, v)
+            kwargs_attrs = (('fill', 'fillColor'), ('stroke', 'strokeColor'), ('strokewidth', 'strokeWidth'))
+        elif isinstance(item, Text):
+            kwargs_attrs = (('fill', 'fillColor'), ('font', 'fontName'), ('fontsize', 'fontSize'), ('align', 'align'), ('lineheight', 'lineHeight'))
+        else:
+            kwargs_attrs = ()
+        keys = kwargs.keys()
+        for kwarg, attr in kwargs_attrs:
+            if kwarg in keys:
+                v = kwargs.pop(kwarg)
+                if kwarg in ('fill', 'stroke'):
+                    if isinstance(v, (int, float)):
+                        v = self.color(v)
+                    elif isinstance(v, tuple):
+                        v = self.color(*v)
+                setattr(item, attr, v)
         remaining = kwargs.keys()
         if remaining:
             raise NodeBoxError, "Unknown argument(s) '%s'" % ", ".join(remaining)

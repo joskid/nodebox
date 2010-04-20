@@ -168,40 +168,40 @@ class Context(CanvasContext):
     
     def text(self, txt, x, y, width=0, height=0, outline=False, draw=True, **kwargs):
         if outline:
-            t = CanvasContext.text(self, txt, x, y, width, height, Boolean(False))
+            t = CanvasContext.text(self, unicode(txt), x, y, width, height, Boolean(False))
             p = t.path
             self._setAttributesFromKwargs(p, **kwargs)
             if draw:
                 self.addPath(p)
             return p
         else:
-            t = CanvasContext.text(self, txt, x, y, width, height, Boolean(draw))
+            t = CanvasContext.text(self, unicode(txt), x, y, width, height, Boolean(draw))
             self._setAttributesFromKwargs(t, **kwargs)
             return t
             
     def textpath(self, txt, x, y, width=None, height=None, **kwargs):
         if width is None: width = 0
         if height is None: height = 0
-        p = CanvasContext.textpath(self, txt, x, y, width, height)
+        p = CanvasContext.textpath(self, unicode(txt), x, y, width, height)
         self._setAttributesFromKwargs(p, **kwargs)
         return p
 
     def textmetrics(self, txt, width=None, height=None, **kwargs):
         if width is None: width = 0
         if height is None: height = 0
-        r = CanvasContext.textmetrics(self, txt, width, height)
+        r = CanvasContext.textmetrics(self, unicode(txt), width, height)
         # todo: handle kwargs?
         return r
 
     def textwidth(self, txt, width=None, **kwargs):
         if width is None: width = 0
-        w = CanvasContext.textwidth(self, txt, width)
+        w = CanvasContext.textwidth(self, unicode(txt), width)
         # todo: handle kwargs?
         return w
 
     def textheight(self, txt, height=None, **kwargs):
         if height is None: height = 0
-        h = CanvasContext.textheight(self, txt, height)
+        h = CanvasContext.textheight(self, unicode(txt), height)
         # todo: handle kwargs?
         return h
     

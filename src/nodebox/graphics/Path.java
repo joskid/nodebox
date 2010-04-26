@@ -315,7 +315,7 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         float right = cx + halfWidth;
         float top = cy - halfHeight;
         float bottom = cy + halfHeight;
-        // rx/ry cannot be greater than half of the width of the retoctangle
+        // rx/ry cannot be greater than half of the width of the rectangle
         // (required by SVG spec)
         dx = Math.min(dx, width * 0.5f);
         dy = Math.min(dy, height * 0.5f);

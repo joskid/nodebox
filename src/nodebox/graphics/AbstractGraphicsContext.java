@@ -79,10 +79,18 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path rect(Rect r) {
-        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), true);
+    }
+
+    public Path rect(Rect r, boolean draw) {
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), draw);
     }
 
     public Path rect(float x, float y, float width, float height) {
+        return rect(x, y, width, height, true);
+    }
+
+    public Path rect(float x, float y, float width, float height, boolean draw) {
         Path p = new Path();
         switch (rectMode) {
             case CENTER:
@@ -93,19 +101,32 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
                 break;
         }
         inheritFromContext(p);
-        addPath(p);
+        if (draw)
+            addPath(p);
         return p;
     }
 
     public Path rect(Rect r, float roundness) {
-        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), roundness, roundness);
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), roundness, roundness, true);
+    }
+
+    public Path rect(Rect r, float roundness, boolean draw) {
+        return rect(r.getX(), r.getY(), r.getWidth(), r.getHeight(), roundness, roundness, draw);
     }
 
     public Path rect(float x, float y, float width, float height, float roundness) {
-        return rect(x, y, width, height, roundness, roundness);
+        return rect(x, y, width, height, roundness, roundness, true);
+    }
+
+    public Path rect(float x, float y, float width, float height, float roundness, boolean draw) {
+        return rect(x, y, width, height, roundness, roundness, draw);
     }
 
     public Path rect(float x, float y, float width, float height, float rx, float ry) {
+        return rect(x, y, width, height, rx, ry, true);
+    }
+
+    public Path rect(float x, float y, float width, float height, float rx, float ry, boolean draw) {
         Path p = new Path();
         switch (rectMode) {
             case CENTER:
@@ -116,7 +137,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
                 break;
         }
         inheritFromContext(p);
-        addPath(p);
+        if (draw)
+            addPath(p);
         return p;
     }
 

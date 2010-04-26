@@ -31,8 +31,16 @@ class Context(CanvasContext):
 
     #### Primitives ####
     
-    # todo: rect
-    
+    def rect(self, x, y, width, height, roundness=0.0, draw=True, **kwargs):
+        if roundness == 0:
+            p = CanvasContext.rect(self, x, y, width, height, Boolean(draw))
+        else:
+            rw = roundness * width * 0.5
+            rh = roundness * height * 0.5
+            p = CanvasContext.rect(self, x, y, width, height, rw, rh, Boolean(draw))
+        self._setAttributesFromKwargs(p, **kwargs)
+        return p
+
     def ellipse(self, x, y, width, height, draw=True, **kwargs):
         p = CanvasContext.ellipse(self, x, y, width, height, Boolean(draw))
         self._setAttributesFromKwargs(p, **kwargs)

@@ -197,12 +197,6 @@ public class Text extends AbstractGrob {
         return new Rect(bounds);
     }
 
-    //// Drawing ////
-
-    public void inheritFromContext(GraphicsContext ctx) {
-        // TODO: Implement
-    }
-
     //// Transformations ////
 
     protected void setupTransform(Graphics2D g) {

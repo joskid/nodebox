@@ -890,9 +890,6 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         }
     }
 
-    public void inheritFromContext(GraphicsContext ctx) {
-    }
-
     public Path clone() {
         return new Path(this);
     }

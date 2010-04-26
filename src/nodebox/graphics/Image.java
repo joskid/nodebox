@@ -168,10 +168,6 @@ public class Image extends AbstractGrob {
         }
     }
 
-    public void inheritFromContext(GraphicsContext ctx) {
-        // TODO: Implement
-    }
-
     public void draw(Graphics2D g) {
         setupTransform(g);
         // You can only position an image using an affine transformation.

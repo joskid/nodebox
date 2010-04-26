@@ -277,6 +277,22 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         close();
     }
 
+    public void cornerRect(Rect r, float roundness) {
+        roundedRect(Rect.corneredRect(r), roundness);
+    }
+
+    public void cornerRect(Rect r, float rx, float ry) {
+        roundedRect(Rect.corneredRect(r), rx, ry);
+    }
+
+    public void cornerRect(float cx, float cy, float width, float height, float r) {
+        roundedRect(Rect.corneredRect(cx, cy, width, height), r);
+    }
+
+    public void cornerRect(float cx, float cy, float width, float height, float rx, float ry) {
+        roundedRect(Rect.corneredRect(cx, cy, width, height), rx, ry);
+    }
+
     public void roundedRect(Rect r, float roundness) {
         roundedRect(r, roundness, roundness);
     }

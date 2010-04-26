@@ -107,12 +107,14 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Path rect(float x, float y, float width, float height, float rx, float ry) {
         Path p = new Path();
-        float w2 = 0, h2 = 0;
-        if (rectMode == RectMode.CORNER) {
-            w2 = width / 2;
-            h2 = height / 2;
+        switch (rectMode) {
+            case CENTER:
+                p.rect(x, y, width, height, rx, ry);
+                break;
+            case CORNER:
+                p.cornerRect(x, y, width, height, rx, ry);
+                break;
         }
-        p.rect(x + w2, y + h2, width, height, rx, ry);
         inheritFromContext(p);
         addPath(p);
         return p;

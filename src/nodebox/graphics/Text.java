@@ -170,13 +170,13 @@ public class Text extends AbstractGrob {
 
     //// Metrics ////
 
-    private AttributedString getStyledText() {
+    private AttributedString getStyledText(String text) {
         AttributedString attrString = new AttributedString(text);
         attrString.addAttribute(TextAttribute.FONT, getFont());
         if (fillColor != null)
             attrString.addAttribute(TextAttribute.FOREGROUND, fillColor.getAwtColor());
         if (align == Align.RIGHT) {
-            attrString.addAttribute(TextAttribute.RUN_DIRECTION, TextAttribute.RUN_DIRECTION_RTL);
+            //attrString.addAttribute(TextAttribute.RUN_DIRECTION, TextAttribute.RUN_DIRECTION_RTL);
         } else if (align == Align.CENTER) {
             // TODO: Center alignment?
         } else if (align == Align.JUSTIFY) {
@@ -205,7 +205,7 @@ public class Text extends AbstractGrob {
         trans.concatenate(getTransform().getAffineTransform());
         g.setTransform(trans);
     }
-    
+
     public void draw(Graphics2D g) {
         if (fillColor == null) return;
         setupTransform(g);
@@ -250,20 +250,41 @@ public class Text extends AbstractGrob {
 
         private float x, y;
         private float ascent;
-        private AttributedString styledText;
-        private LineBreakMeasurer measurer;
+        private int currentIndex = 0;
+        private String[] textParts;
+        private LineBreakMeasurer[] measurers;
+        private LineBreakMeasurer currentMeasurer;
+        private String currentText;
         private boolean first;
 
         private TextLayoutIterator() {
             x = 0;
             y = 0;
-            styledText = getStyledText();
-            measurer = new LineBreakMeasurer(styledText.getIterator(), new FontRenderContext(new AffineTransform(), true, true));
+            textParts = text.split("\n");
+            measurers = new LineBreakMeasurer[textParts.length];
+            FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
+            for (int i = 0; i < textParts.length; i++) {
+                AttributedString s = getStyledText(textParts[i]);
+                measurers[i] = new LineBreakMeasurer(s.getIterator(), frc);
+            }
+            currentMeasurer = measurers[currentIndex];
+            currentText = textParts[currentIndex];
             first = true;
         }
 
         public boolean hasNext() {
-            return measurer.getPosition() < text.length();
+            if (currentMeasurer.getPosition() < currentText.length())
+                return true;
+            else {
+                currentIndex++;
+                if (currentIndex < textParts.length) {
+                    currentMeasurer = measurers[currentIndex];
+                    currentText = textParts[currentIndex];
+                    return hasNext();
+                } else {
+                    return false;
+                }
+            }
         }
 
         public TextLayout next() {
@@ -273,7 +294,8 @@ public class Text extends AbstractGrob {
                 y += ascent * lineHeight;
             }
             float layoutWidth = width == 0 ? Float.MAX_VALUE : (float) width;
-            TextLayout layout = measurer.nextLayout(layoutWidth);
+
+            TextLayout layout = currentMeasurer.nextLayout(layoutWidth);
             if (width == 0) {
                 layoutWidth = layout.getAdvance();
                 if (align == Align.RIGHT) {
@@ -287,12 +309,13 @@ public class Text extends AbstractGrob {
                 x = (float) ((width - layout.getAdvance()) / 2.0F);
             } else if (align == Align.JUSTIFY) {
                 // Don't justify the last line.
-                if (measurer.getPosition() < text.length()) {
+                if (currentMeasurer.getPosition() < currentText.length()) {
                     layout = layout.getJustifiedLayout((float) width);
                 }
             }
             ascent = layout.getAscent();
             // y += layout.getDescent() + layout.getLeading() + layout.getAscent();
+
             return layout;
         }
 

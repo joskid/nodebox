@@ -314,12 +314,12 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
         Path p = new Path();
         p.moveto(x, y);
-        p.lineto(x-head, y+head);
-        p.lineto(x-head, y+tail);
-        p.lineto(x-width, y+tail);
-        p.lineto(x-width, y-tail);
-        p.lineto(x-head, y-tail);
-        p.lineto(x-head, y-head);
+        p.lineto(x - head, y + head);
+        p.lineto(x - head, y + tail);
+        p.lineto(x - width, y + tail);
+        p.lineto(x - width, y - tail);
+        p.lineto(x - head, y - tail);
+        p.lineto(x - head, y - head);
         p.lineto(x, y);
         p.close();
         inheritFromContext(p);
@@ -334,14 +334,14 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
         Path p = new Path();
         p.moveto(x, y);
-        p.lineto(x, y+width*(1-head));
-        p.lineto(x-width*head, y+width);
-        p.lineto(x-width*head, y+width*tail*.4f);
-        p.lineto(x-width*tail*.6f, y+width);
-        p.lineto(x-width, y+width*tail*.6f);
-        p.lineto(x-width*tail*.4f, y+width*head);
-        p.lineto(x-width, y+width*head);
-        p.lineto(x-width*(1-head), y);
+        p.lineto(x, y + width * (1 - head));
+        p.lineto(x - width * head, y + width);
+        p.lineto(x - width * head, y + width * tail * .4f);
+        p.lineto(x - width * tail * .6f, y + width);
+        p.lineto(x - width, y + width * tail * .6f);
+        p.lineto(x - width * tail * .4f, y + width * head);
+        p.lineto(x - width, y + width * head);
+        p.lineto(x - width * (1 - head), y);
         p.lineto(x, y);
         p.close();
         inheritFromContext(p);
@@ -435,7 +435,10 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     public Path findpath(List<Point> points, float curvature) {
-        throw new RuntimeException("findpath is not implemented yet.");
+        Path path = Path.findPath(points, curvature);
+        inheritFromContext(path);
+        addPath(path);
+        return path;
     }
 
     //// Clipping ////
@@ -467,7 +470,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
             Transform.Mode newMode = Transform.Mode.valueOf(mode.toUpperCase());
             return transformMode = newMode;
         } catch (IllegalArgumentException e) {
-            throw new NodeBoxError("transform: available types for transform() are CORNER and CENTER\\n\"");            
+            throw new NodeBoxError("transform: available types for transform() are CORNER and CENTER\\n\"");
         }
     }
 
@@ -576,7 +579,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     public float colorrange(float range) {
         return colorRange = range;
     }
-     
+
     /**
      * Create an empty (black) color object.
      *
@@ -1034,7 +1037,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         // Bring the color into the 0-1 scale for the current colorrange
         if (colorRange == 1f) return v;
         return v / colorRange;
-        
+
     }
 
     public double random() {

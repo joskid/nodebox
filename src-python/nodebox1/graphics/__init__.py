@@ -1,5 +1,5 @@
 from java.lang import Boolean
-from nodebox.graphics import CanvasContext, Path, Text, NodeBoxError
+from nodebox.graphics import CanvasContext, Point, Path, Text, NodeBoxError
 from random import choice
 
 class Context(CanvasContext):
@@ -83,7 +83,16 @@ class Context(CanvasContext):
         else:
             return CanvasContext.autoclosepath(self, Boolean(close))
     
-    # todo: findpath
+    def findpath(self, points, curvature=1.0):
+        # The list of points consists of Point objects,
+        # but it shouldn't crash on something straightforward
+        # as someone supplying a list of (x,y)-tuples.
+
+        from types import TupleType
+        for i, pt in enumerate(points):
+            if type(pt) == TupleType:
+                points[i] = Point(pt[0], pt[1])
+        return CanvasContext.findpath(self, points, curvature)
     
     ### Transformation commands ###
     

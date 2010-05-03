@@ -2,8 +2,7 @@ package nodebox.graphics;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Base class for all geometric (vector) data.
@@ -758,6 +757,100 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         }
         return p;
     }
+
+    public static Path findPath(java.util.List<Point> points) {
+        Point[] pts = new Point[points.size()];
+        points.toArray(pts);
+        return findPath(pts, 1);
+    }
+
+    public static Path findPath(java.util.List<Point> points, float curvature) {
+        Point[] pts = new Point[points.size()];
+        points.toArray(pts);
+        return findPath(pts, curvature);
+    }
+
+    public static Path findPath(Point[] points) {
+        return findPath(points, 1);
+    }
+
+    /**
+     * Constructs a path between the given list of points.
+     * </p>
+     * Interpolates the list of points and determines
+     * a smooth bezier path betweem them.
+     * Curvature is only useful if the path has more than  three points.
+     * </p>
+     * @param points     the points of which to construct the path from.
+     * @param curvature  the smoothness of the generated path (0: straight, 1: smooth)
+     * @return a new Path.
+     */
+    public static Path findPath(Point[] points, float curvature) {
+        if (points.length == 0) return null;
+        if (points.length == 1) {
+            Path path = new Path();
+            path.moveto(points[0].x, points[0].y);
+            return path;
+        }
+        if (points.length == 2) {
+            Path path = new Path();
+            path.moveto(points[0].x, points[0].y);
+            path.lineto(points[1].x, points[1].y);
+            return path;
+        }
+
+        // Zero curvature means straight lines.
+
+        curvature = Math.max(0, Math.min(1, curvature));
+        if (curvature == 0) {
+            Path path = new Path();
+            path.moveto(points[0].x, points[0].y);
+            for (int i = 0; i < points.length; i++)
+                path.lineto(points[i].x, points[i].y);
+            return path;
+        }
+
+        curvature = (float) (4 + (1.0-curvature)*40);
+
+        HashMap<Integer, Float> dx, dy, bi, ax, ay;
+        dx = new HashMap<Integer, Float>();
+        dy = new HashMap<Integer, Float>();
+        bi = new HashMap<Integer, Float>();
+        ax = new HashMap<Integer, Float>();
+        ay = new HashMap<Integer, Float>();
+        dx.put(0, 0f);
+        dx.put(points.length-1, 0f);
+        dy.put(0, 0f);
+        dy.put(points.length-1, 0f);
+        bi.put(1, -0.25f);
+        ax.put(1, (points[2].x-points[0].x-dx.get(0)) / 4);
+        ay.put(1, (points[2].y-points[0].y-dy.get(0)) / 4);
+
+        for (int i = 2; i < points.length-1; i++) {
+            bi.put(i, -1 / (curvature + bi.get(i-1)));
+            ax.put(i, -(points[i+1].x-points[i-1].x-ax.get(i-1)) * bi.get(i));
+            ay.put(i, -(points[i+1].y-points[i-1].y-ay.get(i-1)) * bi.get(i));
+        }
+
+        for (int i = points.length - 2; i >= 1; i--) {
+            dx.put(i, ax.get(i) + dx.get(i+1) * bi.get(i));
+            dy.put(i, ay.get(i) + dy.get(i+1) * bi.get(i));
+        }
+
+        Path path = new Path();
+        path.moveto(points[0].x, points[0].y);
+        for (int i = 0; i < points.length-1; i++) {
+            path.curveto(points[i].x + dx.get(i),
+                         points[i].y + dy.get(i),
+                         points[i+1].x - dx.get(i+1),
+                         points[i+1].y - dy.get(i+1),
+                         points[i+1].x,
+                         points[i+1].y);
+        }
+
+        return path;
+    }
+
 
     //// Geometric queries ////
 

@@ -22,7 +22,7 @@ public class Text extends AbstractGrob {
     private double height = 0;
     private String fontName = "Helvetica";
     private double fontSize = 24;
-    private double lineHeight;
+    private double lineHeight = 1.2;
     private Align align = Align.CENTER;
     private Color fillColor = new Color();
 

@@ -30,11 +30,12 @@ public class TranslateHandle extends AbstractHandle {
     public void draw(GraphicsContext ctx) {
         float x = node.asFloat(txName);
         float y = node.asFloat(tyName);
+        ctx.rectmode(GraphicsContext.RectMode.CENTER);
         Path p = new Path();
         p.setFillColor(HANDLE_COLOR);
         ctx.stroke(HANDLE_COLOR);
         p.setStrokeColor(null);
-        ctx.fill();
+        ctx.nofill();
         drawDot(ctx, x, y);
 
         if (dragState == DragState.NONE) {

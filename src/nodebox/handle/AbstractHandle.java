@@ -97,6 +97,7 @@ public abstract class AbstractHandle implements Handle {
     //// Utility methods ////
 
     protected void drawDot(GraphicsContext ctx, float x, float y) {
+        ctx.rectmode(GraphicsContext.RectMode.CENTER);
         ctx.fill(HANDLE_COLOR);
         ctx.rect(x, y, HANDLE_SIZE, HANDLE_SIZE);
     }

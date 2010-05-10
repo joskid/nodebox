@@ -190,12 +190,32 @@ public class Color implements Cloneable {
         return r;
     }
 
+    public void setRed(double r) {
+        this.r = clamp(r);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setR(double r) {
+        setRed(r);
+    }
+
     public double getGreen() {
         return g;
     }
 
     public double getG() {
         return g;
+    }
+
+    public void setGreen(double g) {
+        this.g = clamp(g);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setG(double g) {
+        setGreen(g);
     }
 
     public double getBlue() {
@@ -206,12 +226,32 @@ public class Color implements Cloneable {
         return b;
     }
 
+    public void setBlue(double b) {
+        this.b = clamp(b);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setB(double b) {
+        setBlue(b);
+    }
+
     public double getAlpha() {
         return a;
     }
 
     public double getA() {
         return a;
+    }
+
+    public void setAlpha(double a) {
+        this.a = clamp(a);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setA(double a) {
+        setAlpha(a);
     }
 
     public boolean isVisible() {
@@ -226,6 +266,16 @@ public class Color implements Cloneable {
         return h;
     }
 
+    public void setHue(double h) {
+        this.h = clamp(h);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setH(double h) {
+        setHue(h);
+    }
+
     public double getSaturation() {
         return s;
     }
@@ -234,12 +284,32 @@ public class Color implements Cloneable {
         return s;
     }
 
+    public void setSaturation(double s) {
+        this.s = clamp(s);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setS(double s) {
+        setSaturation(s);
+    }
+
     public double getBrightness() {
         return v;
     }
 
     public double getV() {
         return v;
+    }
+
+    public void setBrightness(double v) {
+        this.v = clamp(v);
+        updateHSB();
+        updateCMYK();
+    }
+
+    public void setV(double v) {
+        setBrightness(v);
     }
 
     private void updateRGB() {

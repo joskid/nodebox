@@ -926,7 +926,6 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public Path textpath(String text, float x, float y, float width, float height) {
         Text t = new Text(text, x, y, width, height);
-        inheritFromContext(t);
         return t.getPath();
     }
 

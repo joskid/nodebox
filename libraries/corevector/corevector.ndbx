@@ -793,6 +793,9 @@ class BezierPathEditor(AbstractHandle):
 
         x, y = self.mouse()
         
+        _ctx.ellipsemode(CENTER)
+        _ctx.rectmode(CENTER)
+        _ctx.autoclosepath(False)
         _ctx.strokewidth(self.strokewidth)
         
         r = 4
@@ -871,9 +874,9 @@ class BezierPathEditor(AbstractHandle):
                 _ctx.nofill()
                 _ctx.stroke(self.new_color)
                 rx, ry = self.reflect(pt.x, pt.y, pt.ctrl2.x, pt.ctrl2.y)
-                _ctx.beginPath(pt.x, pt.y)
+                _ctx.beginpath(pt.x, pt.y)
                 _ctx.curveto(rx, ry, x, y, x, y)
-                _ctx.endPath()
+                _ctx.endpath()
 
                 # A dashed line indicates what
                 # a CLOSETO would look like.
@@ -904,7 +907,7 @@ class BezierPathEditor(AbstractHandle):
                 _ctx.nostroke()
                 _ctx.fill(self.handle_color)
                 _ctx.ellipse(x, y, r*2, r*2)
-                _ctx.fill(Color(1, 1, 1))
+                _ctx.fill(1)
                 _ctx.rotate(45)
                 _ctx.rect(x, y, r+1, 1.25)
                 _ctx.rotate(-90)
@@ -913,7 +916,7 @@ class BezierPathEditor(AbstractHandle):
                 if self.edit == len(self._points)-1:
                     _ctx.fill(self.handle_color)
                     _ctx.ellipse(x+r*2+2, y, r*2, r*2)
-                    _ctx.fill(Color(1, 1, 1))
+                    _ctx.fill(1)
                     _ctx.rect(x+r*2+3-2.25, y, 1.5, r-1)
                     _ctx.rect(x+r*2+3+0.75, y, 1.5, r-1)
         
@@ -1721,6 +1724,7 @@ class FreeHandEditor(AbstractHandle):
             
             # Draws the current location of the cursor.
             r = 4
+            _ctx.ellipsemode(CENTER)
             _ctx.nofill()
             _ctx.strokewidth(self.strokewidth)
             _ctx.stroke(self.handle_color)
@@ -2103,113 +2107,23 @@ def cook(self):
             p.moveto(x1, y1)
         else:
             p.lineto(x1, y1)
-    p.fillColor = self.fill
-    p.strokeColor = self.stroke
-    p.strokeWidth = self.strokeWidth
+    p.close()
+    p.fill = self.fill
+    if self.strokeWidth > 0:
+        p.strokeColor = self.stroke
+        p.strokeWidth = self.strokeWidth
+    else:
+        p.strokeColor = None
     return p.asGeometry()]]></value>
         </param>
         <param name="_handle">
-            <value type="python"><![CDATA[from nodebox.graphics import Path, Transform, Point
-from nodebox.handle import AbstractHandle
-from nodebox.util.Geometry import angle, distance
-from math import sin, cos, pi
+            <value type="python"><![CDATA[from nodebox.handle import CombinedHandle, CircleScaleHandle, PointHandle
 
-class PolygonHandle(AbstractHandle):
-    NONE, CENTER, OUTER = range(3)
-
-    def __init__(self, *args):
-        AbstractHandle.__init__(self, *args)
-        self.dragState = PolygonHandle.NONE
-        self._sides = 0
-        self._angle = 0
-        self.update()
-   
-    def update(self):
-        self.visible = self.node.asInt("sides") >= 3
-        
-    def mousePressed(self, pt):
-        self.px = pt.x
-        self.py = pt.y
-        
-        self.ocx = self.node.asFloat("x")
-        self.ocy = self.node.asFloat("y")
-        self.ocr = self.node.asFloat("radius")
-        center = self.createHitRectangle(self.ocx, self.ocy)
-        if self.node.asInt("align"):
-            t = Transform()
-            t.translate(self.ocx, self.ocy)
-            t.rotate(- self.find_angle())
-            p = t.map(Point(self.ocr, 0))
-            outer = self.createHitRectangle(p.x, p.y)
-        else:
-            outer = self.createHitRectangle(self.ocx + self.ocr, self.ocy)
-        
-        if outer.contains(pt):
-            self.dragState = self.OUTER
-        elif center.contains(pt):
-            self.dragState = self.CENTER
-        else:
-            self.dragState = self.NONE
-        return self.dragState != self.NONE
-
-    def mouseDragged(self, pt):
-        if self.dragState == self.NONE: return False
-        
-        x = pt.x
-        y = pt.y
-        dx = x - self.px
-        dy = y - self.py
-        
-        if (dx == 0 and dy == 0): return False
-        
-        if self.dragState == self.CENTER:
-            self.node.silentSet("x", self.ocx + dx)
-            self.node.silentSet("y", self.ocy + dy)
-        elif self.dragState == self.OUTER:
-            if self.node.asInt("align"):
-                d = distance(self.node.asFloat("x"), self.node.asFloat("y"), x, y)
-                self.node.silentSet("radius", d)
-            else:
-                self.node.silentSet("radius", self.ocr + dx)
-        return True
-
-    def mouseReleased(self, pt):
-        if self.dragState == self.NONE: return False
-        self.dragState = self.NONE
-        return True
-    
-    def find_angle(self):
-        sides = self.node.asInt("sides")
-        if sides == self._sides:
-            return self._angle
-        else:
-            t = 2*pi/sides
-            x, y = cos(t), sin(t)
-            self._angle = angle(x, y, 1.0, 0.0)
-            self._sides = sides
-            return self._angle
-              
-    def draw(self, ctx):
-        x = self.node.asFloat("x")
-        y = self.node.asFloat("y")
-        radius = self.node.asFloat("radius")
-        cornerPath = Path()
-        cornerPath.fillColor = AbstractHandle.HANDLE_COLOR
-        cornerPath.strokeWidth = 0
-        strokePath = Path()
-        strokePath.fillColor = None
-        strokePath.strokeColor = AbstractHandle.HANDLE_COLOR
-        strokePath.line(0, 0, radius, 0)
-        t = Transform()
-        t.translate(x, y)
-        if self.node.asInt("align"):
-            t.rotate(-self.find_angle())
-        strokePath = t.map(strokePath)
-        ctx.draw(strokePath)
-        for point in strokePath.points:
-            self.drawDot(cornerPath, point.x, point.y)
-        ctx.draw(cornerPath)
-
+class PolygonHandle(CombinedHandle):
+    def __init__(self, node):
+        CombinedHandle.__init__(self, node)
+        self.addHandle(PointHandle(node))
+        self.addHandle(CircleScaleHandle(node, "radius", CircleScaleHandle.Mode.RADIUS, "x", "y"))
 
 def cook(self):
     return PolygonHandle(self.node)]]></value>
@@ -2332,6 +2246,11 @@ class ReflectHandle(CombinedHandle):
         CombinedHandle.__init__(self, node)
         self.addHandle(TranslateHandle(node, "x", "y"))
         self.addHandle(RotateHandle(node, "angle", "x", "y"))
+        self.update()
+        
+    def update(self):
+        CombinedHandle.update(self)
+        self.visible = self.node.getPort("shape").value is not None
     
     def draw(self, ctx):
         x = self.node.asFloat("x")
@@ -2339,7 +2258,7 @@ class ReflectHandle(CombinedHandle):
         a = self.node.asFloat("angle")
         x1, y1 = coordinates(x, y, -1000, a)
         x2, y2 = coordinates(x, y, 1000, a)
-        ctx.strokeColor = self.HANDLE_COLOR
+        ctx.stroke(self.HANDLE_COLOR)
         ctx.line(x1, y1, x2, y2)
         CombinedHandle.draw(self, ctx)
 
@@ -2461,8 +2380,8 @@ class SnapHandle(PointHandle):
         snap_x = self.node.asFloat("x")
         snap_y = self.node.asFloat("y")
         distance = self.node.asFloat("distance")
-        ctx.stroke = Color(0.4, 0.4, 0.4, 0.5)
-        ctx.strokeWidth = 1.0
+        ctx.stroke(0.4, 0.4, 0.4, 0.5)
+        ctx.strokewidth(1.0)
         for i in xrange(-100, 100):
             x = -snap_x + (i * distance)
             y = -snap_y + (i * distance)
@@ -2494,143 +2413,115 @@ def cook(self):
     <node exported="true" name="sort" prototype="filter" x="250" y="410">
         <description>Sort points or shapes using different sorting methods</description>
         <param name="_code">
-            <value type="python"><![CDATA[from nodebox.graphics import Geometry, Point
+            <value type="python"><![CDATA[from nodebox.graphics import IGeometry, Geometry, Path, Contour, Point
 from nodebox.util.Geometry import distance, angle
-from random import seed, shuffle
+from random import shuffle, seed
 
-def by_x(p1, p2):
-    if _sort_paths:
-        return cmp(p1.bounds.x, p2.bounds.x)
-    return cmp(p1.x, p2.x)
-
-def by_y(p1, p2):
-    if _sort_paths:
-        return cmp(p1.bounds.y, p2.bounds.y)
-    return cmp(p1.y, p2.y)
-
-def by_proximity(x, y):
-    def fn(p1, p2):
-        if _sort_paths:
-            p1 = p1.bounds
-            p2 = p2.bounds
-        dist1 = distance(p1.x, p1.y, x, y)
-        dist2 = distance(p2.x, p2.y, x, y)
-        return cmp(dist1, dist2)
-    return fn
-
-def by_angle(x, y):
-    def fn(p1, p2):
-        if _sort_paths:
-            p1 = p1.bounds
-            p2 = p2.bounds
-        dist1 = angle(p1.x, p1.y, x, y)
-        dist2 = angle(p2.x, p2.y, x, y)
-        return cmp(dist1, dist2)
-    return fn
-
-def sort_items(items, order, **kwargs):
-    if order == 'unchanged':
-        pass
-    elif order == 'by_x':
-        items.sort(by_x)
-    elif order == 'by_y':
-        items.sort(by_y)
-    elif order == 'random':
-        seed(kwargs["seed"])
-        shuffle(items)
-    elif order == 'reversed':
-        items.reverse()
-    elif order == 'shift':
-        offset = kwargs["offset"] % len(items)
+def shift(items, offset=0):
+    if items:
         for i in xrange(offset):
-            item = items[0]
-            items = items[1:]
-            items.append(item)
-    elif order == 'proximity':
-        items.sort(by_proximity(kwargs["x"], kwargs["y"]))
-    elif order == 'angle':
-        items.sort(by_angle(kwargs["x"], kwargs["y"]))
-    return items
+            first = items.pop(0)
+            items.append(first)
 
-def sort_points(shape, scope, order, **kwargs):
-    new_shape = Geometry()
-    if scope == "pt_g":
-        # Sorts points per group.
-        # Color information is discarded.
-        points = list(shape.points)
-        points = sort_items(points, order, **kwargs)
-        for point in points:
-            new_shape.addPoint(Point(point.x, point.y))
-        new_shape.paths[0].fillColor = None
-    elif scope == "pt_p":
-        # Sorts points per path.
-        # Color information is kept.
-        for path in shape.paths:
-            points = list(path.points)
-            points = sort_items(points, order, **kwargs)
-            p = path.clone()
-            for i, point in enumerate(points):
-                pp = p.points[i]
-                pp.x = point.x
-                pp.y = point.y
-                pp.type = point.LINE_TO
-            new_shape.add(p)
-    elif scope == "pt_c":
-        # Sorts points per contour.
-        # Color information is kept.
-        for path in shape.paths:
-            p = path.cloneAndClear()
-            for contour in path.contours:
-                points = list(contour.points)
-                points = sort_items(points, order, **kwargs)
-                c = contour.clone()
-                for i, point in enumerate(points):
-                    cp = c.points[i]
-                    cp.x = point.x
-                    cp.y = point.y
-                    cp.type = Point.LINE_TO
-                p.add(c)
-            new_shape.add(p)
-    return new_shape
+def points_within_geometry(new_shape, shape, sort, kwargs):
+    # The reason we wrap shape.points in a separate list is because 
+    # getPoints (or getPaths or getContours) returns a Java ArrayList
+    # which we can't perform a Python sort operation on.
+    points = list(shape.points)
+    sort(points, **kwargs)
+    for point in points:
+        new_shape.addPoint(point.x, point.y)
+    # Color information is discarded.
+    new_shape.fillColor = None
 
-def sort_paths(shape, order, **kwargs):
-    new_shape = Geometry()
-    paths = list(shape.paths)
-    paths = sort_items(paths, order, **kwargs)
-    for path in paths:
-        new_shape.add(path.clone())
-    return new_shape
+def points_within_path(new_shape, shape, sort, kwargs):
+    for path in shape.paths:
+        points = list(path.points)
+        sort(points, **kwargs)
+        p = path.clone()
+        # TODO: This implementation makes sure that the new path
+        # has exactly the same amount of contours as the original path,
+        # but since the points are all moved around (across contours)
+        # maybe it makes more sense to keep only one contour?
+        for i, point in enumerate(points):
+            pp = p.points[i]
+            pp.x = point.x
+            pp.y = point.y
+            pp.type = Point.LINE_TO
+        new_shape.add(p)
 
-def sort_contours(shape, order, **kwargs):
-    new_shape = Geometry()
+def points_within_contour(new_shape, shape, sort, kwargs):
+    for path in shape.paths:
+        p = path.cloneAndClear()
+        for contour in path.contours:
+            points = list(contour.points)
+            sort(points, **kwargs)
+            c = Contour()
+            for point in points:
+                c.addPoint(point.x, point.y)
+            p.add(c)
+        new_shape.add(p)
+
+def contours_within_path(new_shape, shape, sort, kwargs):
     for path in shape.paths:
         # Create an empty path with the current path's color information
         # Add the sorted contours to the path.
         p = path.cloneAndClear()
         contours = list(path.contours)
-        contours = sort_items(contours, order, **kwargs)
+        sort(contours, **kwargs)
         for c in contours:
-            p.add(c)
+            p.add(c.clone())
         new_shape.add(p)
-    return new_shape
-        
+
+def paths_within_geometry(new_shape, shape, sort, kwargs):
+    paths = list(shape.paths)
+    sort(paths, **kwargs)
+    for path in paths:
+        new_shape.add(path.clone())
+
+sort_scope = {
+    "pt_g": points_within_geometry,
+    "pt_p": points_within_path,
+    "pt_c": points_within_contour,
+    "c_p": contours_within_path,
+    "p_g": paths_within_geometry
+}
+
+sort_methods = {
+    (Point, "by_x"): {'key': Point.getX },
+    (Point, "by_y"): {'key': Point.getY },
+    (IGeometry, "by_x"): {'key': lambda g: g.bounds.x },
+    (IGeometry, "by_y"): {'key': lambda g: g.bounds.y },
+    "random": {'method': shuffle },
+    "reversed": {'kwargs': {'reverse': True}},
+}
+
 def cook(self):
     if self.shape is None: return None
+    if self.order == "unchanged": return self.shape.clone()
     
-    # whether the comparison functions should compare a points' x/y values (True)
-    # or a paths' bounding box x/y values. (False)
-    global _sort_paths
-    _sort_paths = True
+    # These functions are re-created on the fly since they depend
+    # on the user's given input.
+    sort_methods.update({
+        (Point, "angle"): {'key': lambda pt: angle(pt.x, pt.y, self.x, self.y) },
+        (Point, "proximity"): {'key': lambda pt: distance(pt.x, pt.y, self.x, self.y) },
+        (IGeometry, "angle"): {'key': lambda g: angle(g.bounds.x, g.bounds.y, self.x, self.y) },
+        (IGeometry, "proximity"): {'key': lambda g: distance(g.bounds.x, g.bounds.y, self.x, self.y) },
+        "shift": {'method': shift, 'kwargs': {'offset': self.offset}},
+    })
     
-    kwargs = {"seed": self.seed, "offset": self.offset, "x": self.x, "y": self.y}
-    if self.scope in ["pt_c", "pt_p", "pt_g"]:
-        _sort_paths = False
-        return sort_points(self.shape, self.scope, self.order, **kwargs)
-    elif self.scope == "p_g":
-        return sort_paths(self.shape, self.order, **kwargs)
-    elif self.scope == "c_p":
-        return sort_contours(self.shape, self.order, **kwargs)
-    return None]]></value>
+    klass = self.scope.startswith('pt') and Point or IGeometry
+    sort_method = sort_methods.get(self.order, sort_methods.get((klass, self.order)))
+    method = sort_method.get('method', list.sort)
+    kwargs = sort_method.get('kwargs', {})
+    key = sort_method.get('key')
+    if key is not None:
+        kwargs['key'] = key
+    
+    seed(self.seed)
+    new_shape = Geometry()
+    sort_scope[self.scope](new_shape, self.shape, method, kwargs)
+    return new_shape]]></value>
         </param>
         <param enableExpression="order == &quot;proximity&quot; || order == &quot;angle&quot;" name="_handle">
             <value type="python"><![CDATA[from nodebox.handle import PointHandle
@@ -2703,39 +2594,14 @@ def cook(self):
     return p.asGeometry()]]></value>
         </param>
         <param name="_handle">
-            <value type="python"><![CDATA[from nodebox.handle import AbstractHandle, FourPointHandle
+            <value type="python"><![CDATA[from nodebox.handle import CombinedHandle, CircleScaleHandle, PointHandle
 
-class StarHandle(AbstractHandle):
+class StarHandle(CombinedHandle):
     def __init__(self, node):
-        AbstractHandle.__init__(self, node)
-        self.innerHandle = FourPointHandle(node, "x", "y", "inner", "inner")
-        self.outerHandle = FourPointHandle(node, "x", "y", "outer", "outer")
-        self.mousedown = False
-
-    def draw(self, ctx):
-        self.innerHandle.draw(ctx)
-        self.outerHandle.draw(ctx)
-
-    def mousePressed(self, pt):
-        inner, outer = self.innerHandle, self.outerHandle
-
-        # if the inner diameter is larger than the outer,
-        # we should first check the handles of the outer rectangle,
-        # so treat the outer as if it was the inner.
-        if abs(self.node.asFloat("inner")) > abs(self.node.asFloat("outer")):
-            inner, outer = outer, inner
-
-        self.mousedown = inner.mousePressed(pt) or outer.mousePressed(pt)
-        return self.mousedown
-
-    def mouseDragged(self, pt):
-        if not self.mousedown: return False
-        return self.innerHandle.mouseDragged(pt) or self.outerHandle.mouseDragged(pt)
-
-    def mouseReleased(self, pt):
-        if not self.mousedown: return False
-        self.mousedown = False
-        return self.innerHandle.mouseReleased(pt) or self.outerHandle.mouseReleased(pt)
+        CombinedHandle.__init__(self, node)
+        self.addHandle(PointHandle(node))
+        self.addHandle(CircleScaleHandle(node, "inner", CircleScaleHandle.Mode.DIAMETER, "x", "y"))
+        self.addHandle(CircleScaleHandle(node, "outer", CircleScaleHandle.Mode.DIAMETER, "x", "y"))
 
 def cook(self):
     return StarHandle(self.node)]]></value>

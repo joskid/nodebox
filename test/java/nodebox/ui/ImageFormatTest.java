@@ -1,4 +1,4 @@
-package nodebox.client;
+package nodebox.ui;
 
 import junit.framework.TestCase;
 

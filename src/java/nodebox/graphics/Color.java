@@ -328,7 +328,7 @@ public final class Color implements Cloneable {
                 h = 4 + (r - g) / d;
         }
 
-        h = h * (float) (60.0 / 360);
+        h = h * (60.0 / 360);
         if (h < 0)
             h = h + 1;
 

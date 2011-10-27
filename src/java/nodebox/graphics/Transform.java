@@ -143,14 +143,20 @@ public class Transform implements Cloneable {
     }
 
     public Path map(Path p) {
-        Path newPath = new Path(p);
-        map(newPath.getPoints());
+        Path newPath = new Path(p, false);
+        for (Contour c : p.getContours()) {
+            Contour newContour = new Contour(map(c.getPoints()), c.isClosed());
+            newPath.add(newContour);
+        }
         return newPath;
     }
 
     public Geometry map(Geometry g) {
-        Geometry newGeometry = new Geometry(g);
-        map(newGeometry.getPoints());
+        Geometry newGeometry = new Geometry();
+        for (Path p : g.getPaths()) {
+            Path newPath = map(p);
+            newGeometry.add(newPath);
+        }
         return newGeometry;
     }
 
@@ -162,6 +168,7 @@ public class Transform implements Cloneable {
      * @return The list of transformed points.
      */
     public List<Point> map(List<Point> points) {
+        // Prepare the points for the AffineTransform transformation.
         double[] coords = new double[points.size() * 2];
         int i = 0;
         for (Point pt : points) {
@@ -169,10 +176,11 @@ public class Transform implements Cloneable {
             coords[i++] = pt.y;
         }
         affineTransform.transform(coords, 0, coords, 0, points.size());
-        List<Point> transformed = new ArrayList<Point>(points.size());
 
-        for (i=0;i<coords.length;i+=2) {
-            transformed.add(new Point(coords[i], coords[i+1]));
+        // Convert the transformed points into a new List.
+        List<Point> transformed = new ArrayList<Point>(points.size());
+        for (i = 0; i < coords.length; i += 2) {
+            transformed.add(new Point(coords[i], coords[i + 1]));
         }
         return transformed;
     }

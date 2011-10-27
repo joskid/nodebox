@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Contour extends AbstractGeometry {
 
-    private static final BasicStroke DEFAULT_STROKE = new BasicStroke(1f);
+    private static final BasicStroke DEFAULT_STROKE = new BasicStroke(1);
     private static final int SEGMENT_ACCURACY = 20;
 
     private List<Point> points;
@@ -28,6 +28,14 @@ public class Contour extends AbstractGeometry {
         closed = other.closed;
     }
 
+    public Contour(Iterable<Point> points, boolean closed) {
+        this.points = new ArrayList<Point>();
+        for (Point p : points) {
+            this.points.add(p);
+        }
+        this.closed = closed;
+    }
+
     //// Point operations ////
 
     public int getPointCount() {
@@ -36,6 +44,10 @@ public class Contour extends AbstractGeometry {
 
     public java.util.List<Point> getPoints() {
         return points;
+    }
+
+    void setPoints(List<Point> points) {
+        this.points = points;
     }
 
     public void addPoint(Point pt) {
@@ -277,7 +289,7 @@ public class Contour extends AbstractGeometry {
         double delta = 1;
         if (closed) {
             if (amount > 0) {
-                delta = 1f / amount;
+                delta = 1.0 / amount;
             }
         } else {
             // The delta value is divided by amount - 1, because we also want the last point (t=1.0)
@@ -285,7 +297,7 @@ public class Contour extends AbstractGeometry {
             // E.g. if amount = 4, I want point at t 0.0, 0.33, 0.66 and 1.0,
             // if amount = 2, I want point at t 0.0 and t 1.0
             if (amount > 2) {
-                delta = 1f / (amount - 1f);
+                delta = 1.0 / (amount - 1.0);
             }
         }
         for (int i = 0; i < amount; i++) {
@@ -345,7 +357,7 @@ public class Contour extends AbstractGeometry {
      * @return a new Contour with segments of the given length.
      */
     public Contour resampleByLength(double segmentLength) {
-        if (segmentLength <= 0.0000001f) {
+        if (segmentLength <= 0.0000001) {
             throw new IllegalArgumentException("Segment length must be greater than zero.");
         }
         double contourLength = getLength();
@@ -420,4 +432,5 @@ public class Contour extends AbstractGeometry {
     public Contour clone() {
         return new Contour(this);
     }
+
 }

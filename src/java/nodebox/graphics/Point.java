@@ -1,8 +1,10 @@
 package nodebox.graphics;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 import java.awt.geom.Point2D;
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -84,6 +86,10 @@ public final class Point {
 
     public Point2D toPoint2D() {
         return new Point2D.Double(x, y);
+    }
+
+    public Iterator<Double> iterator() {
+        return ImmutableList.<Double>of(x, y).iterator();
     }
 
 }

@@ -90,10 +90,9 @@ public class GeometryTest extends GraphicsTestCase {
         g.add(p1);
         g.add(p2);
         assertEquals(Rect.centeredRect((40 - 10) / 2 + 10, 20, 60, 40), g.getBounds());
-        for (Point pt : g.getPoints()) {
-            pt.move(5, 7);
-        }
-        assertEquals(Rect.centeredRect(30, 27, 60, 40), g.getBounds());
+        Transform t = Transform.translated(5, 7);
+        Geometry g2 = t.map(g);
+        assertEquals(Rect.centeredRect(30, 27, 60, 40), g2.getBounds());
     }
 
     public void testColors() {
@@ -125,7 +124,7 @@ public class GeometryTest extends GraphicsTestCase {
         Geometry g = new Geometry();
         g.add(p1);
         g.add(p2);
-        assertEquals(100f, g.getLength());
+        assertEquals(100.0, g.getLength());
         Point[] points = g.makePoints(5);
         assertPointEquals(0, 0, points[0]);
         assertPointEquals(25, 0, points[1]);
@@ -148,28 +147,19 @@ public class GeometryTest extends GraphicsTestCase {
      */
     public void testCacheInvalidation() {
         Geometry g = new Geometry();
-        assertEquals(0f, g.getLength());
+        assertEquals(0.0, g.getLength());
         Path p1 = new Path();
         p1.line(0, 0, 50, 0);
         g.add(p1);
-        assertEquals(50f, g.getLength());
+        assertEquals(50.0, g.getLength());
         // Change the Path after it was added to the Geometry.
         p1.line(50, 0, 75, 0);
         // This change is not detected by the Geometry, and thus the length is not updated.
-        assertEquals(50f, g.getLength());
+        assertEquals(50.0, g.getLength());
         // Manually invalidate the group.
         g.invalidate();
         // This time, the length is correct.
-        assertEquals(75f, g.getLength());
-        // Manually change the position of the last point.
-        Point pt = g.getPoints().get(3);
-        pt.x = 100;
-        // This change is not detected by the Path, and thus the length is not updated.
-        assertEquals(75f, g.getLength());
-        // Manually invalidate the path.
-        g.invalidate();
-        // This time, the length is correct.
-        assertEquals(100f, g.getLength());
+        assertEquals(75.0, g.getLength());
     }
 
     public void testLength() {
@@ -180,7 +170,7 @@ public class GeometryTest extends GraphicsTestCase {
         p2.line(0, 100, 100, 100);
         g.add(p1);
         g.add(p2);
-        assertEquals(200f, g.getLength());
+        assertEquals(200.0, g.getLength());
     }
 
 }

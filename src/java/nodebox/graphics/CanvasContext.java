@@ -191,7 +191,7 @@ public class CanvasContext extends AbstractGraphicsContext {
 
     @Override
     public Image image(String path, double x, double y, double width, double height, boolean draw) {
-        return image(path, x, y, width, height, 1.0f, draw);
+        return image(path, x, y, width, height, 1.0, draw);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class Image extends AbstractGrob {
 
     private double x, y;
     private double desiredWidth, desiredHeight;
-    private double alpha = 1.0F;
+    private double alpha = 1;
 
     private BufferedImage image;
     private static BufferedImage blankImage = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_GRAY);

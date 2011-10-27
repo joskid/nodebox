@@ -19,6 +19,7 @@
 package nodebox.graphics;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -160,12 +161,7 @@ public class Rect implements Iterable {
     }
 
     public Iterator<Double> iterator() {
-        List<Double> list = new ArrayList<Double>();
-        list.add(x);
-        list.add(y);
-        list.add(width);
-        list.add(height);
-        return list.iterator();
+        return ImmutableList.<Double>of(x, y, width, height).iterator();
     }
 
 }

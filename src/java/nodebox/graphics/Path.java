@@ -10,11 +10,11 @@ import java.util.*;
 public class Path extends AbstractGeometry implements Colorizable, Iterable<Point> {
 
     // Simulate a quarter of a circle.
-    private static final float ONE_MINUS_QUARTER = 1.0f - 0.552f;
+    private static final double ONE_MINUS_QUARTER = 1.0 - 0.552;
 
     private Color fillColor = null;
     private Color strokeColor = null;
-    private double strokeWidth = 1f;
+    private double strokeWidth = 1;
     private ArrayList<Contour> contours;
     private transient Contour currentContour = null;
     private transient boolean pathDirty = true;
@@ -27,7 +27,7 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
     public Path() {
         fillColor = new Color();
         strokeColor = null;
-        strokeWidth = 1f;
+        strokeWidth = 1;
         contours = new ArrayList<Contour>();
         currentContour = null;
     }
@@ -305,8 +305,8 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
     }
 
     public void roundedRect(double cx, double cy, double width, double height, double rx, double ry) {
-        double halfWidth = width / 2f;
-        double halfHeight = height / 2f;
+        double halfWidth = width / 2;
+        double halfHeight = height / 2;
         double dx = rx;
         double dy = ry;
 
@@ -316,8 +316,8 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         double bottom = cy + halfHeight;
         // rx/ry cannot be greater than half of the width of the rectangle
         // (required by SVG spec)
-        dx = Math.min(dx, width * 0.5f);
-        dy = Math.min(dy, height * 0.5f);
+        dx = Math.min(dx, width * 0.5);
+        dy = Math.min(dy, height * 0.5);
         moveto(left + dx, top);
         if (dx < width * 0.5)
             lineto(right - rx, top);
@@ -416,10 +416,10 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
                 lineto(px, py);
             } else if (cmd == PathIterator.SEG_QUADTO) {
                 // Convert the quadratic bezier to a cubic bezier.
-                double c1x = px + (points[0] - px) * 2f / 3f;
-                double c1y = py + (points[1] - py) * 2f / 3f;
-                double c2x = points[0] + (points[2] - points[0]) / 3f;
-                double c2y = points[1] + (points[3] - points[1]) / 3f;
+                double c1x = px + (points[0] - px) * 2 / 3;
+                double c1y = py + (points[1] - py) * 2 / 3;
+                double c2x = points[0] + (points[2] - points[0]) / 3;
+                double c2y = points[1] + (points[3] - points[1]) / 3;
                 curveto(c1x, c1y, c2x, c2y, points[2], points[3]);
                 px = points[2];
                 py = points[3];
@@ -951,7 +951,9 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
     //// Transformations ////
 
     public void transform(Transform t) {
-        t.map(getPoints());
+        for (Contour c : contours) {
+            c.setPoints(t.map(c.getPoints()));
+        }
         invalidate(true);
     }
 

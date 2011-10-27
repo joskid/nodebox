@@ -304,12 +304,12 @@ public class Text extends AbstractGrob {
                 if (align == Align.RIGHT) {
                     x = -layoutWidth;
                 } else if (align == Align.CENTER) {
-                    x = -layoutWidth / 2.0F;
+                    x = -layoutWidth / 2.0;
                 }
             } else if (align == Align.RIGHT) {
                 x = width - layout.getAdvance();
             } else if (align == Align.CENTER) {
-                x = (width - layout.getAdvance()) / 2.0F;
+                x = (width - layout.getAdvance()) / 2.0;
             } else if (align == Align.JUSTIFY) {
                 // Don't justify the last line.
                 if (currentMeasurer.getPosition() < currentText.length()) {

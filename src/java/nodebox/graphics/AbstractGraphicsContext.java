@@ -31,10 +31,10 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     public void resetContext() {
         colorMode = Color.Mode.RGB;
-        colorRange = 1f;
+        colorRange = 1;
         fillColor = new Color();
         strokeColor = null;
-        strokeWidth = 1f;
+        strokeWidth = 1;
         path = null;
         autoClosePath = true;
         transformMode = Transform.Mode.CENTER;
@@ -42,7 +42,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
         transformStack = new ArrayList<Transform>();
         fontName = "Helvetica";
         fontSize = 24;
-        lineHeight = 1.2f;
+        lineHeight = 1.2;
         align = Text.Align.LEFT;
     }
 
@@ -322,8 +322,8 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     private Path arrowNormal(double x, double y, double width, boolean draw) {
-        double head = width * .4f;
-        double tail = width * .2f;
+        double head = width * .4;
+        double tail = width * .2;
 
         Path p = createPath();
         p.moveto(x, y);
@@ -342,17 +342,17 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     }
 
     private Path arrowFortyFive(double x, double y, double width, boolean draw) {
-        double head = .3f;
+        double head = .3;
         double tail = 1 + head;
 
         Path p = createPath();
         p.moveto(x, y);
         p.lineto(x, y + width * (1 - head));
         p.lineto(x - width * head, y + width);
-        p.lineto(x - width * head, y + width * tail * .4f);
-        p.lineto(x - width * tail * .6f, y + width);
-        p.lineto(x - width, y + width * tail * .6f);
-        p.lineto(x - width * tail * .4f, y + width * head);
+        p.lineto(x - width * head, y + width * tail * .4);
+        p.lineto(x - width * tail * .6, y + width);
+        p.lineto(x - width, y + width * tail * .6);
+        p.lineto(x - width * tail * .4, y + width * head);
         p.lineto(x - width, y + width * head);
         p.lineto(x - width * (1 - head), y);
         p.lineto(x, y);
@@ -1076,7 +1076,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 
     protected double normalize(double v) {
         // Bring the color into the 0-1 scale for the current colorrange
-        if (colorRange == 1f) return v;
+        if (colorRange == 1) return v;
         return v / colorRange;
 
     }

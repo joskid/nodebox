@@ -9,10 +9,10 @@ public class GraphicsContextTest extends TestCase {
     public void testSize() {
         CanvasContext ctx = new CanvasContext();
         ctx.size(200, 300);
-        assertEquals(200f, ctx.getWIDTH());
-        assertEquals(300f, ctx.getHeight());
-        assertEquals(200f, ctx.getCanvas().getWidth());
-        assertEquals(300f, ctx.getCanvas().getHeight());
+        assertEquals(200.0, ctx.getWIDTH());
+        assertEquals(300.0, ctx.getHeight());
+        assertEquals(200.0, ctx.getCanvas().getWidth());
+        assertEquals(300.0, ctx.getCanvas().getHeight());
     }
 
     public void testInheritFromContext() {
@@ -43,7 +43,7 @@ public class GraphicsContextTest extends TestCase {
         assertFalse(points.hasNext());
     }
 
-    private void assertNextPoint(Iterator<Point> points, float x, float y) {
+    private void assertNextPoint(Iterator<Point> points, double x, double y) {
         assertTrue(points.hasNext());
         assertEquals(new Point(x, y), points.next());
     }

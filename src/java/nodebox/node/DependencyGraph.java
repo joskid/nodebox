@@ -3,7 +3,7 @@ package nodebox.node;
 import java.util.*;
 
 /**
- * Nodes can have only one depency, but can have multiple dependents.
+ * Nodes can have only one dependency, but can have multiple dependents.
  * <p/>
  * TODO: Implement WeakReferences.
  *
@@ -291,7 +291,7 @@ public class DependencyGraph<T, I> {
         return false;
     }
 
-    public class GraphIterator implements Iterator {
+    public class GraphIterator implements Iterator<T> {
         Queue<T> q = new LinkedList<T>();
 
         public GraphIterator(DependencyGraph<T, I> dg) {

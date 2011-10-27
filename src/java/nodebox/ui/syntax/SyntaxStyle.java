@@ -18,6 +18,7 @@
  */
 package nodebox.ui.syntax;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -28,6 +29,10 @@ import java.awt.*;
  * @version $Id: SyntaxStyle.java,v 1.1.1.1 2001/08/20 22:31:42 gfx Exp $
  */
 public class SyntaxStyle {
+
+    // Used for retrieving FontMetrics.
+    private static final JLabel fontMetricsComponent = new JLabel();
+
     /**
      * Creates a new SyntaxStyle.
      *
@@ -89,6 +94,8 @@ public class SyntaxStyle {
 
     /**
      * Returns the font metrics for the styled font.
+     * @param font The font.
+     * @return The font's FontMetrics.
      */
     public FontMetrics getFontMetrics(Font font) {
         if (font == null)
@@ -101,8 +108,7 @@ public class SyntaxStyle {
                 (bold ? Font.BOLD : 0)
                         | (italic ? Font.ITALIC : 0),
                 font.getSize());
-        fontMetrics = Toolkit.getDefaultToolkit().getFontMetrics(lastStyledFont);
-        return fontMetrics;
+        return fontMetricsComponent.getFontMetrics(lastStyledFont);
     }
 
     /**

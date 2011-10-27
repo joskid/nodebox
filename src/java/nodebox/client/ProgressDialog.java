@@ -33,7 +33,7 @@ public class ProgressDialog extends JDialog {
         contentPane.add(messageLabel);
         updateProgress();
         setSize(400, 100);
-        SwingUtils.centerOnScreen(this, owner);
+        setLocationRelativeTo(owner);
     }
 
     public void setTaskCount(int taskCount) {

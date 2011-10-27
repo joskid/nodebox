@@ -978,7 +978,7 @@ class BezierPathEditor(AbstractHandle):
                     _ctx.rect(x+r*2+3+0.75, y, 1.5, r-1)
         
     def import_svg(self):
-        # Parses the string from the node's path parameter and constructs a path
+        # Parses the string from the node's path port and constructs a path
         self.path_string = self.node.asString("path")
         self.path = svg.path_from_string(self.path_string)
         self._points = []

@@ -1,4 +1,4 @@
-package nodebox.client.movie;
+package nodebox.movie;
 
 import java.io.File;
 import java.util.ArrayList;

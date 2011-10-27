@@ -1,4 +1,4 @@
-package nodebox.client.movie;
+package nodebox.movie;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

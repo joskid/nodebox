@@ -13,6 +13,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public class PlatformUtils {
+
+    public static final String APPLICATION_NAME = "NodeBox";
+
     public static int WIN = 1;
     public static int MAC = 2;
     public static int OTHER = 3;
@@ -76,7 +79,7 @@ public class PlatformUtils {
         if (userDataDirectory != null)
             return userDataDirectory;
         if (onMac()) {
-            userDataDirectory = new File(getHomeDirectory(), "Library/" + Application.NAME);
+            userDataDirectory = new File(getHomeDirectory(), "Library/" + APPLICATION_NAME);
         } else if (onWindows()) {
             String localAppData;
             HWND hwndOwner = null;
@@ -93,9 +96,9 @@ public class PlatformUtils {
                 // If the native call fails, use the home directory.
                 localAppData = getHomeDirectory().getPath();
             }
-            userDataDirectory = new File(localAppData, Application.NAME);
+            userDataDirectory = new File(localAppData, APPLICATION_NAME);
         } else {
-            userDataDirectory = new File(getHomeDirectory(), Application.NAME.toLowerCase(Locale.US));
+            userDataDirectory = new File(getHomeDirectory(), APPLICATION_NAME.toLowerCase(Locale.US));
         }
         return userDataDirectory;
     }

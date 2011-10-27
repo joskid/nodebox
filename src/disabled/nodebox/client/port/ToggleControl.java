@@ -19,7 +19,7 @@ public class ToggleControl extends AbstractPortControl {
 //        checkBox.putClientProperty("JComponent.sizeVariant", "small");
 //        checkBox.setOpaque(false);
 //        checkBox.setPreferredSize(new Dimension(150, 18));
-//        checkBox.setFont(PlatformUtils.getSmallFont());
+//        checkBox.setFont(Platform.getSmallFont());
         //checkBox.addActionListener(this);
         add(checkBox);
         setValueForControl(port.getValue());

@@ -14,14 +14,14 @@ public class RepositoryTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        // Create a tempory folder
+        // Create a temporary folder
         tempDirectory = File.createTempFile("localhistory", "");
-        tempDirectory.delete();
-        tempDirectory.mkdir();
+        assertTrue(tempDirectory.delete());
+        assertTrue(tempDirectory.mkdir());
         localHistoryDirectory = new File(tempDirectory, "_history");
         manager = new LocalHistoryManager(localHistoryDirectory);
         testDirectory = new File(tempDirectory, "testproject");
-        testDirectory.mkdir();
+        assertTrue(testDirectory.mkdir());
     }
 
     /**
@@ -29,9 +29,9 @@ public class RepositoryTest extends TestCase {
      */
     public void testHashObject() {
         Repository r = manager.createRepository(testDirectory);
-        String fname = "greeting";
+        String fileName = "greeting";
         String contents = "Hello, world!";
-        createProjectFile(fname, contents);
+        createProjectFile(fileName, contents);
         assertEquals("943a702d06f34599aee1f8da8ef9f7296031d699", r.hashObject("greeting"));
     }
 
@@ -60,10 +60,10 @@ public class RepositoryTest extends TestCase {
         // Assert this repository is empty: no objects, and the head commit returns None.
         assertEquals(0, r.getObjectCount());
         assertEquals(null, r.getHead());
-        String fname = "greeting";
+        String fileName = "greeting";
         String contents = "Hello, world!";
-        createProjectFile(fname, contents);
-        String id = r.hashObject(fname);
+        createProjectFile(fileName, contents);
+        String id = r.hashObject(fileName);
         String commitId1 = r.commit("Adding files to the project.");
         // Assert that the contents are stored in the repository.
         assertEquals(contents, new String(r.readObject(id)));
@@ -71,7 +71,7 @@ public class RepositoryTest extends TestCase {
         assertEquals(commitId1, r.getHead().getId());
         // Since this is the first commit, it will not have a parent.
         assertEquals(null, r.getHead().getParentId());
-        // Once commited, there will be three objects in the database: the file, the tree, and the commit.
+        // Once committed, there will be three objects in the database: the file, the tree, and the commit.
         assertEquals(3, r.getObjectCount());
         String commitId2 = r.commit("My second commit with the same files.");
         assertNotSame(commitId1, commitId2);
@@ -88,8 +88,8 @@ public class RepositoryTest extends TestCase {
         FileUtils.deleteDirectory(tempDirectory);
     }
 
-    private void createProjectFile(String fname, String contents) {
-        File projectFile = new File(testDirectory, fname);
+    private void createProjectFile(String fileName, String contents) {
+        File projectFile = new File(testDirectory, fileName);
         FileUtils.writeFile(projectFile, contents);
     }
 

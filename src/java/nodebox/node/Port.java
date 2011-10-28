@@ -253,7 +253,19 @@ public final class Port {
     }
 
     public Widget getWidget() {
-        return Widget.FLOAT;
+        if (getType().equals(TYPE_INT)) {
+            return Widget.INT;
+        } else if (getType().equals(TYPE_FLOAT)) {
+            return Widget.FLOAT;
+        } else if (getType().equals(TYPE_STRING)) {
+            return Widget.STRING;
+        } else if (getType().equals(TYPE_POINT)) {
+            throw new UnsupportedOperationException("No widget available for point type.");
+        } else if (getType().equals(TYPE_COLOR)) {
+            return Widget.COLOR;
+        } else {
+            throw new UnsupportedOperationException("No widget available for port type " + getType());
+        }
     }
 
     //// Mutation methods ////
@@ -267,7 +279,7 @@ public final class Port {
      */
     public Port withValue(Object value) {
         checkState(isStandardType(), "You can only change the value of a standard type.");
-        checkArgument(correctValueForType(value));
+        checkArgument(correctValueForType(value), "Value '%s' is not correct for %s port.", value, getType());
         return new Port(getName(), getType(), value);
     }
 
@@ -284,7 +296,7 @@ public final class Port {
             return value instanceof String;
         } else if (type.equals(TYPE_POINT)) {
             return value instanceof Point;
-        } else if (type.equals(TYPE_POINT)) {
+        } else if (type.equals(TYPE_COLOR)) {
             return value instanceof Color;
         } else {
             // The value of a custom type should always be null.

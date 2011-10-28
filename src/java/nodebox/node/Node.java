@@ -28,9 +28,19 @@ public final class Node {
     public static final String KEY_CONNECTIONS = "connections";
 
     public static String path(String parentPath, Node node) {
-        checkNotNull(parentPath);
         checkNotNull(node);
-        return Joiner.on("/").join(parentPath, node.getName());
+        return path(parentPath, node.getName());
+    }
+
+    public static String path(String parentPath, String nodeName) {
+        checkNotNull(parentPath);
+        checkNotNull(nodeName);
+        checkArgument(parentPath.startsWith("/"), "Only absolute paths are supported.");
+        if (parentPath.equals("/")) {
+            return "/" + nodeName;
+        } else {
+            return Joiner.on("/").join(parentPath, nodeName);
+        }
     }
 
     private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, OUTPUT_TYPE, POSITION, PORTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
@@ -385,6 +395,31 @@ public final class Node {
         for (Node child : getChildMap().values()) {
             if (child != childToRemove)
                 b.put(child.getName(), child);
+        }
+        return newNodeWithAttribute(Attribute.CHILDREN, b.build());
+    }
+
+     /**
+     * Create a new node with the child replaced by the given node.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param childName The name of the child node to replace.
+      * @param newChild The new child node.
+     * @return A new Node.
+     */
+    public Node withChildReplaced(String childName, Node newChild) {
+        Node childToReplace = getChild(childName);
+        checkNotNull(newChild);
+        checkArgument(newChild.getName().equals(childName), "New child %s does not have the same name as old child %s.", newChild, childName);
+        checkArgument(childToReplace != null, "Node %s is not a child of node %s.", childName, this);
+        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
+        for (Node child : getChildMap().values()) {
+            if (child != childToReplace) {
+                b.put(child.getName(), child);
+            } else {
+                b.put(childName, newChild);
+            }
         }
         return newNodeWithAttribute(Attribute.CHILDREN, b.build());
     }

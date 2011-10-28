@@ -1,12 +1,13 @@
 package nodebox.node;
 
-import com.google.common.base.Splitter;
 import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * This class provides mutable access to the immutable NodeLibrary.
- *
+ * <p/>
  * This class is single-threaded. You can only access it from one concurrent thread.
  * However, the internal nodeLibrary is immutable, so you can keep looking at a NodeLibrary while the controller
  * generates a new one.
@@ -39,64 +40,80 @@ public class NodeLibraryController {
         this.nodeLibrary = nodeLibrary;
     }
 
-
-    public Node createNode(String parentPath, Node prototype) {
-        return null;
+    public Node getNode(String nodePath) {
+        return nodeLibrary.getNodeForPath(nodePath);
     }
 
+    public Node createNode(String parentPath, Node prototype) {
+        Node newNode = prototype.extend();
+        addNode(parentPath, newNode);
+        return newNode;
+    }
 
     public void setNodePosition(String nodePath, Point point) {
+        Node newNode = getNode(nodePath).withPosition(point);
+        replaceNodeInPath(nodePath, newNode);
+    }
+
+    public void setRenderedChild(String parentPath, String nodeName) {
+        Node newParent = getNode(parentPath).withRenderedChildName(nodeName);
+        replaceNodeInPath(parentPath, newParent);
     }
 
     public void addNode(String parentPath, Node node) {
-
+        Node newParent = getNode(parentPath).withChildAdded(node);
+        replaceNodeInPath(parentPath, newParent);
     }
 
     public void removeNode(String parentPath, String nodeName) {
-
+        Node newParent = getNode(parentPath).withChildRemoved(nodeName);
+        replaceNodeInPath(parentPath, newParent);
     }
 
     public void removePort(String nodePath, String portName) {
-
+        Node newNode = getNode(nodePath).withPortRemoved(portName);
+        replaceNodeInPath(nodePath, newNode);
     }
 
     public void renameNode(String nodePath, String newName) {
-
+        throw new UnsupportedOperationException();
     }
 
-    public void setPortValue(String nodePath, Port port, Object value) {
-
+    public void setPortValue(String nodePath, String portName, Object value) {
+        Node newNode = getNode(nodePath).withPortValue(portName, value);
+        replaceNodeInPath(nodePath, newNode);
     }
 
-
-
-
-    public void connect(Node outputNode, Node inputNode, Port inputPort) {
-        new Connection(outputNode, inputNode, inputPort);
+    public void connect(String parentPath, Node outputNode, Node inputNode, Port inputPort) {
+        throw new UnsupportedOperationException();
+        //Connection connection = new Connection(outputNode, inputNode, inputPort);
+        //Node newParent = getNode(parentPath).withConnectionAdded(connection);
+        //replaceNodeInPath(parentPath, newParent);
     }
 
     public void disconnect(String parentPath, Connection connection) {
 
-
     }
 
-    public void undo() {
+    /**
+     * Replace the node at the given path with the new node.
+     * Afterwards, the nodeLibrary field is set to the new NodeLibrary.
+     *
+     * @param nodePath The node path. This path needs to exist.
+     * @param node     The new node to put in place of the old node.
+     */
+    public void replaceNodeInPath(String nodePath, Node node) {
+        checkArgument(nodePath.startsWith("/"), "Node path needs to be an absolute path, starting with '/'.");
+        nodePath = nodePath.substring(1);
+        Node newRoot;
+        if (nodePath.isEmpty()) {
+            newRoot = node;
+        } else {
+            // TODO Recursively replace nodes at higher levels.
+            checkArgument(!nodePath.contains("/"), "Subpaths are not supported yet.");
+            newRoot = nodeLibrary.getRoot().withChildReplaced(nodePath, node);
+        }
+        nodeLibrary = NodeLibrary.create(nodeLibrary.getName(), newRoot, nodeLibrary.getFunctionRepository());
     }
-
-    public void redo() {
-
-    }
-
-
-
-    // TODO Write a algorithm that recursively replaces nodes at higher levels.
-
-    //public void replaceNodeInPath()
-
-
-    public void setRenderedChild(String parentPath, String nodeName) {
-
-    }
-
 
 }

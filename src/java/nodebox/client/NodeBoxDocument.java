@@ -3,6 +3,7 @@ package nodebox.client;
 import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
 import nodebox.function.MathFunctions;
+import nodebox.graphics.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -13,6 +14,8 @@ import nodebox.util.FileUtils;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
+import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -24,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,10 +62,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
     // State
     private final NodeLibraryController controller;
-    private Node activeNetwork;
-    private String activeNetworkPath;
-    private Node activeNode;
-    private String activeNodePath;
+    private String activeNetworkPath = "";
+    private String activeNodeName = "";
     private double frame;
 
     // Rendering
@@ -93,8 +93,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         Node number = Node.ROOT.withName("number")
                 .withPosition(new nodebox.graphics.Point(100, 20))
                 .withFunction("math/add")
-                .withPortAdded(Port.intPort("value", 42));
+                .withPortAdded(Port.intPort("v1", 5))
+                .withPortAdded(Port.intPort("v2", 7));
         demoRoot = Node.ROOT
+                .withPortAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
+                .withPortAdded(Port.floatPort("width", 500))
+                .withPortAdded(Port.floatPort("height", 500))
                 .withChildAdded(zero)
                 .withChildAdded(number)
                 .withRenderedChildName("zero");
@@ -198,8 +202,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         stopEdits();
 
         networkView.updateNodes();
-        networkView.setActiveNode(activeNode);
-        portView.setActiveNode(activeNode);
+        networkView.singleSelect(newNode);
+        portView.setActiveNode(newNode);
     }
 
 
@@ -212,11 +216,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void setNodePosition(Node node, nodebox.graphics.Point point) {
         checkNotNull(node);
         checkNotNull(point);
-        checkArgument(activeNetwork.hasChild(node));
+        checkArgument(getActiveNetwork().hasChild(node));
         // Note that we're passing in the parent network of the node.
         // This means that all move changes to the parent network are grouped
         // together under one edit, instead of for each node individually.
-        addEdit("Move Node", "moveNode", activeNetwork);
+        addEdit("Move Node", "moveNode", getActiveNetwork());
         String nodePath = Node.path(activeNetworkPath, node);
         controller.setNodePosition(nodePath, point);
 
@@ -251,7 +255,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         // TODO: Make NodeAttributesEditor use this.
         // Metadata changes could mean the icon has changed.
         networkView.updateNodes();
-        if (node == activeNode) {
+        if (node == getActiveNode()) {
             portView.updateAll();
             // Updating the metadata could cause changes to a handle.
             viewer.repaint();
@@ -266,12 +270,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      */
     public void setRenderedNode(Node node) {
         checkNotNull(node);
-        checkArgument(activeNetwork.hasChild(node));
+        checkArgument(getActiveNetwork().hasChild(node));
         addEdit("Set Rendered");
         controller.setRenderedChild(activeNetworkPath, node.getName());
 
         networkView.updateNodes();
-        networkView.setActiveNode(activeNode);
+        networkView.singleSelect(node);
         requestRender();
     }
 
@@ -313,10 +317,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      */
     private void removeNodeImpl(Node node) {
         checkNotNull(node, "Node to remove cannot be null.");
-        checkArgument(activeNetwork.hasChild(node), "Node to remove is not in active network.");
+        checkArgument(getActiveNetwork().hasChild(node), "Node to remove is not in active network.");
         controller.removeNode(activeNetworkPath, node.getName());
         // If the removed node was the active one, reset the port view.
-        if (node == activeNode) {
+        if (node == getActiveNode()) {
             setActiveNode((Node) null);
         }
     }
@@ -330,7 +334,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      */
     public void connect(Node outputNode, Node inputNode, Port inputPort) {
         addEdit("Connect");
-        controller.connect(outputNode, inputNode, inputPort);
+        controller.connect(activeNetworkPath, outputNode, inputNode, inputPort);
         requestRender();
     }
 
@@ -348,20 +352,6 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     /**
-     * Copy children of this network to the new parent.
-     *
-     * @param children  The children to copy.
-     * @param oldParent The old parent.
-     * @param newParent The new parent.
-     * @return The newly copied nodes.
-     */
-    public Collection<Node> copyChildren(Collection<Node> children, Node oldParent, Node newParent) {
-        addEdit("Copy");
-        throw new UnsupportedOperationException("Not implemented yet.");
-//        return oldParent.copyChildren(children, newParent);
-    }
-
-    /**
      * @param node          the node on which to add the port
      * @param parameterName the name of the new port
      */
@@ -369,7 +359,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         addEdit("Add Parameter");
         throw new UnsupportedOperationException("Not implemented yet.");
         // TODO Port port = Port.portForType();
-//        if (node == activeNode) {
+//        if (node == getActiveNode()) {
 //            portView.updateAll();
 //            viewer.repaint();
 //        }
@@ -382,26 +372,28 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @param portName The name of the port
      */
     public void removePort(Node node, String portName) {
-        checkArgument(activeNetwork.hasChild(node));
+        checkArgument(getActiveNetwork().hasChild(node));
         addEdit("Remove Parameter");
         controller.removePort(Node.path(activeNetworkPath, node), portName);
 
-        if (node == activeNode) {
+        if (node == getActiveNode()) {
             portView.updateAll();
             viewer.repaint();
         }
     }
 
     /**
-     * Set the port to the given value.
+     * Set the port of the active node to the given value.
      *
-     * @param port  the port to set
-     * @param value the new value
+     * @param portName The name of the port on the active node.
+     * @param value    The new value.
      */
-    public void setPortValue(Port port, Object value) {
-        checkNotNull(port, "Port cannot be null.");
+    public void setPortValue(String portName, Object value) {
+        checkNotNull(portName, "Port cannot be null.");
+        Port port = getActiveNode().getPort(portName);
+        checkArgument(port != null, "Port %s does not exist on node %s", portName, getActiveNode());
         addEdit("Change Value", "changeValue", port);
-        controller.setPortValue(activeNodePath, port, value);
+        controller.setPortValue(getActiveNodePath(), portName, value);
 
         // TODO set variables on the root port.
 //        if (port.getNode() == nodeLibrary.getRoot()) {
@@ -432,7 +424,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     //// Port pane callbacks ////
 
     public void editMetadata() {
-        if (activeNode == null) return;
+        if (getActiveNode() == null) return;
 //                JDialog editorDialog = new NodeAttributesDialog(NodeBoxDocument.this);
 //                editorDialog.setSize(580, 751);
 //                editorDialog.setLocationRelativeTo(NodeBoxDocument.this);
@@ -446,13 +438,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         checkNotNull(node, "Node cannot be null");
         Port port = node.getPort(portName);
         checkNotNull(port, "Port '" + portName + "' is not a port on node " + node);
-        setPortValue(port, value);
+        setPortValue(portName, value);
     }
 
     public void silentSet(Node node, String portName, Object value) {
         try {
             Port port = node.getPort(portName);
-            setPortValue(port, value);
+            setPortValue(portName, value);
         } catch (Exception ignored) {
         }
     }
@@ -477,36 +469,32 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @return The currently active network.
      */
     public Node getActiveNetwork() {
-        return activeNetwork;
+        // TODO Make this faster? Cache until changes are made?
+        return getNodeLibrary().getNodeForPath(activeNetworkPath);
     }
 
     public String getActiveNetworkPath() {
         return activeNetworkPath;
     }
 
-    public void setActiveNetwork(Node activeNetwork) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
     public void setActiveNetwork(String path) {
         checkNotNull(path);
         activeNetworkPath = path;
-        activeNetwork = controller.getNodeLibrary().getNodeForPath(path);
+        Node network = getNodeLibrary().getNodeForPath(path);
 
-        if (activeNetwork.getRenderedChild() != null) {
-            setActiveNode(activeNetwork.getRenderedChild());
-        } else if (!activeNetwork.isEmpty()) {
+        if (network.getRenderedChild() != null) {
+            setActiveNode(network.getRenderedChild());
+        } else if (!network.isEmpty()) {
             // Set the active node to the first child.
-            setActiveNode(activeNetwork.getChildren().iterator().next());
+            setActiveNode(network.getChildren().iterator().next());
         } else {
             setActiveNode((Node) null);
         }
 
         addressBar.setPath(activeNetworkPath);
         //viewer.setHandleEnabled(activeNode != null && activeNode.hasEnabledHandle());
+        networkView.updateNodes();
         viewer.repaint();
-        networkView.setActiveNetwork(activeNetwork);
-        networkView.setActiveNode(activeNode);
         requestRender();
     }
 
@@ -525,19 +513,19 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @return The active node. Can be null.
      */
     public Node getActiveNode() {
-        return activeNode;
+        if (activeNodeName.isEmpty()) {
+            return getActiveNetwork();
+        } else {
+            return getNodeLibrary().getNodeForPath(getActiveNodePath());
+        }
     }
 
     public String getActiveNodePath() {
-        return activeNodePath;
+        return Node.path(activeNetworkPath, activeNodeName);
     }
 
     public String getActiveNodeName() {
-        if (activeNode == null) {
-            return "";
-        } else {
-            return activeNode.getName();
-        }
+        return activeNodeName;
     }
 
     /**
@@ -552,28 +540,28 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      */
     public void setActiveNode(Node node) {
         stopCombiningEdits();
-        if (activeNode == node) return;
+        if (getActiveNode() == node) return;
         if (node != null) {
-            checkArgument(activeNetwork.hasChild(node));
-            activeNode = node;
-            activeNodePath = Node.path(activeNetworkPath, node);
+            setActiveNode(node.getName());
         } else {
-            activeNodePath = "";
+            setActiveNode("");
         }
-
-        //createHandleForActiveNode();
-        viewer.repaint();
-        portView.setActiveNode(activeNode == null ? activeNetwork : activeNode);
-        networkView.setActiveNode(activeNode);
-        //editorPane.setActiveNode(activeNode);
     }
 
     public void setActiveNode(String nodeName) {
         if (nodeName.isEmpty()) {
-            setActiveNode((Node) null);
+            activeNodeName = "";
         } else {
-            setActiveNode(activeNetwork.getChild(nodeName));
+            checkArgument(getActiveNetwork().hasChild(nodeName));
+            activeNodeName = nodeName;
         }
+
+        Node n = getActiveNode();
+        //createHandleForActiveNode();
+        //editorPane.setActiveNode(activeNode);
+        viewer.repaint(); // For the handle
+        portView.setActiveNode(n == null ? getActiveNetwork() : n);
+        networkView.singleSelect(n);
     }
 
 //    private void createHandleForActiveNode() {
@@ -948,7 +936,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     private boolean exportToFile(File file, ImageFormat format) {
-        return exportToFile(file, activeNetwork, format);
+        return exportToFile(file, getActiveNetwork(), format);
     }
 
     private boolean exportToFile(File file, Object outputValue, ImageFormat format) {
@@ -1105,7 +1093,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void copy() {
         // When copying, save a reference to the nodes and the parent network.
         // Since the model is immutable, we don't need to make defensive copies.
-        nodeClipboard = new NodeClipboard(activeNetwork, networkView.getSelectedNodes());
+        nodeClipboard = new NodeClipboard(getActiveNetwork(), networkView.getSelectedNodes());
     }
 
     public void paste() {

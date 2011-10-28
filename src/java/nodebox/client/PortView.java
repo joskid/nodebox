@@ -171,6 +171,7 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         revalidate();
     }
 
+    @SuppressWarnings("unchecked")
     private PortControl constructControl(Class controlClass, Port p) {
         try {
             Constructor constructor = controlClass.getConstructor(Port.class);
@@ -186,7 +187,7 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
     }
 
     public void onValueChange(PortControl control, Object newValue) {
-        document.setPortValue(control.getPort(), newValue);
+        document.setPortValue(control.getPort().getName(), newValue);
     }
 
     private class ControlPanel extends JPanel {

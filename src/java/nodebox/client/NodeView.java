@@ -58,24 +58,23 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
     }
 
-    private NetworkView networkView;
-    private Node node;
+    private final NetworkView networkView;
+    private final String nodeName;
     private BufferedImage fullIcon;
-
     private Border border;
 
     private boolean selected;
     private transient boolean codeChanged;
     private transient double fakeX, fakeY;
 
-    public NodeView(NetworkView networkView, Node node) {
+    public NodeView(NetworkView networkView, String nodeName) {
         this.networkView = networkView;
-        this.node = node;
+        this.nodeName = nodeName;
         this.selected = false;
         this.codeChanged = false;
         setTransparency(1.0F);
         addInputEventListener(new NodeHandler());
-        setOffset(node.getPosition().toPoint2D());
+        setOffset(getNode().getPosition().toPoint2D());
         setBounds(0, 0, NODE_FULL_SIZE, NODE_FULL_SIZE + TEXT_HEIGHT);
         addPropertyChangeListener(PROPERTY_TRANSFORM, this);
         addPropertyChangeListener(PROPERTY_BOUNDS, this);
@@ -83,8 +82,20 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         updateIcon();
     }
 
+    public NetworkView getNetworkView() {
+        return networkView;
+    }
+
     public NodeBoxDocument getDocument() {
         return networkView.getDocument();
+    }
+
+    public Node getNode() {
+        return networkView.getActiveNetwork().getChild(nodeName);
+    }
+
+    public String getNodeName() {
+        return nodeName;
     }
 
     /**
@@ -172,21 +183,13 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     }
 
     public void updateIcon() {
-        fullIcon = getFullImageForNode(node, true);
+        fullIcon = getFullImageForNode(getNode(), true);
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals(PROPERTY_TRANSFORM)) {
-            getDocument().setNodePosition(node, new nodebox.graphics.Point(super.getOffset()));
+            getDocument().setNodePosition(getNode(), new nodebox.graphics.Point(super.getOffset()));
         }
-    }
-
-    public NetworkView getNetworkView() {
-        return networkView;
-    }
-
-    public Node getNode() {
-        return node;
     }
 
     public Border getBorder() {
@@ -218,7 +221,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         //if (node.hasError())
         //    g.drawImage(nodeError, 0, 0, null);
 
-        if (networkView.getActiveNetwork().getRenderedChild() == node)
+        if (networkView.getActiveNetwork().getRenderedChildName().equals(getNodeName()))
             g.drawImage(nodeRendered, 0, 0, null);
 
         g.drawImage(nodeRim, 0, 0, null);
@@ -226,9 +229,9 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         // Draw the node name.
         g.setFont(Theme.SMALL_BOLD_FONT);
         g.setColor(Theme.NETWORK_NODE_NAME_COLOR);
-        int textWidth = g.getFontMetrics().stringWidth(node.getName());
+        int textWidth = g.getFontMetrics().stringWidth(getNodeName());
         int x = (int) ((NODE_FULL_SIZE - textWidth) / 2f);
-        SwingUtils.drawShadowText(g, node.getName(), x, NODE_FULL_SIZE + 5, Theme.NETWORK_NODE_NAME_SHADOW_COLOR, -1);
+        SwingUtils.drawShadowText(g, getNodeName(), x, NODE_FULL_SIZE + 5, Theme.NETWORK_NODE_NAME_SHADOW_COLOR, -1);
 
         // Reset the clipping.
         g.setClip(clip);
@@ -255,11 +258,11 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     }
 
     private void doRename() {
-        String s = JOptionPane.showInputDialog(networkView, "New name:", node.getName());
+        String s = JOptionPane.showInputDialog(networkView, "New name:", getNodeName());
         if (s == null || s.length() == 0)
             return;
         try {
-            getDocument().setNodeName(node, s);
+            getDocument().setNodeName(getNode(), s);
         } catch (InvalidNameException ex) {
             JOptionPane.showMessageDialog(networkView, "The given name is not valid.\n" + ex.getMessage(), Application.NAME, JOptionPane.ERROR_MESSAGE);
         }
@@ -304,7 +307,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                 if (y > NODE_FULL_SIZE - 4) {
                     doRename();
                 } else {
-                    getDocument().setRenderedNode(node);
+                    getDocument().setRenderedNode(getNode());
                 }
             }
             e.setHandled(true);
@@ -443,7 +446,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            getDocument().setRenderedNode(node);
+            getDocument().setRenderedNode(getNode());
             networkView.repaint();
         }
     }
@@ -467,7 +470,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            getDocument().removeNode(node);
+            getDocument().removeNode(getNode());
         }
     }
 
@@ -478,7 +481,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         }
 
         public void actionPerformed(ActionEvent e) {
-            getDocument().setActiveNetwork(node);
+            String childPath = Node.path(getDocument().getActiveNetworkPath(), getNodeName());
+            getDocument().setActiveNetwork(childPath);
         }
     }
 

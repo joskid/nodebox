@@ -34,8 +34,6 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
     public static final float MAX_ZOOM = 1.0f;
 
     private final NodeBoxDocument document;
-    private Node activeNetwork;
-    private Node activeNode;
 
     private static Cursor defaultCursor, panCursor;
 
@@ -134,7 +132,7 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
     }
 
     public Node getActiveNetwork() {
-        return activeNetwork;
+        return document.getActiveNetwork();
     }
 
     /**
@@ -148,10 +146,10 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
     public void updateNodes() {
         getLayer().removeAllChildren();
         deselectAll();
-        if (activeNetwork == null) return;
+        if (getActiveNetwork() == null) return;
         // Add nodes
-        for (Node n : activeNetwork.getChildren()) {
-            NodeView nv = new NodeView(this, n);
+        for (Node n : getActiveNetwork().getChildren()) {
+            NodeView nv = new NodeView(this, n.getName());
             getLayer().addChild(nv);
         }
         // TODO: Do we need validate?
@@ -171,19 +169,8 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
         updateConnections();
     }
 
-    public void setActiveNetwork(Node activeNetwork) {
-        this.activeNetwork = activeNetwork;
-        updateNodes();
-    }
-
     public Node getActiveNode() {
-        return activeNode;
-    }
-
-    public void setActiveNode(Node activeNode) {
-        this.activeNode = activeNode;
-        singleSelect(activeNode);
-        repaint();
+        return document.getActiveNode();
     }
 
     //// View queries ////
@@ -502,7 +489,9 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
             return;
         }
         NodeView selectedNode = selection.iterator().next();
-        getDocument().setActiveNetwork(selectedNode.getNode());
+
+        String childPath = Node.path(getDocument().getActiveNetworkPath(), selectedNode.getNodeName());
+        getDocument().setActiveNetwork(childPath);
     }
 
     //// Other node operations ////

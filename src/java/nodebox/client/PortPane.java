@@ -1,5 +1,10 @@
 package nodebox.client;
 
+import nodebox.ui.NButton;
+import nodebox.ui.Pane;
+import nodebox.ui.PaneHeader;
+import nodebox.ui.PaneView;
+
 import java.awt.*;
 
 public class PortPane extends Pane {
@@ -15,7 +20,7 @@ public class PortPane extends Pane {
         NButton metadataButton = new NButton("Metadata", "res/port-metadata.png");
         metadataButton.setActionMethod(this, "editMetadata");
         paneHeader.add(metadataButton);
-        portView = new PortView(this);
+        portView = new PortView(this, document);
         add(paneHeader, BorderLayout.NORTH);
         add(portView, BorderLayout.CENTER);
     }

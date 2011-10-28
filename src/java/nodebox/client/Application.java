@@ -18,13 +18,17 @@
  */
 package nodebox.client;
 
+import nodebox.function.FunctionRepository;
 import nodebox.node.NodeLibrary;
+import nodebox.node.NodeLibraryController;
 import nodebox.node.NodeRepository;
+import nodebox.ui.*;
 import nodebox.versioncheck.Host;
 import nodebox.versioncheck.Updater;
 import nodebox.versioncheck.Version;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -184,9 +188,9 @@ public class Application implements Host {
      * @throws RuntimeException if we can't create the user directories. This is fatal.
      */
     private void createNodeBoxDataDirectories() throws RuntimeException {
-        PlatformUtils.getUserDataDirectory().mkdir();
-        PlatformUtils.getUserScriptsDirectory().mkdir();
-        PlatformUtils.getUserPythonDirectory().mkdir();
+        Platform.getUserDataDirectory().mkdir();
+        Platform.getUserScriptsDirectory().mkdir();
+        Platform.getUserPythonDirectory().mkdir();
     }
 
     /**
@@ -204,7 +208,7 @@ public class Application implements Host {
      * @throws RuntimeException if the adapter methods could not be loaded.
      */
     private void registerForMacOSXEvents() throws RuntimeException {
-        if (!PlatformUtils.onMac()) return;
+        if (!Platform.onMac()) return;
         try {
             // Generate and register the OSXAdapter, passing it a hash of all the methods we wish to
             // use as delegates for various com.apple.eawt.ApplicationListener methods
@@ -227,9 +231,10 @@ public class Application implements Host {
     }
 
     private void initPython() {
-        NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
-        NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
-        repository = NodeRepository.of(corevectorLibrary, coreimageLibrary);
+        //NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
+        //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
+        //repository = NodeRepository.of(corevectorLibrary, coreimageLibrary);
+        repository = NodeRepository.of();
         PythonUtils.initializePython();
     }
 
@@ -253,9 +258,7 @@ public class Application implements Host {
     }
 
     public void showPreferences() {
-        PreferencesDialog dialog = new PreferencesDialog();
-        dialog.setModal(true);
-        dialog.setVisible(true);
+        Toolkit.getDefaultToolkit().beep();
     }
 
     public void readFromFile(String path) {
@@ -283,8 +286,7 @@ public class Application implements Host {
     }
 
     public NodeBoxDocument createNewDocument() {
-        NodeLibrary newLibrary = new NodeLibrary("untitled");
-        NodeBoxDocument doc = new NodeBoxDocument(newLibrary);
+        NodeBoxDocument doc = new NodeBoxDocument();
         addDocument(doc);
         return doc;
     }

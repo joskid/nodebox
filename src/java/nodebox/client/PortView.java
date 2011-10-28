@@ -3,6 +3,9 @@ package nodebox.client;
 import nodebox.client.port.*;
 import nodebox.node.Node;
 import nodebox.node.Port;
+import nodebox.ui.Pane;
+import nodebox.ui.PaneView;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,16 +41,15 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         CONTROL_MAP.put(Port.Widget.TOGGLE, ToggleControl.class);
     }
 
-    // TODO Remove the reference to the document.
-    private NodeBoxDocument document;
-    private Pane pane;
+    private final NodeBoxDocument document;
+    private final Pane pane;
     private Node activeNode;
     private JPanel controlPanel;
     private Map<Port, PortControl> controlMap = new HashMap<Port, PortControl>();
-    private MultiConnectionPanel multiConnectionPanel;
 
-    public PortView(Pane pane) {
+    public PortView(Pane pane, NodeBoxDocument document) {
         this.pane = pane;
+        this.document = document;
         setLayout(new BorderLayout());
         controlPanel = new ControlPanel(new GridBagLayout());
         // controlPanel = new JPanel(new GridBagLayout());
@@ -60,10 +62,6 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
 
     public NodeBoxDocument getDocument() {
         return document;
-    }
-
-    public void setDocument(NodeBoxDocument document) {
-        this.document = document;
     }
 
     public Node getActiveNode() {
@@ -127,31 +125,11 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         }
     }
 
-    // Update the multi-connection panel in the port view.
-    public void updateConnectionPanel() {
-        if (multiConnectionPanel != null) {
-            multiConnectionPanel.update();
-        }
-    }
-
     private void rebuildInterface() {
         controlPanel.removeAll();
         controlMap.clear();
         if (activeNode == null) return;
         int rowIndex = 0;
-//        for (Port p : activeNode.getPorts()) {
-//            if (p.getCardinality() != Port.Cardinality.MULTIPLE) continue;
-//            multiConnectionPanel = new MultiConnectionPanel(getDocument(), p);
-//            PortRow portRow = new PortRow(p, multiConnectionPanel);
-//            GridBagConstraints rowConstraints = new GridBagConstraints();
-//            rowConstraints.gridx = 0;
-//            rowConstraints.gridy = rowIndex;
-//            rowConstraints.fill = GridBagConstraints.HORIZONTAL;
-//            rowConstraints.weightx = 1.0;
-//            controlPanel.add(portRow, rowConstraints);
-//            rowIndex++;
-//        }
-
         for (Port p : activeNode.getPorts()) {
             // Ports starting with underscores are hidden.
             if (p.getName().startsWith("_")) continue;

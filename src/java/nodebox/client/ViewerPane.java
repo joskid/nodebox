@@ -1,14 +1,18 @@
 package nodebox.client;
 
+import nodebox.ui.NButton;
+import nodebox.ui.Pane;
+import nodebox.ui.PaneHeader;
+import nodebox.ui.PaneView;
+
 import java.awt.*;
 
 public class ViewerPane extends Pane {
 
-    // TODO This is only kept here for duplicating panes.
     private final NodeBoxDocument document;
-    private PaneHeader paneHeader;
-    private Viewer viewer;
-    private NButton handlesCheck, pointsCheck, pointNumbersCheck, originCheck;
+    private final PaneHeader paneHeader;
+    private final Viewer viewer;
+    private final NButton handlesCheck, pointsCheck, pointNumbersCheck, originCheck;
 
     public ViewerPane(final NodeBoxDocument document) {
         this.document = document;

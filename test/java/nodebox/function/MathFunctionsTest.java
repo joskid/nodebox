@@ -13,7 +13,7 @@ public class MathFunctionsTest {
 
     private final FunctionLibrary mathLibrary = MathFunctions.LIBRARY;
     private final FunctionRepository functionRepository = FunctionRepository.of(mathLibrary);
-    private final NodeContext context = new NodeContext(functionRepository);
+    private final NodeContext context = new NodeContext(0);
 
     @Test
     public void testInvertExists() {
@@ -26,7 +26,7 @@ public class MathFunctionsTest {
     @Test(expected = NodeRenderException.class)
     public void testCallInvertWithNoArguments() {
         Node invertNode = Node.ROOT.withFunction("math/invert");
-        context.render(invertNode);
+        context.renderChildNode(functionRepository, invertNode);
     }
 
     @Test
@@ -34,7 +34,7 @@ public class MathFunctionsTest {
         Node invertNode = Node.ROOT
                 .withFunction("math/invert")
                 .withPortAdded(Port.intPort("value", 5));
-        Object result = context.render(invertNode);
+        Object result = context.renderChildNode(functionRepository, invertNode);
         assertEquals(-5, result);
     }
 
@@ -49,13 +49,13 @@ public class MathFunctionsTest {
                 .withFunction("math/subtract")
                 .withPortAdded(Port.intPort("a", 10))
                 .withPortAdded(Port.intPort("b", 3));
-        assertEquals(7, context.render(subtract1));
+        assertEquals(7, context.renderChildNode(functionRepository, subtract1));
 
         Node subtract2 = Node.ROOT
                 .withFunction("math/subtract")
                 .withPortAdded(Port.intPort("b", 3))
                 .withPortAdded(Port.intPort("a", 10));
-        assertEquals(-7, context.render(subtract2));
+        assertEquals(-7, context.renderChildNode(functionRepository, subtract2));
     }
 
 }

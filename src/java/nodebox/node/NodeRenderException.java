@@ -1,7 +1,7 @@
 package nodebox.node;
 
 /**
- * An exception that wraps the errors that occur during node render time.
+ * An exception that wraps the errors that occur during node renderNetwork time.
  */
 public class NodeRenderException extends RuntimeException {
 

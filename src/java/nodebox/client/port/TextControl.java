@@ -1,10 +1,8 @@
 package nodebox.client.port;
 
 import nodebox.client.NodeBoxDocument;
-import nodebox.client.TextWindow;
-import nodebox.client.Theme;
-import nodebox.node.Parameter;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,10 +48,10 @@ public class TextControl extends AbstractPortControl implements ActionListener {
         } else if (e.getSource() == externalWindowButton) {
             NodeBoxDocument doc = NodeBoxDocument.getCurrentDocument();
             if (doc == null) throw new RuntimeException("No current active document.");
-            TextWindow window = new TextWindow(port);
-            window.setLocationRelativeTo(this);
-            window.setVisible(true);
-            doc.addPortEditor(window);
+//            TextWindow window = new TextWindow(port);
+//            window.setLocationRelativeTo(this);
+//            window.setVisible(true);
+//            doc.addPortEditor(window);
         }
     }
 

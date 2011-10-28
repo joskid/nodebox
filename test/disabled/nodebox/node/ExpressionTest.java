@@ -269,10 +269,10 @@ public class ExpressionTest extends NodeTestCase {
         Parameter pValue1 = number1.getParameter("value");
         pValue1.set(84);
         assertEquals("number1", number1.getName());
-        //Parameter p1 = test1.addParameter("p1", Parameter.Type.INT);
+        //Parameter p1 = test1.addPort("p1", Parameter.Type.INT);
         Node number2 = net.create(numberNode);
         assertEquals("number2", number2.getName());
-        //Parameter p2 = number2.addParameter("p2", Parameter.Type.INT);
+        //Parameter p2 = number2.addPort("p2", Parameter.Type.INT);
         Parameter pValue2 = number2.getParameter("value");
         pValue2.set(12);
         // Trying to get the value of number2 by just using the expression "value" is impossible,

@@ -152,9 +152,9 @@ public class NetworkTest extends NodeTestCase {
         NodeType vectorNetworkType = manager.getNodeType("nodebox.node.vector.network");
         NodeType towerType = vectorNetworkType.clone();
         towerType.setDescription("Gets an image and makes points out of it.");
-        Parameter pFloorHeight = towerType.addParameter("floorHeight", Parameter.Type.FLOAT);
+        Parameter pFloorHeight = towerType.addPort("floorHeight", Parameter.Type.FLOAT);
         pFloorHeight.setLabel("Height of Floor");
-        Parameter pSize = towerType.addParameter("buildingHeight", Parameter.Type.INT);
+        Parameter pSize = towerType.addPort("buildingHeight", Parameter.Type.INT);
         pSize.setLabel("Building Height (in floors)");
         // Inner nodes
         Node rect1 = towerType.create(RectNode.class);

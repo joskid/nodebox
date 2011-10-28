@@ -1,7 +1,7 @@
 package nodebox.client.port;
 
-import nodebox.client.NButton;
 import nodebox.node.Port;
+import nodebox.ui.NButton;
 
 import java.awt.*;
 

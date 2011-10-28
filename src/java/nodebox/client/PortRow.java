@@ -2,6 +2,8 @@ package nodebox.client;
 
 import nodebox.node.ConnectionError;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
+import nodebox.ui.ShadowLabel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -169,9 +171,9 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
         public void actionPerformed(ActionEvent e) {
             document.startEdits("Toggle Parameter Expression");
             if (port.hasExpression()) {
-                document.clearPortExpression(port);
+//                document.clearPortExpression(port);
             } else {
-                document.setPortExpression(port, port.getExpression());
+//                document.setPortExpression(port, port.getExpression());
             }
             document.stopEdits();
             // We don't have to change the expression status here.
@@ -196,7 +198,7 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
     private class ExpressionFieldChangedAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             try {
-                document.setPortExpression(port, expressionField.getText());
+//                document.setPortExpression(port, expressionField.getText());
             } catch (ConnectionError ce) {
                 JOptionPane.showMessageDialog(PortRow.this, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
             }

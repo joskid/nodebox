@@ -1001,7 +1001,7 @@ public class NodeTest {
 
     private Object render(FunctionRepository repository, Node node) {
         NodeContext context = new NodeContext(repository);
-        return context.render(node);
+        return context.renderNetwork(node);
     }
 
 }

@@ -3,7 +3,7 @@ package nodebox.ui;
 import javax.swing.*;
 import java.awt.*;
 
-class ShadowLabel extends JLabel {
+public class ShadowLabel extends JLabel {
     public ShadowLabel(String text) {
         super(text);
     }

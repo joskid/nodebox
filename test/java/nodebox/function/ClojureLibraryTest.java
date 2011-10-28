@@ -4,41 +4,34 @@ import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.Port;
 import nodebox.util.LoadException;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class ClojureLibraryTest {
 
-    private FunctionRepository functionRepository;
-
-    @Before
-    public void setUp() throws Exception {
-        ClojureLibrary mathLibrary = ClojureLibrary.loadScript("test/clojure/math.clj");
-        functionRepository = FunctionRepository.of(mathLibrary);
-    }
+    private final FunctionLibrary mathLibrary = ClojureLibrary.loadScript("test/clojure/math.clj");
+    private final FunctionRepository functionRepository = FunctionRepository.of(mathLibrary);
+    private final NodeContext context = new NodeContext(0);
 
     @Test
     public void testAdd() {
-        NodeContext context = new NodeContext(functionRepository);
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("clojure-math/add");
-        Object result = context.render(addNode);
+        Object result = context.renderChildNode(functionRepository, addNode);
         assertEquals(0L, result);
     }
 
     @Test
     public void testAddWithArguments() {
-        NodeContext context = new NodeContext(functionRepository);
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("clojure-math/add")
                 .withPortAdded(Port.intPort("v1", 1))
                 .withPortAdded(Port.intPort("v2", 2))
                 .withPortAdded(Port.intPort("v3", 3));
-        Object result = context.render(addNode);
+        Object result = context.renderChildNode(functionRepository, addNode);
         assertEquals(6L, result);
     }
 

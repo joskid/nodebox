@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -67,7 +68,11 @@ public class NodeLibrary {
     }
 
     public Node getNodeForPath(String path) {
+        checkArgument(path.startsWith("/"), "Only absolute paths are supported.");
+        if (path.length() == 1) return root;
+
         Node node = root;
+        path = path.substring(1);
         for (String name : Splitter.on("/").split(path)) {
             node = node.getChild(name);
             if (node == null) return null;
@@ -215,6 +220,16 @@ public class NodeLibrary {
         }
         checkNotNull(text);
         return text;
+    }
+
+    //// Saving ////
+
+    /**
+     * Write the NodeLibrary to a file.
+     * @param file The file to save.
+     */
+    public void store(File file) throws IOException {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
 }

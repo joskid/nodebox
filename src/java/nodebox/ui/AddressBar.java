@@ -3,7 +3,9 @@ package nodebox.ui;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
+import javax.annotation.concurrent.Immutable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -12,10 +14,14 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class AddressBar extends JPanel implements MouseListener {
 
     public static Image addressGradient;
     public static Image addressArrow;
+
+    private static ImmutableList<String> ROOT_LIST = ImmutableList.of("root");
 
     static {
         try {
@@ -56,7 +62,12 @@ public class AddressBar extends JPanel implements MouseListener {
     }
 
     public void setPath(String path) {
-        setParts(Splitter.on("/").split(path));
+        checkArgument(path.startsWith("/"), "Only absolute paths are supported.");
+        if (path.length() == 1) {
+            setParts(ROOT_LIST);
+        } else {
+            setParts(Iterables.concat(ROOT_LIST, Splitter.on("/").split(path)));
+        }
     }
 
     /**

@@ -103,7 +103,7 @@ public class EditorDocument extends JFrame {
 
         private RunAction() {
             putValue(Action.NAME, "Run");
-            putValue(ACCELERATOR_KEY, PlatformUtils.getKeyStroke(KeyEvent.VK_R));
+            putValue(ACCELERATOR_KEY, Platform.getKeyStroke(KeyEvent.VK_R));
         }
 
         public void actionPerformed(ActionEvent actionEvent) {
@@ -157,7 +157,7 @@ public class EditorDocument extends JFrame {
     public class UndoAction extends AbstractAction {
         public UndoAction() {
             putValue(NAME, "Undo");
-            putValue(ACCELERATOR_KEY, PlatformUtils.getKeyStroke(KeyEvent.VK_Z));
+            putValue(ACCELERATOR_KEY, Platform.getKeyStroke(KeyEvent.VK_Z));
             setEnabled(false);
         }
 
@@ -185,7 +185,7 @@ public class EditorDocument extends JFrame {
     public class RedoAction extends AbstractAction {
         public RedoAction() {
             putValue(NAME, "Redo");
-            putValue(ACCELERATOR_KEY, PlatformUtils.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK));
+            putValue(ACCELERATOR_KEY, Platform.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK));
             setEnabled(false);
         }
 

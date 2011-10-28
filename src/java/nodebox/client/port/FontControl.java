@@ -1,7 +1,7 @@
 package nodebox.client.port;
 
-import nodebox.client.Theme;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;

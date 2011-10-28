@@ -6,6 +6,7 @@ import edu.umd.cs.piccolo.util.PPaintContext;
 import nodebox.node.Connection;
 import nodebox.node.Node;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
 
 import java.awt.*;
 import java.awt.geom.GeneralPath;

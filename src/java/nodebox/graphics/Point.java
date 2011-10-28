@@ -67,6 +67,20 @@ public final class Point {
         return type == CURVE_DATA;
     }
 
+    public boolean isOnCurve() {
+        return type != CURVE_DATA;
+    }
+
+    public boolean isOffCurve() {
+        return type == CURVE_DATA;
+    }
+
+    //// "Mutation" methods ////
+
+    public Point moved(double dx, double dy) {
+        return new Point(x + dx, y + dy);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Point)) return false;

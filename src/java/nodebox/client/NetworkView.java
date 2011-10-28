@@ -6,8 +6,10 @@ import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
 import nodebox.node.Node;
-import nodebox.node.NodeLibrary;
 import nodebox.node.Port;
+import nodebox.ui.PaneView;
+import nodebox.ui.Platform;
+import nodebox.ui.Theme;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -21,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
-public class NetworkView extends PCanvas implements PaneView, CodeChangeListener, KeyListener {
+public class NetworkView extends PCanvas implements PaneView, KeyListener {
 
     public static final String SELECT_PROPERTY = "NetworkView.select";
     public static final String HIGHLIGHT_PROPERTY = "highlight";
@@ -30,7 +32,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
 
     public static final float MIN_ZOOM = 0.2f;
     public static final float MAX_ZOOM = 1.0f;
-    
+
     private final NodeBoxDocument document;
     private Node activeNetwork;
     private Node activeNode;
@@ -43,7 +45,6 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
     private JPopupMenu networkMenu;
     private NodeView connectionSource, connectionTarget;
     private Point2D connectionPoint;
-    private Delegate delegate;
 
     private boolean panEnabled = false;
 
@@ -51,7 +52,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         Image panCursorImage;
 
         try {
-            if (PlatformUtils.onWindows())
+            if (Platform.onWindows())
                 panCursorImage = ImageIO.read(new File("res/view-cursor-pan-32.png"));
             else
                 panCursorImage = ImageIO.read(new File("res/view-cursor-pan.png"));
@@ -201,7 +202,8 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         for (Object child : getLayer().getChildrenReference()) {
             if (!(child instanceof NodeView)) continue;
             NodeView nv = (NodeView) child;
-            Rectangle2D r = new Rectangle2D.Double(nv.getNode().getX(), nv.getNode().getY(), NodeView.NODE_FULL_SIZE, NodeView.NODE_FULL_SIZE);
+            nodebox.graphics.Point pt = nv.getNode().getPosition();
+            Rectangle2D r = new Rectangle2D.Double(pt.x, pt.y, NodeView.NODE_FULL_SIZE, NodeView.NODE_FULL_SIZE);
             if (r.contains(point)) {
                 return nv;
             }
@@ -256,7 +258,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         selection.add(nodeView);
         nodeView.setSelected(true);
         firePropertyChange(SELECT_PROPERTY, null, selection);
-        delegate.activeNodeChanged(nodeView.getNode());
+        document.setActiveNode(nodeView.getNode());
     }
 
     public void select(Iterable<Node> nodes) {
@@ -351,7 +353,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
 
     private Set<NodeView> nodesToNodeViews(Iterable<Node> nodes) {
         Set<NodeView> nodeViews = new HashSet<NodeView>();
-        for (Node node: nodes) {
+        for (Node node : nodes) {
             nodeViews.add(getNodeView(node));
         }
         return nodeViews;
@@ -388,23 +390,6 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         repaint();
     }
 
-    //// Node manager ////
-
-    // TODO move to the document.
-    public void showNodeSelectionDialog() {
-        NodeBoxDocument doc = getDocument();
-        NodeSelectionDialog dialog = new NodeSelectionDialog(doc, doc.getNodeLibrary(), doc.getManager());
-        Point pt = getMousePosition();
-        if (pt == null) {
-            pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
-        }
-        pt = (Point) getCamera().localToView(pt);
-        dialog.setVisible(true);
-        if (dialog.getSelectedNode() != null) {
-            doc.createNode(dialog.getSelectedNode(), pt);
-        }
-    }
-
     //// Dragging ////
 
     /**
@@ -434,11 +419,12 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
     /**
      * This method gets called from the NodeView to connect the output port to the input port.
      *
-     * @param output the output port
-     * @param input  the input port
+     * @param outputNode The output node.
+     * @param inputNode  The input node.
+     * @param inputPort  The input port.
      */
-    public void connect(Port output, Port input) {
-        getDocument().connect(output, input);
+    public void connect(Node outputNode, Node inputNode, Port inputPort) {
+        getDocument().connect(outputNode, inputNode, inputPort);
     }
 
     /**
@@ -507,11 +493,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
     //// Network navigation ////
 
     private void goUp() {
-        if (activeNetwork.getParent() == null) {
-            Toolkit.getDefaultToolkit().beep();
-            return;
-        }
-        getDocument().setActiveNetwork(activeNetwork.getParent());
+        getDocument().goUp();
     }
 
     private void goDown() {
@@ -530,13 +512,13 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
 
     public void keyPressed(KeyEvent e) {
         panEnabled = e.getKeyCode() == KeyEvent.VK_SPACE;
-        if (panEnabled && ! getCursor().equals(panCursor))
+        if (panEnabled && !getCursor().equals(panCursor))
             setCursor(panCursor);
     }
 
     public void keyReleased(KeyEvent e) {
         panEnabled = false;
-        if (! getCursor().equals(defaultCursor))
+        if (!getCursor().equals(defaultCursor))
             setCursor(defaultCursor);
     }
 
@@ -565,7 +547,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         public void mouseClicked(PInputEvent e) {
             if (e.getButton() != MouseEvent.BUTTON1) return;
             deselectAll();
-            getDocument().setActiveNode(null);
+            getDocument().setActiveNode((Node)null);
             connectionLayer.mouseClickedEvent(e);
         }
 
@@ -641,7 +623,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_TAB) {
-                showNodeSelectionDialog();
+                document.showNodeSelectionDialog();
             }
         }
     }
@@ -669,7 +651,7 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         }
 
         public void actionPerformed(ActionEvent e) {
-            showNodeSelectionDialog();
+            document.showNodeSelectionDialog();
         }
     }
 
@@ -692,28 +674,6 @@ public class NetworkView extends PCanvas implements PaneView, CodeChangeListener
         public void actionPerformed(ActionEvent e) {
             goUp();
         }
-    }
-
-    public Delegate getDelegate() {
-        return delegate;
-    }
-
-    public void setDelegate(Delegate delegate) {
-        this.delegate = delegate;
-    }
-
-    /**
-     * A callback interface for listening to changes in the network view.
-     */
-    public static interface Delegate {
-
-        /**
-         * Callback method invoked when the active node was changed.
-         *
-         * @param node The new active node.
-         */
-        public void activeNodeChanged(Node node);
-
     }
 
 }

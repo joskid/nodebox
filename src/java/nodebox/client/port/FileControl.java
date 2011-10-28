@@ -1,9 +1,9 @@
 package nodebox.client.port;
 
-import nodebox.client.FileUtils;
 import nodebox.client.NodeBoxDocument;
-import nodebox.client.Theme;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
+import nodebox.util.FileUtils;
 
 import javax.swing.*;
 import java.awt.*;

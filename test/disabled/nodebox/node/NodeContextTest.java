@@ -18,7 +18,7 @@ public class NodeContextTest {
     @Test
     public void testRenderRoot() {
         NodeContext context = new NodeContext(functionRepository);
-        Object result = context.render(Node.ROOT);
+        Object result = context.renderNetwork(Node.ROOT);
         assertEquals(0, result);
     }
 

@@ -8,6 +8,9 @@ import edu.umd.cs.piccolo.util.PPaintContext;
 import nodebox.graphics.Canvas;
 import nodebox.graphics.*;
 import nodebox.handle.Handle;
+import nodebox.ui.PaneView;
+import nodebox.ui.Platform;
+import nodebox.ui.Theme;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -47,13 +50,12 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
     private PLayer viewerLayer;
     private JPopupMenu viewerMenu;
     private Class outputClass;
-    private ViewerEventListener listener;
 
     static {
         Image panCursorImage;
 
         try {
-            if (PlatformUtils.onWindows())
+            if (Platform.onWindows())
                 panCursorImage = ImageIO.read(new File("res/view-cursor-pan-32.png"));
             else
                 panCursorImage = ImageIO.read(new File("res/view-cursor-pan.png"));
@@ -111,10 +113,6 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         getCamera().addLayer(0, viewerLayer);
 
         initMenus();
-    }
-
-    public void setEventListener(ViewerEventListener e) {
-        listener = e;
     }
 
     private void initMenus() {
@@ -435,7 +433,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
                     } else {
                         g2.setColor(Color.RED);
                     }
-                    g2.drawString(index + "", pt.x + 3, pt.y - 2);
+                    g2.drawString(index + "", (int)(pt.x + 3), (int)(pt.y - 2));
                     index++;
                 }
             }

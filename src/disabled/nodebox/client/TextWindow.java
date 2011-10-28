@@ -9,7 +9,7 @@ public class TextWindow extends AbstractPortEditor {
 
     private JTextArea textArea;
 
-    public TextWindow(Parameter parameter) {
+    public TextWindow(Port port) {
         super(parameter);
     }
 

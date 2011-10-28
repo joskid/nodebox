@@ -61,12 +61,12 @@ public class NodeAttributesDialog  extends JDialog {
 
     public void addParameter(Node node, String parameterName) {
         onChanged();
-        document.addParameter(node, parameterName);
+        document.addPort(node, parameterName);
     }
 
     public void removeParameter(Node node, String parameterName) {
         onChanged();
-        document.removeParameter(node, parameterName);
+        document.removePort(node, parameterName);
     }
 
     public void setNodeExported(boolean exported) {
@@ -157,7 +157,7 @@ public class NodeAttributesDialog  extends JDialog {
     public class OKAction extends AbstractAction {
         public OKAction() {
             putValue(NAME, "Ok");
-            putValue(ACCELERATOR_KEY, PlatformUtils.getKeyStroke(KeyEvent.VK_ENTER));
+            putValue(ACCELERATOR_KEY, Platform.getKeyStroke(KeyEvent.VK_ENTER));
         }
 
         public void actionPerformed(ActionEvent e) {

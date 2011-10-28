@@ -1,7 +1,5 @@
 package nodebox.client.port;
 
-import nodebox.client.Theme;
-import nodebox.node.Parameter;
 import nodebox.node.Port;
 
 import javax.swing.*;

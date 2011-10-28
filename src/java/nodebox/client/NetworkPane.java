@@ -1,5 +1,10 @@
 package nodebox.client;
 
+import nodebox.ui.NButton;
+import nodebox.ui.Pane;
+import nodebox.ui.PaneHeader;
+import nodebox.ui.PaneView;
+
 import java.awt.*;
 
 public class NetworkPane extends Pane {
@@ -14,7 +19,7 @@ public class NetworkPane extends Pane {
         paneHeader = new PaneHeader(this);
         NButton newNodeButton = new NButton("New Node", "res/network-new-node.png");
         newNodeButton.setToolTipText("New Node (TAB)");
-        newNodeButton.setActionMethod(this, "createNewNode");
+        newNodeButton.setActionMethod(this, "showNodeSelectionDialog");
         paneHeader.add(newNodeButton);
         networkView = new NetworkView(document);
         add(paneHeader, BorderLayout.NORTH);
@@ -41,8 +46,8 @@ public class NetworkPane extends Pane {
         return networkView;
     }
 
-    public void createNewNode() {
-        networkView.showNodeSelectionDialog();
+    public void showNodeSelectionDialog() {
+        document.showNodeSelectionDialog();
     }
 
 //    public void propertyChange(PropertyChangeEvent evt) {

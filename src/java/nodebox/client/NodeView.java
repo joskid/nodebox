@@ -8,6 +8,8 @@ import nodebox.node.ConnectionError;
 import nodebox.node.InvalidNameException;
 import nodebox.node.Node;
 import nodebox.node.Port;
+import nodebox.ui.SwingUtils;
+import nodebox.ui.Theme;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -362,24 +364,24 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
             if (networkView.isConnecting()) {
                 // Check if both source and target are set.
                 if (networkView.getConnectionSource() != null && networkView.getConnectionTarget() != null) {
-                    Node source = networkView.getConnectionSource().getNode();
-                    Node target = networkView.getConnectionTarget().getNode();
+                    Node outputNode = networkView.getConnectionSource().getNode();
+                    Node inputNode = networkView.getConnectionTarget().getNode();
                     // Look for compatible ports.
-                    java.util.List<Port> compatiblePorts = target.getPortsOfType(source.getOutputType());
+                    java.util.List<Port> compatiblePorts = inputNode.getPortsOfType(outputNode.getOutputType());
                     if (compatiblePorts.isEmpty()) {
                         // There are no compatible parameters.
                     } else if (compatiblePorts.size() == 1) {
                         // Only one possible connection, make it now.
                         Port inputPort = compatiblePorts.get(0);
                         try {
-                            getDocument().connect(source.getOutputPort(), inputPort);
+                            getDocument().connect(outputNode, inputNode, inputPort);
                         } catch (ConnectionError e) {
                             JOptionPane.showMessageDialog(networkView, e.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
                         JPopupMenu menu = new JPopupMenu("Select input");
                         for (Port p : compatiblePorts) {
-                            Action a = new SelectCompatiblePortAction(source, p);
+                            Action a = new SelectCompatiblePortAction(outputNode, inputNode, p);
                             menu.add(a);
                         }
                         Point pt = getNetworkView().getMousePosition();
@@ -398,18 +400,20 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
 
     class SelectCompatiblePortAction extends AbstractAction {
 
-        private Node outputNode;
-        private Port inputPort;
+        private final Node outputNode;
+        private final Node inputNode;
+        private final Port inputPort;
 
-        SelectCompatiblePortAction(Node outputNode, Port inputPort) {
+        SelectCompatiblePortAction(Node outputNode, Node inputNode, Port inputPort) {
             super(inputPort.getName());
             this.outputNode = outputNode;
+            this.inputNode = inputNode;
             this.inputPort = inputPort;
         }
 
         public void actionPerformed(ActionEvent e) {
             try {
-                getDocument().connect(outputNode.getOutputPort(), inputPort);
+                getDocument().connect(outputNode, inputNode, inputPort);
             } catch (ConnectionError ce) {
                 JOptionPane.showMessageDialog(networkView, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
             }

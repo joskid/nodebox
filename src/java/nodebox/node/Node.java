@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import nodebox.graphics.Point;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class Node {
 
@@ -24,6 +26,12 @@ public final class Node {
     public static final String KEY_CHILDREN = "children";
     public static final String KEY_RENDERED_CHILD_NAME = "renderedChildName";
     public static final String KEY_CONNECTIONS = "connections";
+
+    public static String path(String parentPath, Node node) {
+        checkNotNull(parentPath);
+        checkNotNull(node);
+        return Joiner.on("/").join(parentPath, node.getName());
+    }
 
     private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, OUTPUT_TYPE, POSITION, PORTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
@@ -109,6 +117,15 @@ public final class Node {
     public boolean hasChild(String name) {
         checkNotNull(name, "Name cannot be null.");
         return getChildMap().containsKey(name);
+    }
+
+    public boolean hasChild(Node node) {
+        checkNotNull(node, "Node cannot be null.");
+        return getChildMap().containsValue(node);
+    }
+
+    public boolean isEmpty() {
+        return getChildMap().isEmpty();
     }
 
     @SuppressWarnings("unchecked")
@@ -211,7 +228,7 @@ public final class Node {
         return newNodeWithAttribute(Attribute.DESCRIPTION, description);
     }
 
-     /**
+    /**
      * Create a new node with the given image.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
@@ -472,4 +489,8 @@ public final class Node {
         return ImmutableMap.copyOf(transientNodeMap);
     }
 
+    @Override
+    public String toString() {
+        return String.format("<Node %s:%s>", getName(), getFunction());
+    }
 }

@@ -1053,7 +1053,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
 //                p.setMaximumValue(max);
 //            }
 //        } else {
-//            p = node.addParameter(name, type.type);
+//            p = node.addPort(name, type.type);
 //            p.setWidget(type.widget);
 //            if (value != null) {
 //                p.setValue(value);

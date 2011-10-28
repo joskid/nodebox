@@ -5,16 +5,46 @@ import nodebox.function.FunctionRepository;
 
 import java.util.ArrayList;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class NodeContext {
 
-    private final FunctionRepository repository;
-    private final double frame = 1;
+    private final double frame;
 
-    public NodeContext(FunctionRepository repository) {
-        this.repository = repository;
+    public NodeContext(double frame) {
+        this.frame = frame;
     }
 
-    public Object render(Node node) {
+    /**
+     * Render the network by rendering its rendered child.
+     *
+     * @param repository The function repository.
+     * @param network    The network to render.
+     * @return The output value.
+     * @throws NodeRenderException If processing fails.
+     */
+    public Object renderNetwork(FunctionRepository repository, Node network) throws NodeRenderException {
+        checkNotNull(repository);
+        checkNotNull(network);
+        return renderChildNode(repository, network.getRenderedChild());
+    }
+
+    /**
+     * Render the child node.
+     * This doesn't calculate child dependencies.
+     * On the network, renderNetwork the renderedChild.
+     * Note that we pass in the network, not the node to renderNetwork!
+     * This is because we can't go up from the node to the network to retrieve the connections.
+     *
+     * @param repository The function repository.
+     * @param node       The node to render.
+     * @return The output value.
+     * @throws NodeRenderException If processing fails.
+     */
+    public Object renderChildNode(FunctionRepository repository, Node node) throws NodeRenderException {
+        checkNotNull(repository);
+        checkNotNull(node);
+
         // Get the function.
         String functionName = node.getFunction();
         Function function = repository.getFunction(functionName);
@@ -36,4 +66,5 @@ public class NodeContext {
     public double getFrame() {
         return frame;
     }
+
 }

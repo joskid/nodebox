@@ -1,26 +1,30 @@
 package nodebox.client.port;
 
-import nodebox.client.DraggableNumber;
 import nodebox.node.Port;
+import nodebox.ui.DraggableNumber;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.NumberFormat;
 
-public class FloatControl extends AbstractPortControl implements ChangeListener, ActionListener {
+public class IntControl extends AbstractPortControl implements ChangeListener, ActionListener {
 
     private DraggableNumber draggable;
 
-    public FloatControl(Port port) {
+    public IntControl(Port port) {
         super(port);
         setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
         draggable = new DraggableNumber();
         draggable.addChangeListener(this);
-        setPreferredSize(draggable.getPreferredSize());
+        NumberFormat intFormat = NumberFormat.getNumberInstance();
+        intFormat.setMinimumFractionDigits(0);
+        intFormat.setMaximumFractionDigits(0);
+        draggable.setNumberFormat(intFormat);
         // Set bounding
-        // TODO Fix bounding method
+        // TODO add bounding
 //        if (port.getBoundingMethod() == Parameter.BoundingMethod.HARD) {
 //            Float minimumValue = port.getMinimumValue();
 //            if (minimumValue != null)
@@ -30,6 +34,7 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
 //                draggable.setMaximumValue(maximumValue);
 //        }
         add(draggable);
+        setPreferredSize(draggable.getPreferredSize());
         setValueForControl(port.getValue());
     }
 
@@ -40,15 +45,8 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
     }
 
     public void setValueForControl(Object v) {
-        if (v instanceof Float) {
-            draggable.setValue((Float) v);
-        } else if (v instanceof Double) {
-            draggable.setValue(((Double) v).floatValue());
-        } else if (v instanceof Integer) {
-            draggable.setValue(((Integer) v).floatValue());
-        } else {
-            throw new IllegalArgumentException("Value " + v + " is not a number.");
-        }
+        int value = (Integer) v;
+        draggable.setValue(value);
     }
 
     public void stateChanged(ChangeEvent e) {
@@ -60,17 +58,18 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
     }
 
     private void setValueFromControl() {
-        double value = draggable.getValue();
+        double doubleValue = draggable.getValue();
 //        if (port.getBoundingMethod() == Parameter.BoundingMethod.HARD) {
 //            if (port.getMinimumValue() != null) {
-//                value = Math.max(port.getMinimumValue(), value);
+//                doubleValue = Math.max(port.getMinimumValue(), doubleValue);
 //            }
 //            if (port.getMaximumValue() != null) {
-//                value = Math.min(port.getMaximumValue(), value);
+//                doubleValue = Math.min(port.getMaximumValue(), doubleValue);
 //            }
 //        }
-        if (value != port.floatValue()) {
-            setPortValue((float) value);
+        int intValue = (int) doubleValue;
+        if (intValue != port.intValue()) {
+            setPortValue(intValue);
         }
     }
 

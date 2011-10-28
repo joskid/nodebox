@@ -11,6 +11,8 @@ public class InterruptibleProgressDialog extends ProgressDialog {
 
     public InterruptibleProgressDialog(Frame owner, String title) {
         super(owner, title);
+        setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        setAlwaysOnTop(true);
         JButton cancelButton = new JButton("Cancel");
         cancelButton.setBounds(270, 50, 80, 32);
         getContentPane().add(cancelButton);

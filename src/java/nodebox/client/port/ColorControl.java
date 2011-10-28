@@ -1,10 +1,9 @@
 package nodebox.client.port;
 
-import nodebox.client.ColorDialog;
 import nodebox.client.NodeBoxDocument;
-import nodebox.client.SwingUtils;
-import nodebox.client.Theme;
 import nodebox.node.Port;
+import nodebox.ui.ColorDialog;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -64,7 +63,7 @@ public class ColorControl extends AbstractPortControl implements ChangeListener,
 
         if (colorDialog == null) {
             colorDialog = new ColorDialog((Frame) SwingUtilities.getWindowAncestor(this));
-            colorDialog.setColor(port.asColor().getAwtColor());
+            colorDialog.setColor(port.colorValue().getAwtColor());
             int height = colorDialog.getHeight();
             colorDialog.setMinimumSize(new Dimension(400, height));
             colorDialog.setPreferredSize(new Dimension(540, height));
@@ -72,7 +71,7 @@ public class ColorControl extends AbstractPortControl implements ChangeListener,
             colorDialog.setSize(540, 375);
             colorDialog.addChangeListener(this);
             colorDialog.setAlwaysOnTop(true);
-            SwingUtils.centerOnScreen(colorDialog);
+            colorDialog.setLocationRelativeTo(null);
             colorDialog.setVisible(true);
             colorDialog.pack();
         } else {

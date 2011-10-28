@@ -2,6 +2,7 @@ package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
+import nodebox.function.MathFunctions;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -87,12 +88,20 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final Node demoRoot;
 
     static {
-        Node zero = Node.ROOT.withName("zero");
-        demoRoot = Node.ROOT.withChildAdded(zero).withRenderedChildName("zero");
+        Node zero = Node.ROOT.withName("zero")
+                .withPosition(new nodebox.graphics.Point(20, 20));
+        Node number = Node.ROOT.withName("number")
+                .withPosition(new nodebox.graphics.Point(100, 20))
+                .withFunction("math/add")
+                .withPortAdded(Port.intPort("value", 42));
+        demoRoot = Node.ROOT
+                .withChildAdded(zero)
+                .withChildAdded(number)
+                .withRenderedChildName("zero");
     }
 
     public NodeBoxDocument() {
-        this(NodeLibrary.create("untitled", demoRoot, FunctionRepository.of()));
+        this(NodeLibrary.create("untitled", demoRoot, FunctionRepository.of(MathFunctions.LIBRARY)));
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {

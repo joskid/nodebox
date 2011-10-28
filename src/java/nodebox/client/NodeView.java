@@ -139,7 +139,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     /**
      * Create an icon with the node's image and the rounded embellishments.
      *
-     * @param node The node.
+     * @param node      The node.
      * @param drawPorts If true, draw the ports as well.
      * @return an Image object.
      */
@@ -213,11 +213,14 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         g.drawImage(fullIcon, 0, 0, null);
         if (codeChanged)
             g.drawImage(nodeCodeChanged, 0, 0, null);
-        // TODO Add support for node errors / isRendered.
+
+        // TODO Add support for node errors.
         //if (node.hasError())
         //    g.drawImage(nodeError, 0, 0, null);
-        //if (node.isRendered())
-        //    g.drawImage(nodeRendered, 0, 0, null);
+
+        if (networkView.getActiveNetwork().getRenderedChild() == node)
+            g.drawImage(nodeRendered, 0, 0, null);
+
         g.drawImage(nodeRim, 0, 0, null);
 
         // Draw the node name.

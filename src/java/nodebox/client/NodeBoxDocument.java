@@ -3,7 +3,6 @@ package nodebox.client;
 import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
 import nodebox.function.MathFunctions;
-import nodebox.graphics.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -14,8 +13,6 @@ import nodebox.util.FileUtils;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.Color;
-import java.awt.Point;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
@@ -469,7 +466,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @return The currently active network.
      */
     public Node getActiveNetwork() {
-        // TODO Make this faster? Cache until changes are made?
+        // TODO This might be a potential bottleneck.
         return getNodeLibrary().getNodeForPath(activeNetworkPath);
     }
 
@@ -539,16 +536,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @param node the node to change to.
      */
     public void setActiveNode(Node node) {
-        stopCombiningEdits();
-        if (getActiveNode() == node) return;
-        if (node != null) {
-            setActiveNode(node.getName());
-        } else {
-            setActiveNode("");
-        }
+        setActiveNode(node != null ? node.getName() : "");
     }
 
     public void setActiveNode(String nodeName) {
+        if (getActiveNodeName().equals(nodeName)) return;
+        stopCombiningEdits();
         if (nodeName.isEmpty()) {
             activeNodeName = "";
         } else {

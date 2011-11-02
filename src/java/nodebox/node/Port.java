@@ -29,7 +29,7 @@ public final class Port {
     static {
         DEFAULT_VALUES = ImmutableMap.of(
                 TYPE_INT, 0,
-                TYPE_FLOAT, 0f,
+                TYPE_FLOAT, 0.0,
                 TYPE_STRING, "",
                 TYPE_POINT, Point.ZERO,
                 TYPE_COLOR, Color.BLACK
@@ -47,7 +47,7 @@ public final class Port {
         return new Port(name, TYPE_INT, value);
     }
 
-    public static Port floatPort(String name, float value) {
+    public static Port floatPort(String name, double value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
         return new Port(name, TYPE_FLOAT, value);
@@ -108,7 +108,7 @@ public final class Port {
         if (type.equals("int")) {
             value = Integer.valueOf(stringValue);
         } else if (type.equals("float")) {
-            value = Float.valueOf(stringValue);
+            value = Double.valueOf(stringValue);
         } else if (type.equals("point")) {
             value = Point.valueOf(stringValue);
         } else if (type.equals("color")) {
@@ -161,7 +161,7 @@ public final class Port {
         if (type.equals(TYPE_INT)) {
             return (Integer) value;
         } else if (type.equals(TYPE_FLOAT)) {
-            return Math.round((Float) value);
+            return (int) Math.round((Double) value);
         } else {
             return 0;
         }
@@ -177,14 +177,14 @@ public final class Port {
      *
      * @return The value as a Float or 0f if the value cannot be converted.
      */
-    public float floatValue() {
+    public double floatValue() {
         checkValueType();
         if (type.equals(TYPE_INT)) {
-            return ((Integer) value).floatValue();
+            return ((Integer) value).doubleValue();
         } else if (type.equals(TYPE_FLOAT)) {
-            return (Float) value;
+            return (Double) value;
         } else {
-            return 0f;
+            return 0.0;
         }
     }
 
@@ -291,7 +291,7 @@ public final class Port {
         if (type.equals(TYPE_INT)) {
             return value instanceof Integer;
         } else if (type.equals(TYPE_FLOAT)) {
-            return value instanceof Float;
+            return value instanceof Double;
         } else if (type.equals(TYPE_STRING)) {
             return value instanceof String;
         } else if (type.equals(TYPE_POINT)) {

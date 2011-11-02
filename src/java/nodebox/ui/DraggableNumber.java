@@ -254,7 +254,7 @@ public class DraggableNumber extends JComponent implements MouseListener, MouseM
 
     public void mouseClicked(MouseEvent e) {
         if (!isEnabled()) return;
-        float dx = 1.0F;
+        double dx = 1.0F;
         if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) > 0) {
             dx = 10F;
         } else if ((e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) > 0) {
@@ -294,7 +294,7 @@ public class DraggableNumber extends JComponent implements MouseListener, MouseM
 
     public void mouseDragged(MouseEvent e) {
         if (!isEnabled()) return;
-        float deltaX = e.getX() - previousX;
+        double deltaX = e.getX() - previousX;
         if (deltaX == 0F) return;
         if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) > 0) {
             deltaX *= 10;

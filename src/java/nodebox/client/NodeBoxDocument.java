@@ -81,33 +81,47 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final Node demoRoot;
 
     static {
-        Node number = Node.ROOT.withName("number")
+        Node value1 = Node.ROOT.withName("value1")
                 .withPosition(new nodebox.graphics.Point(20, 20))
+                .withFunction("math/value")
+                .withInputAdded(Port.floatPort("number", 5))
+                .withOutputAdded(Port.floatPort("number", 0));
+        Node value2 = Node.ROOT.withName("value2")
+                .withPosition(new nodebox.graphics.Point(20, 100))
+                .withFunction("math/value")
+                .withInputAdded(Port.floatPort("number", 7))
+                .withOutputAdded(Port.floatPort("number", 0));
+        Node add = Node.ROOT.withName("add")
+                .withPosition(new nodebox.graphics.Point(120, 20))
                 .withFunction("math/add")
-                .withInputAdded(Port.intPort("v1", 5))
-                .withInputAdded(Port.intPort("v2", 7))
-                .withOutputAdded(Port.intPort("value", 0));
+                .withInputAdded(Port.floatPort("v1", 0))
+                .withInputAdded(Port.floatPort("v2", 0))
+                .withOutputAdded(Port.floatPort("number", 0));
         Node rect = Node.ROOT.withName("rect")
-                .withPosition(new nodebox.graphics.Point(100, 20))
+                .withPosition(new nodebox.graphics.Point(220, 20))
                 .withFunction("corevector/rect")
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
                 .withInputAdded(Port.floatPort("width", 100))
                 .withInputAdded(Port.floatPort("height", 100))
                 .withOutputAdded(Port.intPort("geometry", 0));
         Node sleepy = Node.ROOT.withName("sleepy")
-                .withPosition(new nodebox.graphics.Point(180, 20))
+                .withPosition(new nodebox.graphics.Point(320, 20))
                 .withFunction("math/slowNumber")
-                .withInputAdded(Port.intPort("value", 0))
-                .withOutputAdded(Port.intPort("value", 0));
+                .withInputAdded(Port.floatPort("value", 0))
+                .withOutputAdded(Port.floatPort("value", 0));
 
         demoRoot = Node.ROOT
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
                 .withInputAdded(Port.floatPort("width", 500))
                 .withInputAdded(Port.floatPort("height", 500))
-                .withChildAdded(number)
+                .withChildAdded(value1)
+                .withChildAdded(value2)
+                .withChildAdded(add)
                 .withChildAdded(rect)
                 .withChildAdded(sleepy)
-                .withRenderedChildName("number");
+                .connect("value1", "number", "add", "v1")
+                .connect("value2", "number", "add", "v2")
+                .withRenderedChildName("add");
     }
 
     public NodeBoxDocument() {
@@ -325,12 +339,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * Create a connection from the given output to the given input.
      *
      * @param outputNode The output node.
+     * @param outputPort The output port.
      * @param inputNode  The input node.
      * @param inputPort  The input port.
      */
-    public void connect(Node outputNode, Node inputNode, Port inputPort) {
+    public void connect(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
         addEdit("Connect");
-        controller.connect(activeNetworkPath, outputNode, inputNode, inputPort);
+        controller.connect(activeNetworkPath, outputNode, outputPort, inputNode, inputPort);
         requestRender();
     }
 
@@ -648,15 +663,17 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * Called when the active network has finished rendering.
      * Called on the Swing EDT so you can update the GUI.
      *
-     * @param context      The node context.
-     * @param outputValues The output values.
+     * @param context         The node context.
+     * @param renderedNetwork The network that was rendered.
      */
-    public void finishedRendering(final NodeContext context, final Map<String, Object> outputValues) {
+    public void finishedRendering(final NodeContext context, final Node renderedNetwork) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                Object firstOutputValue = firstOutputValue(outputValues);
+                Node renderedChild = renderedNetwork.getRenderedChild();
+                Port firstOutputPort = renderedChild.getOutputs().iterator().next();
+                Object result = context.getResult(firstOutputPort);
                 addressBar.setProgressVisible(false);
-                viewer.setOutputValue(firstOutputValue);
+                viewer.setOutputValue(result);
                 networkView.checkErrorAndRepaint();
             }
         });
@@ -689,11 +706,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         final Node renderNetwork = getActiveNetwork();
         renderService.submit(new Runnable() {
             public void run() {
-                final NodeContext context = new NodeContext(frame);
+                final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
                 startRendering(context);
                 Map<String, Object> outputValues = null;
                 try {
-                    outputValues = context.renderNetwork(renderLibrary.getFunctionRepository(), renderNetwork);
+                    context.renderNetwork(renderNetwork);
                 } catch (NodeRenderException e) {
                     LOG.log(Level.WARNING, "Error while processing", e);
                 }
@@ -702,7 +719,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 // We finished rendering so set the renderNetwork flag off.
                 isRendering.set(false);
 
-                finishedRendering(context, outputValues);
+                finishedRendering(context, renderNetwork);
 
                 // If, in the meantime, we got a new renderNetwork request, call the renderNetwork method again.
                 if (shouldRender.get()) {
@@ -1048,11 +1065,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                         if (Thread.currentThread().isInterrupted())
                             break;
 
-                        NodeContext context = new NodeContext(frame);
-                        Map<String, Object> outputValues = context.renderNetwork(exportLibrary.getFunctionRepository(), exportNetwork);
-                        Object firstOutputValue = outputValues.values().iterator().next();
-                        viewer.setOutputValue(firstOutputValue);
-                        exportDelegate.frameDone(frame, firstOutputValue);
+                        NodeContext context = new NodeContext(exportLibrary.getFunctionRepository(), frame);
+                        context.renderNetwork(exportNetwork);
+                        Node renderedChild = exportNetwork.getRenderedChild();
+                        Port firstOutputPort = renderedChild.getOutputs().iterator().next();
+                        Object result = context.getResult(firstOutputPort);
+                        viewer.setOutputValue(result);
+                        exportDelegate.frameDone(frame, result);
 
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {

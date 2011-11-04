@@ -516,6 +516,44 @@ public final class Node {
     }
 
     /**
+     * Create a new node that connects the given child nodes.
+     *
+     * @param outputNode The name of the output (upstream) Node.
+     * @param outputPort The name of the output (upstream) Node.
+     * @param inputNode  The name of the input (downstream) Node.
+     * @param inputPort  The name of the input (downstream) Port.
+     * @return A new Node.
+     */
+    public Node connect(String outputNode, String outputPort, String inputNode, String inputPort) {
+        checkArgument(hasChild(outputNode), "Node does not have a child named %s.", outputNode);
+        checkArgument(hasChild(inputNode), "Node does not have a child named %s.", inputNode);
+        Node output = getChild(outputNode);
+        Node input = getChild(inputNode);
+        checkArgument(output.hasOutput(outputPort), "Node %s does not have an output port %s.", outputNode, outputPort);
+        checkArgument(input.hasInput(inputPort), "Node %s does not have an input port %s.", inputNode, inputPort);
+        Connection newConnection = new Connection(outputNode, outputPort, inputNode, inputPort);
+        ImmutableList.Builder<Connection> b = ImmutableList.builder();
+        for (Connection c : getConnections()) {
+            if (c.getInputNode().equals(inputNode) && c.getInputPort().equals(inputPort)) {
+                // There was already a connection, on this input port.
+                // We "disconnect" it by not including it in the new list.
+            } else {
+                b.add(c);
+            }
+        }
+        b.add(newConnection);
+        return newNodeWithAttribute(Attribute.CONNECTIONS, b.build());
+    }
+
+    public boolean isConnected(String node) {
+        for (Connection c : getConnections()) {
+            if (c.getInputNode().equals(node) || c.getOutputNode().equals(node))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Change an attribute on the node and return a new copy.
      * The prototype remains the same.
      *
@@ -555,6 +593,9 @@ public final class Node {
             case RENDERED_CHILD_NAME:
                 checkArgument(value instanceof String, "Changing the rendered child name requires a String, not %s.", value);
                 return newNode(KEY_RENDERED_CHILD_NAME, value);
+            case CONNECTIONS:
+                checkArgument(value instanceof ImmutableList, "Changing the connections requires an ImmutableList, not %s.", value);
+                return newNode(KEY_CONNECTIONS, value);
             default:
                 throw new AssertionError("Unknown attribute " + attribute);
         }

@@ -170,9 +170,9 @@ public class NDBXWriter {
 
     private static void writeConnection(Document doc, Element parent, Connection conn) {
         Element connElement = doc.createElement("conn");
-        connElement.setAttribute("output", conn.getOutputNode().getName());
-        connElement.setAttribute("input", conn.getInputNode().getName());
-        connElement.setAttribute("port", conn.getInputPort().getName());
+        connElement.setAttribute("output", conn.getOutputNode());
+        connElement.setAttribute("input", conn.getInputNode());
+        connElement.setAttribute("port", conn.getInputPort());
         parent.appendChild(connElement);
     }
 

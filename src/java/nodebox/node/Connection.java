@@ -18,7 +18,6 @@
  */
 package nodebox.node;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -32,32 +31,39 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Connection {
 
-    private final Node outputNode;
-    private final Node inputNode;
-    private final Port inputPort;
+    private final String outputNode;
+    private final String outputPort;
+    private final String inputNode;
+    private final String inputPort;
 
     /**
      * Creates a connection between the output (upstream) node and input (downstream) node.
      *
-     * @param outputNode The output (upstream) Node.
-     * @param inputNode  The input (downstream) Node.
-     * @param inputPort  The input (downstream) Port.
+     * @param outputNode The name of the output (upstream) Node.
+     * @param outputPort The name of the output (upstream) Node.
+     * @param inputNode  The name of the input (downstream) Node.
+     * @param inputPort  The name of the input (downstream) Port.
      */
-    public Connection(Node outputNode, Node inputNode, Port inputPort) {
+    public Connection(String outputNode, String outputPort, String inputNode, String inputPort) {
         checkNotNull(outputNode);
+        checkNotNull(outputPort);
         checkNotNull(inputNode);
         checkNotNull(inputPort);
-        checkArgument(inputNode.hasInput(inputPort.getName()), "Input port %s does not exist on port %s.", inputPort, inputNode);
         this.outputNode = outputNode;
+        this.outputPort = outputPort;
         this.inputNode = inputNode;
         this.inputPort = inputPort;
     }
 
-    public Node getOutputNode() {
+    public String getOutputNode() {
         return outputNode;
     }
 
-    public Node getInputNode() {
+    public String getOutputPort() {
+        return outputPort;
+    }
+
+    public String getInputNode() {
         return inputNode;
     }
 
@@ -66,13 +72,13 @@ public class Connection {
      *
      * @return the input port.
      */
-    public Port getInputPort() {
+    public String getInputPort() {
         return inputPort;
     }
 
     @Override
     public String toString() {
-        return String.format("%s <= %s.%s", getOutputNode(), getInputNode(), getInputPort());
+        return String.format("%s.%s <= %s.%s", getOutputNode(), getOutputPort(), getInputNode(), getInputPort());
     }
 
 }

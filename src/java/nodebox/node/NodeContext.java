@@ -2,58 +2,97 @@ package nodebox.node;
 
 import nodebox.function.Function;
 import nodebox.function.FunctionRepository;
-import org.python.google.common.collect.ImmutableMap;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 public class NodeContext {
 
+    private final FunctionRepository repository;
     private final double frame;
+    private final Map<Port, Object> results = new HashMap<Port, Object>();
+    private final Set<Node> renderedNodes = new HashSet<Node>();
 
-    public NodeContext() {
-        this(1);
+    public NodeContext(FunctionRepository repository) {
+        this(repository, 1);
     }
 
-    public NodeContext(double frame) {
+    public NodeContext(FunctionRepository repository, double frame) {
+        checkNotNull(repository);
+        this.repository = repository;
         this.frame = frame;
+    }
+
+    public Map<Port, Object> getResults() {
+        return results;
+    }
+
+    public Object getResult(Node node, String outputPort) {
+        return results.get(node.getOutput(outputPort));
+    }
+
+    public Object getResult(Port port) {
+        return results.get(port);
     }
 
     /**
      * Render the network by rendering its rendered child.
      *
-     * @param repository The function repository.
-     * @param network    The network to render.
-     * @return The map with output values keyed by port name.
+     * @param network The network to render.
      * @throws NodeRenderException If processing fails.
      */
-    public Map<String, Object> renderNetwork(FunctionRepository repository, Node network) throws NodeRenderException {
-        checkNotNull(repository);
+    public void renderNetwork(Node network) throws NodeRenderException {
         checkNotNull(network);
-        return renderChildNode(repository, network.getRenderedChild());
+        renderChild(network, network.getRenderedChild());
     }
 
     /**
-     * Render the child node.
-     * This doesn't calculate child dependencies.
+     * Render the child by rendering its rendered child.
+     *
+     * @param network The network to render.
+     * @param child   The child node to render.
+     * @throws NodeRenderException If processing fails.
+     */
+    public void renderChild(Node network, Node child) throws NodeRenderException {
+        checkNotNull(network);
+        checkNotNull(child);
+        checkArgument(network.hasChild(child));
+
+        // Check if child was already rendered.
+        if (renderedNodes.contains(child)) return;
+        renderedNodes.add(child);
+
+        // Process dependencies
+        for (Connection c : network.getConnections()) {
+            if (c.getInputNode().equals(child.getName())) {
+                Node outputNode = network.getChild(c.getOutputNode());
+                renderChild(network, outputNode);
+                Port outputPort = outputNode.getOutput(c.getOutputPort());
+                Port inputPort = child.getInput(c.getInputPort());
+                Object result = results.get(outputPort);
+                // Check if the result is null. This can happen if there is a cycle in the network.
+                if (result != null) {
+                    results.put(inputPort, result);
+                }
+            }
+        }
+
+        renderNode(child);
+    }
+
+    /**
+     * Render a single node.
+     * This doesn't evaluate child dependencies.
      * On the network, renderNetwork the renderedChild.
      * Note that we pass in the network, not the node to renderNetwork!
      * This is because we can't go up from the node to the network to retrieve the connections.
      *
-     * @param repository The function repository.
-     * @param node       The node to render.
-     * @return The map with output values keyed by port name.
+     * @param node The node to render.
      * @throws NodeRenderException If processing fails.
      */
-    public Map<String, Object> renderChildNode(FunctionRepository repository, Node node) throws NodeRenderException {
-        checkNotNull(repository);
+    public void renderNode(Node node) throws NodeRenderException {
         checkNotNull(node);
-        ImmutableMap.Builder<String, Object> b = ImmutableMap.builder();
 
         // Get the function.
         String functionName = node.getFunction();
@@ -62,7 +101,15 @@ public class NodeContext {
         // Set arguments on the function.
         ArrayList<Object> arguments = new ArrayList<Object>();
         for (Port p : node.getInputs()) {
-            arguments.add(p.getValue());
+            // Check if the argument is available in the results.
+            // This happens if we have calculated a dependency.
+            Object argumentValue;
+            if (results.containsKey(p)) {
+                argumentValue = results.get(p);
+            } else {
+                argumentValue = p.getValue();
+            }
+            arguments.add(argumentValue);
         }
 
         // Invoke the function.
@@ -76,24 +123,23 @@ public class NodeContext {
         // Build the return value map.
         List<Port> outputs = node.getOutputs();
         if (outputs.isEmpty()) {
-            return ImmutableMap.of();
+            // Do nothing.
         } else if (outputs.size() == 1) {
             Port thePort = node.getOutputs().get(0);
-            return ImmutableMap.of(thePort.getName(), returnValue);
+            results.put(thePort, returnValue);
         } else {
             checkState(returnValue instanceof Iterable);
             Iterator<Port> outputsIterator = outputs.iterator();
             for (Object value : (Iterable) returnValue) {
                 Port p = outputsIterator.next();
-                b.put(p.getName(), value);
+                results.put(p, value);
             }
-            return b.build();
         }
     }
 
-    public Object firstOutputOfRender(FunctionRepository repository, Node node) throws NodeRenderException {
-        Map<String, Object> values = renderChildNode(repository, node);
-        return values.values().iterator().next();
+    public Object renderPort(Node node, String outputPort) throws NodeRenderException {
+        renderNode(node);
+        return results.get(node.getOutput(outputPort));
     }
 
     public double getFrame() {

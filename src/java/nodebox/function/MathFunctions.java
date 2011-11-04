@@ -8,22 +8,26 @@ public class MathFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "add", "subtract", "invert", "slowNumber");
+        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "add", "subtract", "invert", "slowNumber");
     }
 
-    public static int add(int a, int b) {
+    public static double value(double v) {
+        return v;
+    }
+
+    public static double add(double a, double b) {
         return a + b;
     }
 
-    public static int subtract(int a, int b) {
+    public static double subtract(double a, double b) {
         return a - b;
     }
 
-    public static int invert(int v) {
+    public static double invert(double v) {
         return -v;
     }
 
-    public static int slowNumber(int v) {
+    public static double slowNumber(double v) {
         try {
             Thread.sleep(500);
         } catch (InterruptedException ignored) {

@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 public class ClojureLibraryTest {
 
     private final FunctionLibrary mathLibrary = ClojureLibrary.loadScript("test/clojure/math.clj");
-    private final FunctionRepository functionRepository = FunctionRepository.of(mathLibrary);
-    private final NodeContext context = new NodeContext(0);
+    private final FunctionRepository functions = FunctionRepository.of(mathLibrary);
+    private final NodeContext context = new NodeContext(functions);
 
     @Test
     public void testAdd() {
@@ -20,7 +20,7 @@ public class ClojureLibraryTest {
                 .withName("add")
                 .withFunction("clojure-math/add")
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.firstOutputOfRender(functionRepository, addNode);
+        Object result = context.renderPort(addNode, "output");
         assertEquals(0L, result);
     }
 
@@ -33,7 +33,7 @@ public class ClojureLibraryTest {
                 .withInputAdded(Port.intPort("v2", 2))
                 .withInputAdded(Port.intPort("v3", 3))
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.firstOutputOfRender(functionRepository, addNode);
+        Object result = context.renderPort(addNode, "output");
         assertEquals(6L, result);
     }
 

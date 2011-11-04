@@ -381,7 +381,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                         // Only one possible connection, make it now.
                         Port inputPort = compatiblePorts.get(0);
                         try {
-                            getDocument().connect(outputNode, inputNode, inputPort);
+                            getDocument().connect(outputNode, outputNode.getOutputs().get(0), inputNode, inputPort);
                         } catch (ConnectionError e) {
                             JOptionPane.showMessageDialog(networkView, e.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
                         }
@@ -420,7 +420,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
 
         public void actionPerformed(ActionEvent e) {
             try {
-                getDocument().connect(outputNode, inputNode, inputPort);
+                getDocument().connect(outputNode, outputNode.getOutputs().get(0), inputNode, inputPort);
             } catch (ConnectionError ce) {
                 JOptionPane.showMessageDialog(networkView, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
             }

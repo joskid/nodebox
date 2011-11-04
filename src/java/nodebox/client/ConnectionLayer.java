@@ -56,7 +56,11 @@ public class ConnectionLayer extends PLayer {
             } else {
                 g.setColor(Theme.CONNECTION_DEFAULT_COLOR);
             }
-            paintConnection(g, c.getOutputNode(), c.getInputNode(), c.getInputPort());
+            Node outputNode = activeNetwork.getChild(c.getOutputNode());
+            Node inputNode = activeNetwork.getChild(c.getInputNode());
+            Port outputPort = outputNode.getOutput(c.getOutputPort());
+            Port inputPort = inputNode.getInput(c.getInputPort());
+            paintConnection(g, outputNode, outputPort, inputNode, inputPort);
         }
         // Draw temporary connection
         if (networkView.isConnecting() && networkView.getConnectionPoint() != null) {
@@ -67,8 +71,8 @@ public class ConnectionLayer extends PLayer {
         }
     }
 
-    public static void paintConnection(Graphics2D g, Node outputNode, Node inputNode, Port inputPort) {
-        GeneralPath p = connectionPath(outputNode, inputNode, inputPort);
+    public static void paintConnection(Graphics2D g, Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
+        GeneralPath p = connectionPath(outputNode, outputPort, inputNode, inputPort);
         paintConnectionPath(g, p);
     }
 
@@ -82,7 +86,7 @@ public class ConnectionLayer extends PLayer {
         g.draw(p);
     }
 
-    public static GeneralPath connectionPath(Node outputNode, Node inputNode, Port inputPort) {
+    public static GeneralPath connectionPath(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
         float x1 = (float) (inputNode.getPosition().x + 1); // Compensate for selection border
         float y1 = (float) (inputNode.getPosition().x + NodeView.getVerticalOffsetForPort(inputNode, inputPort) + NodeView.NODE_PORT_HEIGHT / 2);
         return connectionPath(outputNode, x1, y1);
@@ -104,9 +108,13 @@ public class ConnectionLayer extends PLayer {
     public Connection clickedConnection(Point2D p) {
         // Make a rectangle out of the point that is slightly larger than the point itself.
         Rectangle2D clickRect = new Rectangle2D.Double(p.getX() - 3, p.getY() - 3, 6, 6);
-        Node node = networkView.getActiveNetwork();
-        for (Connection c : node.getConnections()) {
-            GeneralPath gp = connectionPath(c.getOutputNode(), c.getInputNode(), c.getInputPort());
+        Node activeNetwork = networkView.getActiveNetwork();
+        for (Connection c : activeNetwork.getConnections()) {
+            Node outputNode = activeNetwork.getChild(c.getOutputNode());
+            Node inputNode = activeNetwork.getChild(c.getInputNode());
+            Port outputPort = outputNode.getOutput(c.getOutputPort());
+            Port inputPort = inputNode.getInput(c.getInputPort());
+            GeneralPath gp = connectionPath(outputNode, outputPort, inputNode, inputPort);
             if (gp.intersects(clickRect))
                 return c;
         }

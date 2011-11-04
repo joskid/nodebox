@@ -84,11 +84,9 @@ public class NodeLibraryController {
         replaceNodeInPath(nodePath, newNode);
     }
 
-    public void connect(String parentPath, Node outputNode, Node inputNode, Port inputPort) {
-        throw new UnsupportedOperationException();
-        //Connection connection = new Connection(outputNode, inputNode, inputPort);
-        //Node newParent = getNode(parentPath).withConnectionAdded(connection);
-        //replaceNodeInPath(parentPath, newParent);
+    public void connect(String parentPath, Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
+        Node newParent = getNode(parentPath).connect(outputNode.getName(), outputPort.getName(), inputNode.getName(), inputPort.getName());
+        replaceNodeInPath(parentPath, newParent);
     }
 
     public void disconnect(String parentPath, Connection connection) {

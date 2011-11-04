@@ -32,24 +32,26 @@ public class NodeContextTest {
 
     @Before
     public void setUp() throws Exception {
-        context = new NodeContext();
+        context = new NodeContext(functions);
     }
 
     @Test
     public void testSingleOutput() {
-        Map<String, Object> outputs = context.renderChildNode(functions, valuesToPointNode);
-        assertEquals(1, outputs.size());
-        assertTrue(outputs.containsKey("point"));
-        Object firstOutputValue = outputs.values().iterator().next();
+        context.renderNode(valuesToPointNode);
+        Map<Port, Object> results = context.getResults();
+        assertEquals(1, results.size());
+        assertTrue(results.containsKey(valuesToPointNode.getOutput("point")));
+        Object firstOutputValue = results.values().iterator().next();
         assertEquals(Point.ZERO, firstOutputValue);
     }
 
     @Test
     public void testMultipleOutputs() {
-        Map<String, Object> outputs = context.renderChildNode(functions, pointToValuesNode);
-        assertEquals(2, outputs.size());
-        assertEquals(11.0, outputs.get("x"));
-        assertEquals(22.0, outputs.get("y"));
+        context.renderNode(pointToValuesNode);
+        Map<Port, Object> results = context.getResults();
+        assertEquals(2, results.size());
+        assertEquals(11.0, context.getResult(pointToValuesNode, "x"));
+        assertEquals(22.0, context.getResult(pointToValuesNode, "y"));
     }
 
 }

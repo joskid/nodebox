@@ -70,7 +70,7 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
 //            }
 //        }
         if (value != port.floatValue()) {
-            setPortValue((float) value);
+            setPortValue(value);
         }
     }
 

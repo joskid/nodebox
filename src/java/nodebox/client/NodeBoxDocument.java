@@ -103,6 +103,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.floatPort("width", 100))
                 .withInputAdded(Port.floatPort("height", 100))
                 .withOutputAdded(Port.intPort("geometry", 0));
+        Node sleepy = Node.ROOT.withName("sleepy")
+                .withPosition(new nodebox.graphics.Point(260, 20))
+                .withFunction("math/slowNumber")
+                .withInputAdded(Port.intPort("value", 0))
+                .withOutputAdded(Port.intPort("value", 0));
 
         demoRoot = Node.ROOT
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
@@ -111,6 +116,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(zero)
                 .withChildAdded(number)
                 .withChildAdded(rect)
+                .withChildAdded(sleepy)
                 .withRenderedChildName("zero");
     }
 

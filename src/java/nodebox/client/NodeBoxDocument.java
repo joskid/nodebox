@@ -81,24 +81,21 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final Node demoRoot;
 
     static {
-        Node zero = Node.ROOT.withName("zero")
-                .withPosition(new nodebox.graphics.Point(20, 20))
-                .withOutputAdded(Port.intPort("value", 0));
         Node number = Node.ROOT.withName("number")
-                .withPosition(new nodebox.graphics.Point(100, 20))
+                .withPosition(new nodebox.graphics.Point(20, 20))
                 .withFunction("math/add")
                 .withInputAdded(Port.intPort("v1", 5))
                 .withInputAdded(Port.intPort("v2", 7))
                 .withOutputAdded(Port.intPort("value", 0));
         Node rect = Node.ROOT.withName("rect")
-                .withPosition(new nodebox.graphics.Point(180, 20))
+                .withPosition(new nodebox.graphics.Point(100, 20))
                 .withFunction("corevector/rect")
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
                 .withInputAdded(Port.floatPort("width", 100))
                 .withInputAdded(Port.floatPort("height", 100))
                 .withOutputAdded(Port.intPort("geometry", 0));
         Node sleepy = Node.ROOT.withName("sleepy")
-                .withPosition(new nodebox.graphics.Point(260, 20))
+                .withPosition(new nodebox.graphics.Point(180, 20))
                 .withFunction("math/slowNumber")
                 .withInputAdded(Port.intPort("value", 0))
                 .withOutputAdded(Port.intPort("value", 0));
@@ -107,11 +104,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
                 .withInputAdded(Port.floatPort("width", 500))
                 .withInputAdded(Port.floatPort("height", 500))
-                .withChildAdded(zero)
                 .withChildAdded(number)
                 .withChildAdded(rect)
                 .withChildAdded(sleepy)
-                .withRenderedChildName("zero");
+                .withRenderedChildName("number");
     }
 
     public NodeBoxDocument() {
@@ -156,10 +152,6 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         loaded = true;
 
         setActiveNetwork("/");
-        //setActiveNetwork(nodeLibrary.getRoot());
-        // setActiveNode is not called because it registers that the current node is already null.
-        // The port view is a special case since it does need to show something when the active node is null.
-        //portView.setActiveNode(nodeLibrary.getRoot());
     }
 
     public NodeBoxDocument(File file) throws RuntimeException {

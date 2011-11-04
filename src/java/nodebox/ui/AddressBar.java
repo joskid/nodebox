@@ -5,7 +5,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-import javax.annotation.concurrent.Immutable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -32,10 +31,10 @@ public class AddressBar extends JPanel implements MouseListener {
         }
     }
 
-    private ImmutableList<String> parts = ImmutableList.of();
+    private ImmutableList<String> segments = ImmutableList.of();
     private int[] positions;
     private int armed = -1;
-    private OnPartClickListener onPartClickListener;
+    private OnSegmentClickListener onSegmentClickListener;
     private JProgressBar progressBar;
 
     public AddressBar() {
@@ -52,40 +51,40 @@ public class AddressBar extends JPanel implements MouseListener {
         add(progressBar);
     }
 
-    public ImmutableList<String> getParts() {
-        return parts;
+    public ImmutableList<String> getSegments() {
+        return segments;
     }
 
-    public void setParts(Iterable<String> parts) {
-        this.parts = ImmutableList.copyOf(parts);
+    public void setSegments(Iterable<String> segments) {
+        this.segments = ImmutableList.copyOf(segments);
         repaint();
     }
 
     public void setPath(String path) {
         checkArgument(path.startsWith("/"), "Only absolute paths are supported.");
         if (path.length() == 1) {
-            setParts(ROOT_LIST);
+            setSegments(ROOT_LIST);
         } else {
-            setParts(Iterables.concat(ROOT_LIST, Splitter.on("/").split(path)));
+            setSegments(Iterables.concat(ROOT_LIST, Splitter.on("/").split(path)));
         }
     }
 
     /**
-     * Returns the part-click callback registered for this address bar.
+     * Returns the segment-click callback registered for this address bar.
      *
      * @return The callback, or null if one is not registered.
      */
-    public OnPartClickListener getOnPartClickListener() {
-        return onPartClickListener;
+    public OnSegmentClickListener getOnSegmentClickListener() {
+        return onSegmentClickListener;
     }
 
     /**
-     * Register a callback to be invoked when a part was clicked in the address bar.
+     * Register a callback to be invoked when a segment was clicked in the address bar.
      *
      * @param l the callback that will run.
      */
-    public void setOnPartClickListener(OnPartClickListener l) {
-        onPartClickListener = l;
+    public void setOnSegmentClickListener(OnSegmentClickListener l) {
+        onSegmentClickListener = l;
     }
 
     public boolean getProgressVisible() {
@@ -98,7 +97,7 @@ public class AddressBar extends JPanel implements MouseListener {
 
     @Override
     protected void paintComponent(Graphics g) {
-        positions = new int[parts.size()];
+        positions = new int[segments.size()];
         Graphics2D g2 = (Graphics2D) g;
 
         g2.setFont(Theme.SMALL_BOLD_FONT);
@@ -108,15 +107,15 @@ public class AddressBar extends JPanel implements MouseListener {
         int x = 10;
 
         int i = 0;
-        for (String part : parts) {
+        for (String segment : segments) {
             if (i == armed) {
                 g2.setColor(Theme.TEXT_ARMED_COLOR);
             } else {
                 g2.setColor(Theme.TEXT_NORMAL_COLOR);
             }
-            SwingUtils.drawShadowText(g2, part, x, 16);
+            SwingUtils.drawShadowText(g2, segment, x, 16);
 
-            int width = g2.getFontMetrics().stringWidth(part);
+            int width = g2.getFontMetrics().stringWidth(segment);
             x += width + 5;
             positions[i] = x + 10;
             g2.drawImage(addressArrow, x, 1, null);
@@ -139,9 +138,9 @@ public class AddressBar extends JPanel implements MouseListener {
         int mx = e.getX();
         int partIndex = partIndex(mx);
         if (partIndex == -1) return;
-        String selectedPart = parts.get(partIndex);
-        if (selectedPart != null && onPartClickListener != null)
-            onPartClickListener.onPartClicked(pathForIndex(partIndex));
+        String selectedPart = segments.get(partIndex);
+        if (selectedPart != null && onSegmentClickListener != null)
+            onSegmentClickListener.onSegmentClicked(pathForIndex(partIndex));
         repaint();
     }
 
@@ -164,7 +163,7 @@ public class AddressBar extends JPanel implements MouseListener {
     }
 
     private String pathForIndex(int endIndex) {
-        return Joiner.on("/").join(parts.subList(0, endIndex));
+        return "/" + Joiner.on("/").join(segments.subList(0, endIndex));
     }
 
     @Override
@@ -174,16 +173,16 @@ public class AddressBar extends JPanel implements MouseListener {
     }
 
     /**
-     * Callback listener to be invoked when an address part has been clicked.
+     * Callback listener to be invoked when an address segment has been clicked.
      */
-    public static interface OnPartClickListener {
+    public static interface OnSegmentClickListener {
 
         /**
          * Called when a part has been clicked.
          *
          * @param fullPath The full path of the part that was clicked.
          */
-        public void onPartClicked(String fullPath);
+        public void onSegmentClicked(String fullPath);
 
     }
 

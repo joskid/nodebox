@@ -127,8 +127,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         parameterNetworkSplit = new CustomSplitPane(JSplitPane.VERTICAL_SPLIT, portPane, networkPane);
         topSplit = new CustomSplitPane(JSplitPane.HORIZONTAL_SPLIT, viewerPane, parameterNetworkSplit);
         addressBar = new AddressBar();
-        addressBar.setOnPartClickListener(new AddressBar.OnPartClickListener() {
-            public void onPartClicked(String fullPath) {
+        addressBar.setOnSegmentClickListener(new AddressBar.OnSegmentClickListener() {
+            public void onSegmentClicked(String fullPath) {
                 setActiveNetwork(fullPath);
             }
         });
@@ -489,7 +489,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         Node network = getNodeLibrary().getNodeForPath(path);
 
         if (network.getRenderedChild() != null) {
-            setActiveNode(network.getRenderedChild());
+            setActiveNode(network.getRenderedChildName());
         } else if (!network.isEmpty()) {
             // Set the active node to the first child.
             setActiveNode(network.getChildren().iterator().next());

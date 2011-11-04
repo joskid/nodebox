@@ -386,7 +386,7 @@ public final class Node {
      */
     public Node withOutputAdded(Port port) {
         checkNotNull(port, "Port cannot be null.");
-        checkArgument(!hasInput(port.getName()), "An output port named %s already exists on node %s.", port.getName(), this);
+        checkArgument(!hasOutput(port.getName()), "An output port named %s already exists on node %s.", port.getName(), this);
         ImmutableList.Builder<Port> b = ImmutableList.builder();
         b.addAll(getOutputs());
         b.add(port);

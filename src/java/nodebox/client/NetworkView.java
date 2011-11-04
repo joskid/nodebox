@@ -162,10 +162,6 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
     }
 
     public void updatePosition(Node node) {
-        NodeView nv = getNodeView(node);
-        if (nv == null) return;
-        // TODO Make this work.
-        //nv.setOffset(node.getX(), node.getY());
         updateConnections();
     }
 

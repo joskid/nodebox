@@ -88,7 +88,7 @@ public class ConnectionLayer extends PLayer {
 
     public static GeneralPath connectionPath(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
         float x1 = (float) (inputNode.getPosition().x + 1); // Compensate for selection border
-        float y1 = (float) (inputNode.getPosition().x + NodeView.getVerticalOffsetForPort(inputNode, inputPort) + NodeView.NODE_PORT_HEIGHT / 2);
+        float y1 = (float) (inputNode.getPosition().y + NodeView.getVerticalOffsetForPort(inputNode, inputPort) + NodeView.NODE_PORT_HEIGHT / 2);
         return connectionPath(outputNode, x1, y1);
     }
 

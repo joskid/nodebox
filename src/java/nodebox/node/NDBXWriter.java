@@ -137,7 +137,7 @@ public class NDBXWriter {
         }
 
         // Add the ports
-        for (Port port : node.getPorts()) {
+        for (Port port : node.getInputs()) {
             writePort(doc, el, node, port);
         }
 
@@ -158,7 +158,7 @@ public class NDBXWriter {
         Node protoNode = node.getPrototype();
         Port protoPort = null;
         if (protoNode != null)
-            protoPort = protoNode.getPort(port.getName());
+            protoPort = protoNode.getInput(port.getName());
         // If the port and its prototype are equal, don't write anything.
         if (port.equals(protoPort)) return;
         Element el = doc.createElement("port");

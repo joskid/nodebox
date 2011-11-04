@@ -20,7 +20,7 @@ public class FreehandHandle extends AbstractHandle {
     public FreehandHandle(Node node, String pathPortName) {
         super(node);
         this.pathPortName = pathPortName;
-        this.port = node.getPort(pathPortName);
+        this.port = node.getInput(pathPortName);
     }
 
     public void draw(GraphicsContext ctx) {

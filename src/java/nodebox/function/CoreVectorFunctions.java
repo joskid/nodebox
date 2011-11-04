@@ -3,6 +3,9 @@ package nodebox.function;
 import nodebox.graphics.Geometry;
 import nodebox.graphics.Path;
 import nodebox.graphics.Point;
+import org.python.google.common.collect.ImmutableList;
+
+import java.util.List;
 
 /**
  * Core vector function library.
@@ -23,5 +26,8 @@ public class CoreVectorFunctions {
         return p.asGeometry();
     }
 
+    public static List<Double> pointToNumbers(Point point) {
+        return ImmutableList.of(point.getX(), point.getY());
+    }
 
 }

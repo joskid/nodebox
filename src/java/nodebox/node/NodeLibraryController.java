@@ -71,7 +71,7 @@ public class NodeLibraryController {
     }
 
     public void removePort(String nodePath, String portName) {
-        Node newNode = getNode(nodePath).withPortRemoved(portName);
+        Node newNode = getNode(nodePath).withInputRemoved(portName);
         replaceNodeInPath(nodePath, newNode);
     }
 
@@ -80,7 +80,7 @@ public class NodeLibraryController {
     }
 
     public void setPortValue(String nodePath, String portName, Object value) {
-        Node newNode = getNode(nodePath).withPortValue(portName, value);
+        Node newNode = getNode(nodePath).withInputValue(portName, value);
         replaceNodeInPath(nodePath, newNode);
     }
 

@@ -47,7 +47,7 @@ public class Connection {
         checkNotNull(outputNode);
         checkNotNull(inputNode);
         checkNotNull(inputPort);
-        checkArgument(inputNode.hasPort(inputPort.getName()), "Input port %s does not exist on port %s.", inputPort, inputNode);
+        checkArgument(inputNode.hasInput(inputPort.getName()), "Input port %s does not exist on port %s.", inputPort, inputNode);
         this.outputNode = outputNode;
         this.inputNode = inputNode;
         this.inputPort = inputPort;

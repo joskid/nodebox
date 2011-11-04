@@ -35,7 +35,7 @@ public class TestNodes extends NodeLibrary {
         }
 
         public Object cook(Node node, ProcessingContext context) {
-            if (node.getPort("valuePort").isConnected()) {
+            if (node.getInput("valuePort").isConnected()) {
                 return node.getPortValue("valuePort");
             } else {
                 return node.asInt("value");

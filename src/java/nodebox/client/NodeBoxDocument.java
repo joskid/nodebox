@@ -91,19 +91,19 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         Node number = Node.ROOT.withName("number")
                 .withPosition(new nodebox.graphics.Point(100, 20))
                 .withFunction("math/add")
-                .withPortAdded(Port.intPort("v1", 5))
-                .withPortAdded(Port.intPort("v2", 7));
+                .withInputAdded(Port.intPort("v1", 5))
+                .withInputAdded(Port.intPort("v2", 7));
         Node rect = Node.ROOT.withName("rect")
                 .withPosition(new nodebox.graphics.Point(180, 20))
                 .withFunction("corevector/rect")
-                .withPortAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
-                .withPortAdded(Port.floatPort("width", 100))
-                .withPortAdded(Port.floatPort("height", 100));
+                .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
+                .withInputAdded(Port.floatPort("width", 100))
+                .withInputAdded(Port.floatPort("height", 100));
 
         demoRoot = Node.ROOT
-                .withPortAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
-                .withPortAdded(Port.floatPort("width", 500))
-                .withPortAdded(Port.floatPort("height", 500))
+                .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
+                .withInputAdded(Port.floatPort("width", 500))
+                .withInputAdded(Port.floatPort("height", 500))
                 .withChildAdded(zero)
                 .withChildAdded(number)
                 .withChildAdded(rect)
@@ -396,7 +396,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      */
     public void setPortValue(String portName, Object value) {
         checkNotNull(portName, "Port cannot be null.");
-        Port port = getActiveNode().getPort(portName);
+        Port port = getActiveNode().getInput(portName);
         checkArgument(port != null, "Port %s does not exist on node %s", portName, getActiveNode());
         addEdit("Change Value", "changeValue", port);
         controller.setPortValue(getActiveNodePath(), portName, value);
@@ -442,14 +442,14 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     // TODO Merge setPortValue and setValue.
     public void setValue(Node node, String portName, Object value) {
         checkNotNull(node, "Node cannot be null");
-        Port port = node.getPort(portName);
+        Port port = node.getInput(portName);
         checkNotNull(port, "Port '" + portName + "' is not a port on node " + node);
         setPortValue(portName, value);
     }
 
     public void silentSet(Node node, String portName, Object value) {
         try {
-            Port port = node.getPort(portName);
+            Port port = node.getInput(portName);
             setPortValue(portName, value);
         } catch (Exception ignored) {
         }
@@ -997,8 +997,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
     private void exportToMovieFile(File file, final VideoFormat videoFormat, final int fromValue, final int toValue) {
         file = videoFormat.ensureFileExtension(file);
-        final int width = getNodeLibrary().getRoot().getPort("width").intValue();
-        final int height = getNodeLibrary().getRoot().getPort("height").intValue();
+        final int width = getNodeLibrary().getRoot().getInput("width").intValue();
+        final int height = getNodeLibrary().getRoot().getInput("height").intValue();
         final Movie movie = new Movie(file.getAbsolutePath(), videoFormat, width, height, false);
         exportThreadedRange(controller.getNodeLibrary(), fromValue, toValue, new ExportDelegate() {
             @Override

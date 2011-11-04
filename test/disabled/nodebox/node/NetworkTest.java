@@ -159,11 +159,11 @@ public class NetworkTest extends NodeTestCase {
         // Inner nodes
         Node rect1 = towerType.create(RectNode.class);
         Node copy1 = towerType.create(CopyType.class);
-        rect1.getPort("width").set(50.0);
-        rect1.getPort("height").setExpression("network.floorHeight");
-        copy1.getPort("shape").connect(rect1);
-        copy1.getPort("copies").setExpression("network.buildingHeight");
-        copy1.getPort("ty").setExpression("network.floorHeight");
+        rect1.getInput("width").set(50.0);
+        rect1.getInput("height").setExpression("network.floorHeight");
+        copy1.getInput("shape").connect(rect1);
+        copy1.getInput("copies").setExpression("network.buildingHeight");
+        copy1.getInput("ty").setExpression("network.floorHeight");
         copy1.setRendered();
         // Execute the macro.
         towerType.setValue("floorHeight", 20.0);
@@ -188,14 +188,14 @@ public class NetworkTest extends NodeTestCase {
         assertEquals("translate1", translate1.getName());
         translate1.setPosition(40, 80);
         translate1.setRendered();
-        translate1.getPort("polygon").connect(polygon1);
+        translate1.getInput("polygon").connect(polygon1);
         Node rect1 = polynet1.create(manager.getNode("polygraph.rect"));
         assertEquals("rect1", rect1.getName());
         rect1.setPosition(180, 30);
         Node merge1 = polynet1.create(manager.getNode("polygraph.merge"));
         assertEquals("merge1", merge1.getName());
-        merge1.getPort("polygons").connect(translate1);
-        merge1.getPort("polygons").connect(rect1);
+        merge1.getInput("polygons").connect(translate1);
+        merge1.getInput("polygons").connect(rect1);
 
         NodeLibrary newLibrary = storeAndLoad(testLibrary);
         Node newRoot = newLibrary.getRootNode();
@@ -214,18 +214,18 @@ public class NetworkTest extends NodeTestCase {
         assertEquals(polygon1.getValue("stroke"), nPolygon1.getValue("stroke"));
         assertTrue(nPolygon1.isConnected());
         assertTrue(nTranslate1.isConnected());
-        assertTrue(nTranslate1.getPort("polygon").isConnectedTo(nPolygon1));
-        assertTrue(nMerge1.getPort("polygons").isConnectedTo(nRect1));
-        assertTrue(nMerge1.getPort("polygons").isConnectedTo(nTranslate1));
+        assertTrue(nTranslate1.getInput("polygon").isConnectedTo(nPolygon1));
+        assertTrue(nMerge1.getInput("polygons").isConnectedTo(nRect1));
+        assertTrue(nMerge1.getInput("polygons").isConnectedTo(nTranslate1));
         // Check if this is the same connection
-        Port nPolygons = nMerge1.getPort("polygons");
+        Port nPolygons = nMerge1.getInput("polygons");
         assertEquals(1, nTranslate1.getOutputPort().getConnections().size());
         assertEquals(1, nRect1.getOutputPort().getConnections().size());
         Connection c1 = nTranslate1.getOutputPort().getConnections().get(0);
         Connection c2 = nRect1.getOutputPort().getConnections().get(0);
         assertTrue(c1 != c2);
         // This tests for a bug where the connection would be created twice.
-        nMerge1.getPort("polygons").disconnect();
+        nMerge1.getInput("polygons").disconnect();
         assertFalse(nPolygons.isConnectedTo(nRect1));
         assertFalse(nPolygons.isConnectedTo(nTranslate1));
     }
@@ -325,8 +325,8 @@ public class NetworkTest extends NodeTestCase {
         Node negate1 = net1.create(negateNode);
         Node addConstant1 = net1.create(addConstantNode);
         number1.setValue("value", 5);
-        negate1.getPort("value").connect(number1);
-        addConstant1.getPort("value").connect(negate1);
+        negate1.getInput("value").connect(number1);
+        addConstant1.getInput("value").connect(negate1);
         addConstant1.setValue("constant", -3);
         addConstant1.setRendered();
         assertTrue(negate1.isConnected());
@@ -387,7 +387,7 @@ public class NetworkTest extends NodeTestCase {
         assert inputPortName != null;
         assert outputNode != null;
         try {
-            inputNode.getPort(inputPortName).connect(outputNode);
+            inputNode.getInput(inputPortName).connect(outputNode);
         } catch (IllegalArgumentException e) {
             fail("Should not have thrown IllegalArgumentException: " + e);
         }
@@ -395,7 +395,7 @@ public class NetworkTest extends NodeTestCase {
 
     private void assertInvalidConnect(Node inputNode, String inputPortName, Node outputNode) {
         try {
-            inputNode.getPort(inputPortName).connect(outputNode);
+            inputNode.getInput(inputPortName).connect(outputNode);
             fail("Should have thrown IllegalArgumentException.");
         } catch (IllegalArgumentException ignored) {
         }

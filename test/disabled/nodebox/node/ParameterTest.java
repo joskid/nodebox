@@ -298,7 +298,7 @@ public class ParameterTest extends NodeTestCase {
         Node rect1 = polynet.create(manager.getNode("polygraph.rect"));
         Node rect2 = polynet.create(manager.getNode("polygraph.rect"));
         Node translate1 = polynet.create(manager.getNode("polygraph.translate"));
-        translate1.getPort("polygon").connect(rect1);
+        translate1.getInput("polygon").connect(rect1);
         translate1.getParameter("tx").setExpression("rect2.x");
         Parameter txParam = translate1.getParameter("tx");
         Parameter xParam = rect2.getParameter("x");
@@ -318,9 +318,9 @@ public class ParameterTest extends NodeTestCase {
         Node number3 = net1.create(numberNode);
         number3.setValue("value", 3);
         Node multiAdd = net1.create(multiAddNode);
-        Connection c1 = multiAdd.getPort("values").connect(number1);
-        Connection c2 = multiAdd.getPort("values").connect(number2);
-        Connection c3 = multiAdd.getPort("values").connect(number3);
+        Connection c1 = multiAdd.getInput("values").connect(number1);
+        Connection c2 = multiAdd.getInput("values").connect(number2);
+        Connection c3 = multiAdd.getInput("values").connect(number3);
         assertFalse(c1 == c2);
         assertFalse(c1 == c3);
         multiAdd.update();

@@ -33,7 +33,7 @@ public class MathFunctionsTest {
     public void testCallInvert() {
         Node invertNode = Node.ROOT
                 .withFunction("math/invert")
-                .withPortAdded(Port.intPort("value", 5));
+                .withInputAdded(Port.intPort("value", 5));
         Object result = context.renderChildNode(functionRepository, invertNode);
         assertEquals(-5, result);
     }
@@ -47,14 +47,14 @@ public class MathFunctionsTest {
     public void testPortOrder() {
         Node subtract1 = Node.ROOT
                 .withFunction("math/subtract")
-                .withPortAdded(Port.intPort("a", 10))
-                .withPortAdded(Port.intPort("b", 3));
+                .withInputAdded(Port.intPort("a", 10))
+                .withInputAdded(Port.intPort("b", 3));
         assertEquals(7, context.renderChildNode(functionRepository, subtract1));
 
         Node subtract2 = Node.ROOT
                 .withFunction("math/subtract")
-                .withPortAdded(Port.intPort("b", 3))
-                .withPortAdded(Port.intPort("a", 10));
+                .withInputAdded(Port.intPort("b", 3))
+                .withInputAdded(Port.intPort("a", 10));
         assertEquals(-7, context.renderChildNode(functionRepository, subtract2));
     }
 

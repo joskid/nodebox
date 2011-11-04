@@ -10,7 +10,7 @@ import java.util.Set;
  * The NodeAccessProxy makes access to nodes and parameters more
  * convenient from expressions. So, instead of writing:
  * <p/>
- * <pre><code>network.getNode("rect1").getPort("x").getValue()</code></pre>
+ * <pre><code>network.getNode("rect1").getInput("x").getValue()</code></pre>
  * <p/>
  * You can write:
  * <p/>
@@ -62,7 +62,7 @@ public class NodeAccessProxy implements Map {
             keySet.add(p.getName());
         }
         // 3. Add ports
-        for (Port p : node.getPorts()) {
+        for (Port p : node.getInputs()) {
             keySet.add(p.getName());
         }
         // 4. Add reserved words
@@ -137,7 +137,7 @@ public class NodeAccessProxy implements Map {
 
         // Search the ports
         if (node.hasPort(k)) {
-            return node.getPort(k);
+            return node.getInput(k);
         }
 
 

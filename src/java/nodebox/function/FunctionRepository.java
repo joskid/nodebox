@@ -48,7 +48,7 @@ public class FunctionRepository {
         Function function = getFunction(identifier);
         Node n = Node.ROOT.withFunction(identifier);
         for (Function.Argument arg : function.getArguments()) {
-            n = n.withPortAdded(Port.portForType(arg.getName(), arg.getType()));
+            n = n.withInputAdded(Port.portForType(arg.getName(), arg.getType()));
         }
         return n;
     }

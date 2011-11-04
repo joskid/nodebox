@@ -139,8 +139,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     public static int getVerticalOffsetForPort(Node node, Port port) {
         checkNotNull(node);
         checkNotNull(port);
-        int portIndex = node.getPorts().indexOf(port);
-        int portCount = node.getPorts().size();
+        int portIndex = node.getInputs().indexOf(port);
+        int portCount = node.getInputs().size();
         int totalPortsHeight = (NODE_PORT_HEIGHT + NODE_PORT_MARGIN) * (portCount - 1) + NODE_PORT_HEIGHT;
         int offsetPerPort = NODE_PORT_HEIGHT + NODE_PORT_MARGIN;
         int portStartY = (NODE_FULL_SIZE - totalPortsHeight) / 2 - 1;
@@ -165,7 +165,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         Graphics2D fg = fullIcon.createGraphics();
         if (drawPorts) {
             // Count the input ports and draw them.
-            java.util.List<Port> inputs = node.getPorts();
+            java.util.List<Port> inputs = node.getInputs();
             for (Port p : inputs) {
                 int portY = getVerticalOffsetForPort(node, p);
                 fg.drawImage(nodeInPort, 0, portY, null);
@@ -373,7 +373,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                     Node outputNode = networkView.getConnectionSource().getNode();
                     Node inputNode = networkView.getConnectionTarget().getNode();
                     // Look for compatible ports.
-                    java.util.List<Port> compatiblePorts = inputNode.getPortsOfType(outputNode.getOutputType());
+                    java.util.List<Port> compatiblePorts = inputNode.getInputsOfType(outputNode.getOutputType());
                     if (compatiblePorts.isEmpty()) {
                         // There are no compatible parameters.
                     } else if (compatiblePorts.size() == 1) {

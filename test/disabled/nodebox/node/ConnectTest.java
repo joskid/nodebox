@@ -62,23 +62,23 @@ public class ConnectTest extends NodeTestCase {
         Node multiply1 = multiplyNode.newInstance(testLibrary, "multiply1");
         Node upper1 = convertToUppercaseNode.newInstance(testLibrary, "upper1");
 
-        assertFalse(multiply1.getPort("v1").isConnected());
-        assertFalse(multiply1.getPort("v1").isConnectedTo(number1));
+        assertFalse(multiply1.getInput("v1").isConnected());
+        assertFalse(multiply1.getInput("v1").isConnectedTo(number1));
         assertFalse(number1.isOutputConnected());
         assertFalse(number1.isOutputConnectedTo(multiply1));
-        assertFalse(number1.isOutputConnectedTo(multiply1.getPort("v1")));
+        assertFalse(number1.isOutputConnectedTo(multiply1.getInput("v1")));
 
-        assertTrue(multiply1.getPort("v1").canConnectTo(number1));
-        assertTrue(multiply1.getPort("v2").canConnectTo(number1));
+        assertTrue(multiply1.getInput("v1").canConnectTo(number1));
+        assertTrue(multiply1.getInput("v2").canConnectTo(number1));
         assertFalse(convertToUppercaseNode.getPort("value").canConnectTo(number1));
 
-        Connection conn = multiply1.getPort("v1").connect(number1);
-        assertTrue(multiply1.getPort("v1").isConnected());
-        assertTrue(multiply1.getPort("v1").isConnectedTo(number1));
+        Connection conn = multiply1.getInput("v1").connect(number1);
+        assertTrue(multiply1.getInput("v1").isConnected());
+        assertTrue(multiply1.getInput("v1").isConnectedTo(number1));
         assertTrue(number1.isOutputConnected());
         assertTrue(number1.isOutputConnectedTo(multiply1));
-        assertTrue(number1.isOutputConnectedTo(multiply1.getPort("v1")));
-        assertEquals(multiply1.getPort("v1"), conn.getInputPort());
+        assertTrue(number1.isOutputConnectedTo(multiply1.getInput("v1")));
+        assertEquals(multiply1.getInput("v1"), conn.getInputPort());
         assertEquals(number1.getOutputPort(), conn.getOutputPort());
         assertEquals(multiply1, conn.getInputNode());
         assertEquals(number1, conn.getOutputNode());
@@ -95,14 +95,14 @@ public class ConnectTest extends NodeTestCase {
         upstream = Node.ROOT_NODE.newInstance(testLibrary, "upstream", HashMap.class);
         downstream = Node.ROOT_NODE.newInstance(testLibrary, "downstream", HashMap.class);
         downstream.addPort("value");
-        downstream.getPort("value").connect(upstream);
+        downstream.getInput("value").connect(upstream);
         // Reset the library
         testLibrary = new NodeLibrary("test");
         // Upstream is a more specific type, which is allowed.
         upstream = Node.ROOT_NODE.newInstance(testLibrary, "upstream", LinkedHashMap.class);
         downstream = Node.ROOT_NODE.newInstance(testLibrary, "downstream", HashMap.class);
         downstream.addPort("value");
-        downstream.getPort("value").connect(upstream);
+        downstream.getInput("value").connect(upstream);
         // Reset the library
         testLibrary = new NodeLibrary("test");
         // Now downstream is more specific, which is NOT allowed.
@@ -116,7 +116,7 @@ public class ConnectTest extends NodeTestCase {
         upstream = Node.ROOT_NODE.newInstance(testLibrary, "upstream", LinkedHashMap.class);
         downstream = Node.ROOT_NODE.newInstance(testLibrary, "downstream", Map.class);
         downstream.addPort("value");
-        downstream.getPort("value").connect(upstream);
+        downstream.getInput("value").connect(upstream);
     }
 
     public void testCycles() {
@@ -140,7 +140,7 @@ public class ConnectTest extends NodeTestCase {
         assertFalse(addConstant1.isDirty());
         // Connecting the add constant to another node makes it dirty.
         // The output (upstream) node doesn't become dirty.
-        addConstant1.getPort("value").connect(number1);
+        addConstant1.getInput("value").connect(number1);
         assertFalse(number1.isDirty());
         assertTrue(addConstant1.isDirty());
         addConstant1.update();
@@ -162,12 +162,12 @@ public class ConnectTest extends NodeTestCase {
         addConstant1.update();
         assertFalse(addConstant1.isDirty());
         // Disconnecting makes the downstream dirty.
-        addConstant1.getPort("value").disconnect();
+        addConstant1.getInput("value").disconnect();
         assertFalse(number1.isDirty());
         assertTrue(addConstant1.isDirty());
         // Connect addConstant1 to a new node.
         Node number2 = numberNode.newInstance(testLibrary, "number2");
-        addConstant1.getPort("value").connect(number2);
+        addConstant1.getInput("value").connect(number2);
         // Check if disconnected nodes still propagate.
         number1.update();
         assertFalse(number1.isDirty());
@@ -183,8 +183,8 @@ public class ConnectTest extends NodeTestCase {
         Node number1 = numberNode.newInstance(testLibrary, "number1");
         Node number2 = numberNode.newInstance(testLibrary, "number2");
         Node m = multiplyNode.newInstance(testLibrary, "multiply1");
-        m.getPort("v1").connect(number1);
-        m.getPort("v2").connect(number2);
+        m.getInput("v1").connect(number1);
+        m.getInput("v2").connect(number2);
         assertNull(m.getOutputValue());
         number1.setValue("value", 3);
         number2.setValue("value", 2);
@@ -198,8 +198,8 @@ public class ConnectTest extends NodeTestCase {
         assertFalse(m.isDirty());
         assertEquals(6, m.getOutputValue());
         // Test if value stops propagating after disconnection.
-        m.getPort("v1").disconnect();
-        assertFalse(m.getPort("v1").isConnected());
+        m.getInput("v1").disconnect();
+        assertFalse(m.getInput("v1").isConnected());
         assertTrue(m.isDirty());
         // The value is still the old value because the node has not been updated yet.
         assertEquals(6, m.getOutputValue());
@@ -215,23 +215,23 @@ public class ConnectTest extends NodeTestCase {
         Node m = multiplyNode.newInstance(testLibrary, "multiply1");
         number1.setValue("value", 5);
         number2.setValue("value", 2);
-        m.getPort("v1").connect(number1);
-        m.getPort("v2").connect(number2);
-        assertTrue(m.getPort("v1").isConnected());
+        m.getInput("v1").connect(number1);
+        m.getInput("v2").connect(number2);
+        assertTrue(m.getInput("v1").isConnected());
         assertTrue(number1.isOutputConnected());
         m.update();
-        assertEquals(5, m.getPort("v1").getValue());
+        assertEquals(5, m.getInput("v1").getValue());
         assertEquals(10, m.getOutputValue());
-        assertFalse(m.getPort("v1").getConnections().isEmpty());
+        assertFalse(m.getInput("v1").getConnections().isEmpty());
 
         // Disconnecting a port makes the dependent nodes dirty, but not the upstream nodes.
         // "Dirt flows downstream"
-        m.getPort("v1").disconnect();
+        m.getInput("v1").disconnect();
         assertTrue(m.isDirty());
         assertFalse(number1.isDirty());
-        assertFalse(m.getPort("v1").isConnected());
+        assertFalse(m.getInput("v1").isConnected());
         assertFalse(number1.isOutputConnected());
-        assertTrue(m.getPort("v1").getConnections().isEmpty());
+        assertTrue(m.getInput("v1").getConnections().isEmpty());
         // The value of the input port is set to null after disconnection.
         // Since our simple multiply node doesn't handle null, it throws
         // a NullPointerException, which gets wrapped in a ProcessingError.
@@ -247,7 +247,7 @@ public class ConnectTest extends NodeTestCase {
         Node root = testLibrary.getRootNode();
         Node number1 = root.create(numberNode);
         Node addConstant1 = root.create(addConstantNode);
-        Port pValue = addConstant1.getPort("value");
+        Port pValue = addConstant1.getInput("value");
         pValue.connect(number1);
         // Remove the specific connection and check if everything was removed.
         root.disconnectChildPort(pValue, number1);
@@ -263,7 +263,7 @@ public class ConnectTest extends NodeTestCase {
         // Create a basic connection.
         Node number1 = numberNode.newInstance(testLibrary, "number1");
         Node negate1 = negateNode.newInstance(testLibrary, "negate1");
-        negate1.getPort("value").connect(number1);
+        negate1.getInput("value").connect(number1);
         // Remove the node. This should also remove all connections.
         testLibrary.getRootNode().remove(number1);
         assertFalse(number1.isConnected());
@@ -274,12 +274,12 @@ public class ConnectTest extends NodeTestCase {
         Node number1 = numberNode.newInstance(testLibrary, "number1");
         Node number2 = numberNode.newInstance(testLibrary, "number2");
         Node negate1 = negateNode.newInstance(testLibrary, "negate1");
-        negate1.getPort("value").connect(number1);
+        negate1.getInput("value").connect(number1);
         assertTrue(number1.isConnected());
         assertFalse(number2.isConnected());
         assertTrue(negate1.isConnected());
         // Now change the connection to number2.
-        negate1.getPort("value").connect(number2);
+        negate1.getInput("value").connect(number2);
         assertFalse(number1.isConnected());
         assertTrue(number2.isConnected());
         assertTrue(negate1.isConnected());
@@ -311,8 +311,8 @@ public class ConnectTest extends NodeTestCase {
         Node number2 = net.create(numberNode);
         number2.setValue("value", 10);
         Node multiAdd1 = net.create(multiAddNode);
-        multiAdd1.getPort("values").connect(number1);
-        multiAdd1.getPort("values").connect(number2);
+        multiAdd1.getInput("values").connect(number1);
+        multiAdd1.getInput("values").connect(number2);
         assertTrue(number1.isConnected());
         assertTrue(number2.isConnected());
         multiAdd1.setRendered();
@@ -346,14 +346,14 @@ public class ConnectTest extends NodeTestCase {
         assertEquals(0, l.connectCounter);
         assertEquals(0, l.disconnectCounter);
         // Creating a connection fires the event.
-        addConstant1.getPort("value").connect(number1);
+        addConstant1.getInput("value").connect(number1);
         assertEquals(1, l.connectCounter);
         assertEquals(0, l.disconnectCounter);
         // Create a second number and connect it to the add constant.
         // This should fire a disconnectChildPort event from number1, and a connect
         // event to number2.
         Node number2 = root.create(numberNode);
-        addConstant1.getPort("value").connect(number2);
+        addConstant1.getInput("value").connect(number2);
         assertEquals(2, l.connectCounter);
         assertEquals(1, l.disconnectCounter);
         // Disconnect the constant node. This should remove all (1) connections,
@@ -370,7 +370,7 @@ public class ConnectTest extends NodeTestCase {
         Node number2 = root.create(numberNode);
         Node number3 = root.create(numberNode);
         Node multiAdd = root.create(multiAddNode);
-        Port pValues = multiAdd.getPort("values");
+        Port pValues = multiAdd.getInput("values");
         Connection c1 = pValues.connect(number1);
         Connection c2 = pValues.connect(number2);
         Connection c3 = pValues.connect(number3);
@@ -409,7 +409,7 @@ public class ConnectTest extends NodeTestCase {
         Node number2 = root.create(numberNode);
         Node number3 = root.create(numberNode);
         Node multiAdd = root.create(multiAddNode);
-        Port pValues = multiAdd.getPort("values");
+        Port pValues = multiAdd.getInput("values");
         Connection c1 = pValues.connect(number1);
         Connection c2 = pValues.connect(number2);
         Connection c3 = pValues.connect(number3);
@@ -439,7 +439,7 @@ public class ConnectTest extends NodeTestCase {
     private void addNewConnection(Node root) {
         Node number = root.create(numberNode);
         Node add = root.create(addNode);
-        Port addValue = add.getPort("v1");
+        Port addValue = add.getInput("v1");
         addValue.connect(number);
     }
 

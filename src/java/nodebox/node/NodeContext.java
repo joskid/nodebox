@@ -51,7 +51,7 @@ public class NodeContext {
 
         // Set arguments on the function.
         ArrayList<Object> arguments = new ArrayList<Object>();
-        for (Port p : node.getPorts()) {
+        for (Port p : node.getInputs()) {
             arguments.add(p.getValue());
         }
 

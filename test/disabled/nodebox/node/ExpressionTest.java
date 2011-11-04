@@ -331,7 +331,7 @@ public class ExpressionTest extends NodeTestCase {
         stamper.addParameter("value", Parameter.Type.FLOAT);
         stamper.setValue("key", "mywidth");
         stamper.setValue("value", 50);
-        stamper.getPort("polygon").connect(rect1);
+        stamper.getInput("polygon").connect(rect1);
         stamper.update();
         p = (Polygon) stamper.getOutputValue();
         assertEquals(new Rectangle(0, 0, 50, 100), p.getBounds());

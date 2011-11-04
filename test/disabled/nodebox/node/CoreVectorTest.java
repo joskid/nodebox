@@ -1,11 +1,11 @@
 package nodebox.node;
 
 import junit.framework.TestCase;
-import nodebox.ui.Platform;
 import nodebox.client.PythonUtils;
 import nodebox.graphics.Geometry;
 import nodebox.graphics.Rect;
 import nodebox.graphics.Transform;
+import nodebox.ui.Platform;
 
 /**
  * Tests the Core Vector nodes
@@ -52,7 +52,7 @@ public class CoreVectorTest extends TestCase {
         Node filter = createNode("filter");
         assertUpdateNull(filter);
         Node generator = createNode("generator");
-        filter.getPort("shape").connect(generator);
+        filter.getInput("shape").connect(generator);
         Geometry geo = updateNode(filter);
         Transform t = Transform.rotated(45f);
         Rect r = t.map(Rect.centeredRect(0, 0, 100, 100));

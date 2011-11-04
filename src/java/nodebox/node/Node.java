@@ -21,7 +21,7 @@ public final class Node {
     public static final String KEY_FUNCTION = "function";
     public static final String KEY_OUTPUT_TYPE = "outputType";
     public static final String KEY_POSITION = "position";
-    public static final String KEY_PORTS = "ports";
+    public static final String KEY_INPUTS = "inputs";
     public static final String KEY_CHILDREN = "children";
     public static final String KEY_RENDERED_CHILD_NAME = "renderedChildName";
     public static final String KEY_CONNECTIONS = "connections";
@@ -42,7 +42,7 @@ public final class Node {
         }
     }
 
-    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, OUTPUT_TYPE, POSITION, PORTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, OUTPUT_TYPE, POSITION, INPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final PrototypeMap properties;
@@ -62,7 +62,7 @@ public final class Node {
         m.put(KEY_FUNCTION, "core/zero");
         m.put(KEY_OUTPUT_TYPE, Port.TYPE_INT);
         m.put(KEY_POSITION, Point.ZERO);
-        m.put(KEY_PORTS, ImmutableList.<Port>of());
+        m.put(KEY_INPUTS, ImmutableList.<Port>of());
         m.put(KEY_CHILDREN, ImmutableMap.<String, Node>of());
         m.put(KEY_RENDERED_CHILD_NAME, "");
         m.put(KEY_CONNECTIONS, ImmutableList.<Connection>of());
@@ -143,13 +143,13 @@ public final class Node {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Port> getPorts() {
-        return (List<Port>) getProperty(KEY_PORTS);
+    public List<Port> getInputs() {
+        return (List<Port>) getProperty(KEY_INPUTS);
     }
 
-    public Port getPort(String name) {
+    public Port getInput(String name) {
         checkNotNull(name, "Port name cannot be null.");
-        for (Port p : getPorts()) {
+        for (Port p : getInputs()) {
             if (p.getName().equals(name)) {
                 return p;
             }
@@ -157,9 +157,9 @@ public final class Node {
         return null;
     }
 
-    public ImmutableList<Port> getPortsOfType(String type) {
+    public ImmutableList<Port> getInputsOfType(String type) {
         ImmutableList.Builder<Port> b = ImmutableList.builder();
-        for (Port p : getPorts()) {
+        for (Port p : getInputs()) {
             if (p.getType().equals(type)) {
                 b.add(p);
             }
@@ -167,8 +167,8 @@ public final class Node {
         return b.build();
     }
 
-    public boolean hasPort(String name) {
-        return getPort(name) != null;
+    public boolean hasInput(String name) {
+        return getInput(name) != null;
     }
 
     /**
@@ -286,44 +286,44 @@ public final class Node {
     }
 
     /**
-     * Create a new node with the given port added.
+     * Create a new node with the given input port added.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
      * @param port The port to add.
      * @return A new Node.
      */
-    public Node withPortAdded(Port port) {
+    public Node withInputAdded(Port port) {
         checkNotNull(port, "Port cannot be null.");
-        checkArgument(!hasPort(port.getName()), "A port named %s already exists on node %s.", port.getName(), this);
+        checkArgument(!hasInput(port.getName()), "An input port named %s already exists on node %s.", port.getName(), this);
         ImmutableList.Builder<Port> b = ImmutableList.builder();
-        b.addAll(getPorts());
+        b.addAll(getInputs());
         b.add(port);
-        return newNodeWithAttribute(Attribute.PORTS, b.build());
+        return newNodeWithAttribute(Attribute.INPUTS, b.build());
     }
 
     /**
-     * Create a new node with the given port removed.
+     * Create a new node with the given input port removed.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
      * @param portName The name of the port to remove.
      * @return A new Node.
      */
-    public Node withPortRemoved(String portName) {
-        Port portToRemove = getPort(portName);
-        checkArgument(portToRemove != null, "Port %s does not exist on node %s.", portName, this);
+    public Node withInputRemoved(String portName) {
+        Port portToRemove = getInput(portName);
+        checkArgument(portToRemove != null, "Input port %s does not exist on node %s.", portName, this);
 
         ImmutableList.Builder<Port> b = ImmutableList.builder();
-        for (Port port : getPorts()) {
+        for (Port port : getInputs()) {
             if (portToRemove != port)
                 b.add(port);
         }
-        return newNodeWithAttribute(Attribute.PORTS, b.build());
+        return newNodeWithAttribute(Attribute.INPUTS, b.build());
     }
 
     /**
-     * Create a new node with the named port replaced.
+     * Create a new node with the given input port replaced.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
@@ -331,23 +331,23 @@ public final class Node {
      * @param newPort  The new Port instance.
      * @return A new Node.
      */
-    public Node withPortChanged(String portName, Port newPort) {
-        Port oldPort = getPort(portName);
+    public Node withInputChanged(String portName, Port newPort) {
+        Port oldPort = getInput(portName);
         checkNotNull(oldPort, "Port %s does not exist on node %s.", portName, this);
         ImmutableList.Builder<Port> b = ImmutableList.builder();
         // Add all ports back in the correct order.
-        for (Port port : getPorts()) {
+        for (Port port : getInputs()) {
             if (port == oldPort) {
                 b.add(newPort);
             } else {
                 b.add(port);
             }
         }
-        return newNodeWithAttribute(Attribute.PORTS, b.build());
+        return newNodeWithAttribute(Attribute.INPUTS, b.build());
     }
 
     /**
-     * Create a new node with the named port set to a new value.
+     * Create a new node with the given input port set to a new value.
      * Only standard port types (int, float, string, point) can have their value set.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
@@ -356,11 +356,11 @@ public final class Node {
      * @param value    The new Port value.
      * @return A new Node.
      */
-    public Node withPortValue(String portName, Object value) {
-        Port p = getPort(portName);
-        checkArgument(p != null, "Port %s does not exist on node %s.", portName, this);
+    public Node withInputValue(String portName, Object value) {
+        Port p = getInput(portName);
+        checkArgument(p != null, "Input port %s does not exist on node %s.", portName, this);
         p = p.withValue(value);
-        return withPortChanged(portName, p);
+        return withInputChanged(portName, p);
     }
 
     /**
@@ -472,9 +472,9 @@ public final class Node {
             case POSITION:
                 checkArgument(value instanceof Point, "Changing the position requires a Point, not %s.", value);
                 return newNode(KEY_POSITION, value);
-            case PORTS:
+            case INPUTS:
                 checkArgument(value instanceof ImmutableList, "Changing the ports requires an ImmutableList, not %s.", value);
-                return newNode(KEY_PORTS, value);
+                return newNode(KEY_INPUTS, value);
             case CHILDREN:
                 checkArgument(value instanceof ImmutableMap, "Changing the children requires an ImmutableMap, not %s.", value);
                 return newNode(KEY_CHILDREN, value);

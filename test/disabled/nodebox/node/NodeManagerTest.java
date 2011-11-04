@@ -45,7 +45,7 @@ public class NodeManagerTest extends TestCase {
         assertTrue(move1.hasParameter("ty"));
         assertFalse(move1.hasParameter("x"));
         // Test connections
-        assertTrue(move1.getPort("polygon").isConnectedTo(rect1));
+        assertTrue(move1.getInput("polygon").isConnectedTo(rect1));
         assertTrue(rect1.isConnectedTo(move1));
         // Try executing
         rect1.update();

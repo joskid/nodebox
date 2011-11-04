@@ -35,7 +35,7 @@ public class PythonNodeTest extends NodeTestCase {
         PythonCode code = new PythonCode("def cook(self):\n" +
                 "  return self.polygon.translated(self.tx, self.ty)");
         mover.setValue("_code", code);
-        mover.getPort("polygon").connect(rect1);
+        mover.getInput("polygon").connect(rect1);
         mover.update();
         Polygon polygon = (Polygon) mover.getOutputValue();
         assertEquals(new Rectangle(10, 20, 100, 100), polygon.getBounds());
@@ -105,7 +105,7 @@ public class PythonNodeTest extends NodeTestCase {
         PythonCode upperCode = new PythonCode("def cook(self):\n  return self.string.upper()");
         upper.setValue("_code", upperCode);
 
-        upper.getPort("string").connect(stringIn);
+        upper.getInput("string").connect(stringIn);
         stringIn.setValue("string", "hello");
         upper.update();
         assertEquals("HELLO", upper.getOutputValue());

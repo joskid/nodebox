@@ -46,7 +46,7 @@ public class NodeTestCase extends TestCase {
 
     public void assertConnectionError(Node inputNode, String inputPort, Node outputNode, String message) {
         try {
-            inputNode.getPort(inputPort).connect(outputNode);
+            inputNode.getInput(inputPort).connect(outputNode);
             fail(message);
         } catch (IllegalArgumentException ignored) {
         }

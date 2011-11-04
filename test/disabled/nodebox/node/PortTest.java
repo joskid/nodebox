@@ -97,18 +97,18 @@ public class PortTest extends NodeTestCase {
         Node test = Node.ROOT_NODE.newInstance(testLibrary, "test");
         test.addPort("single");
         test.addPort("multiple", Port.Cardinality.MULTIPLE);
-        assertEquals(Port.Cardinality.SINGLE, test.getPort("single").getCardinality());
-        assertEquals(Port.Cardinality.MULTIPLE, test.getPort("multiple").getCardinality());
+        assertEquals(Port.Cardinality.SINGLE, test.getInput("single").getCardinality());
+        assertEquals(Port.Cardinality.MULTIPLE, test.getInput("multiple").getCardinality());
         // Now clone this instance and check cardinality.
         Node cloned = test.newInstance(testLibrary, "cloned");
-        assertEquals(Port.Cardinality.SINGLE, cloned.getPort("single").getCardinality());
-        assertEquals(Port.Cardinality.MULTIPLE, cloned.getPort("multiple").getCardinality());
+        assertEquals(Port.Cardinality.SINGLE, cloned.getInput("single").getCardinality());
+        assertEquals(Port.Cardinality.MULTIPLE, cloned.getInput("multiple").getCardinality());
     }
 
     public void testAccessors() {
         Node rect1 = rectNode.newInstance(testLibrary, "rect1");
         Node trans1 = translateNode.newInstance(testLibrary, "trans1");
-        Port pPolygon = trans1.getPort("polygon");
+        Port pPolygon = trans1.getInput("polygon");
         assertFalse(pPolygon.isConnected());
         pPolygon.connect(rect1);
         Connection c = pPolygon.getConnections().get(0);
@@ -139,7 +139,7 @@ public class PortTest extends NodeTestCase {
 
     private void assertValidValue(Node n, Object value) {
         try {
-            n.getPort("p").validate(value);
+            n.getInput("p").validate(value);
         } catch (IllegalArgumentException e) {
             fail("The value '" + value + "' should have been accepted: " + e);
         }
@@ -148,7 +148,7 @@ public class PortTest extends NodeTestCase {
 
     private void assertInvalidValue(Node n, Object value) {
         try {
-            n.getPort("p").validate(value);
+            n.getInput("p").validate(value);
             fail("The value '" + value + "' should not have been accepted.");
         } catch (IllegalArgumentException ignored) {
         }

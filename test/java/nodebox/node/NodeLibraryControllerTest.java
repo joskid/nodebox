@@ -53,11 +53,11 @@ public class NodeLibraryControllerTest {
     }
 
     public void testSetPortValue() {
-        Node numberNode = Node.ROOT.withName("number").withPortAdded(Port.intPort("value", 10));
+        Node numberNode = Node.ROOT.withName("number").withInputAdded(Port.intPort("value", 10));
         controller.addNode("/", numberNode);
-        assertEquals(10, controller.getNode("/number").getPort("value").intValue());
+        assertEquals(10, controller.getNode("/number").getInput("value").intValue());
         controller.setPortValue("/number", "value", 42);
-        assertEquals(42, controller.getNode("/number").getPort("value").intValue());
+        assertEquals(42, controller.getNode("/number").getInput("value").intValue());
     }
 
 }

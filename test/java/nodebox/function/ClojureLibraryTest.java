@@ -28,9 +28,9 @@ public class ClojureLibraryTest {
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("clojure-math/add")
-                .withPortAdded(Port.intPort("v1", 1))
-                .withPortAdded(Port.intPort("v2", 2))
-                .withPortAdded(Port.intPort("v3", 3));
+                .withInputAdded(Port.intPort("v1", 1))
+                .withInputAdded(Port.intPort("v2", 2))
+                .withInputAdded(Port.intPort("v3", 3));
         Object result = context.renderChildNode(functionRepository, addNode);
         assertEquals(6L, result);
     }

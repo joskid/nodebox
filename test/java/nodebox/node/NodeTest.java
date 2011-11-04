@@ -25,17 +25,17 @@ public class NodeTest {
     public void testPortOrder() {
         Port pAlpha = Port.intPort("alpha", 1);
         Port pBeta = Port.intPort("beta", 2);
-        Node original = Node.ROOT.withPortAdded(pAlpha).withPortAdded(pBeta);
+        Node original = Node.ROOT.withInputAdded(pAlpha).withInputAdded(pBeta);
         ImmutableList<String> orderedPortNames = ImmutableList.of("alpha", "beta");
         assertEquals(orderedPortNames, portNames(original));
 
-        Node alphaChanged = original.withPortValue("alpha", 11);
+        Node alphaChanged = original.withInputValue("alpha", 11);
         assertEquals(orderedPortNames, portNames(alphaChanged));
     }
 
     public List<String> portNames(Node n) {
         List<String> portNames = new LinkedList<String>();
-        for (Port p : n.getPorts()) {
+        for (Port p : n.getInputs()) {
             portNames.add(p.getName());
         }
         return portNames;

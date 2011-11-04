@@ -1,14 +1,11 @@
 package nodebox.client;
 
 import nodebox.Icons;
-import nodebox.node.*;
 
-import javax.swing.*;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -96,7 +93,7 @@ public class NodeAttributesEditor extends JPanel implements ListSelectionListene
 
         parameterList.addHeader("NODE");
         parameterList.addNodeSettings();
-        parameterList.addHeader("PORTS");
+        parameterList.addHeader("INPUTS");
         for (Port p : node.getPorts()) {
             parameterList.addPort(p);
         }

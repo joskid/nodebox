@@ -209,7 +209,7 @@ public class NodeLibraryTest extends TestCase {
         Node alpha = Node.ROOT_NODE.newInstance(library, "alpha", Polygon.class);
         Node beta = Node.ROOT_NODE.newInstance(library, "beta", Polygon.class);
         beta.addPort("polygon");
-        beta.getPort("polygon").connect(alpha);
+        beta.getInput("polygon").connect(alpha);
         assertTrue(alpha.isConnectedTo(beta));
         assertTrue(beta.isConnectedTo(alpha));
         NodeLibraryManager manager = new NodeLibraryManager();

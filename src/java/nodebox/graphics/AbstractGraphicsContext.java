@@ -1038,7 +1038,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     public void var(String name, VarType type, Object value, double min, double max) {
 //        Node node = ProcessingContext.getCurrentContext().getNode();
 //        if (node == null) return;
-//        Parameter p = node.getPort(name);
+//        Parameter p = node.getInput(name);
 //        if (p != null) {
 //            if (p.getType() != type.type) {
 //                p.setType(type.type);
@@ -1070,7 +1070,7 @@ public abstract class AbstractGraphicsContext implements GraphicsContext {
     public Port findVar(String name) {
 //        Node node = ProcessingContext.getCurrentContext().getNode();
 //        if (node == null) return null;
-//        return node.getPort(name);
+//        return node.getInput(name);
         return null;
     }
 

@@ -52,8 +52,8 @@ public class NodeTest {
 
         addNode = Node.ROOT
                 .withName("add")
-                .withPortAdded(Port.intPort("alpha", 11))
-                .withPortAdded(Port.intPort("beta", 22));
+                .withInputAdded(Port.intPort("alpha", 11))
+                .withInputAdded(Port.intPort("beta", 22));
     }
 
     /**
@@ -63,41 +63,41 @@ public class NodeTest {
     public void testRoot() {
         Node test = Node.ROOT.withName("test");
         assertEquals("test", test.getName());
-        assertEquals(0, test.getPorts().size());
+        assertEquals(0, test.getInputs().size());
         assertEquals(0, test.getChildren().size());
     }
 
     @Test
     public void testAddPort() {
-        assertEquals(2, addNode.getPorts().size());
-        assertTrue(addNode.hasPort("alpha"));
-        assertTrue(addNode.hasPort("beta"));
+        assertEquals(2, addNode.getInputs().size());
+        assertTrue(addNode.hasInput("alpha"));
+        assertTrue(addNode.hasInput("beta"));
 
-        addNode = addNode.withPortAdded(Port.intPort("gamma", 33));
-        assertEquals(3, addNode.getPorts().size());
-        assertTrue(addNode.hasPort("gamma"));
+        addNode = addNode.withInputAdded(Port.intPort("gamma", 33));
+        assertEquals(3, addNode.getInputs().size());
+        assertTrue(addNode.hasInput("gamma"));
 
         assertFalse(addNode.hasChild("foo"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAddPortWithSameName() {
-        addNode.withPortAdded(Port.stringPort("alpha", "test"));
+        addNode.withInputAdded(Port.stringPort("alpha", "test"));
     }
 
     @Test
     public void testRemovePort() {
-        assertEquals(2, addNode.getPorts().size());
-        assertTrue(addNode.hasPort("alpha"));
+        assertEquals(2, addNode.getInputs().size());
+        assertTrue(addNode.hasInput("alpha"));
 
-        addNode = addNode.withPortRemoved("alpha");
-        assertEquals(1, addNode.getPorts().size());
-        assertFalse(addNode.hasPort("alpha"));
+        addNode = addNode.withInputRemoved("alpha");
+        assertEquals(1, addNode.getInputs().size());
+        assertFalse(addNode.hasInput("alpha"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveNonPort() {
-        parent.withPortRemoved("foo");
+        parent.withInputRemoved("foo");
     }
 
     @Test
@@ -164,14 +164,14 @@ public class NodeTest {
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("math/add")
-                .withPortAdded(Port.intPort("v1", 0))
-                .withPortAdded(Port.intPort("v2", 0));
+                .withInputAdded(Port.intPort("v1", 0))
+                .withInputAdded(Port.intPort("v2", 0));
 
         Node add1 = addNode.extend().withName("add1");
 
         assertSame(addNode.getFunction(), add1.getFunction());
-        assertSame(addNode.getPort("v1"), add1.getPort("v1"));
-        assertSame(addNode.getPort("v2"), add1.getPort("v2"));
+        assertSame(addNode.getInput("v1"), add1.getInput("v1"));
+        assertSame(addNode.getInput("v2"), add1.getInput("v2"));
     }
 
     @Test
@@ -179,8 +179,8 @@ public class NodeTest {
         FunctionRepository testRepository = FunctionRepository.of(TestFunctions.LIBRARY);
         Node allTypesNode = testRepository.nodeForFunction("test/allTypes");
         assertEquals("test/allTypes", allTypesNode.getFunction());
-        assertEquals(4, allTypesNode.getPorts().size());
-        List<Port> ports = allTypesNode.getPorts();
+        assertEquals(4, allTypesNode.getInputs().size());
+        List<Port> ports = allTypesNode.getInputs();
 
         Port pInt1 = ports.get(0);
         assertEquals(Port.TYPE_INT, pInt1.getType());
@@ -208,9 +208,9 @@ public class NodeTest {
     @Test
     public void testChangeValue() {
         Node n = mathRepository.nodeForFunction("math/invert");
-        assertTrue(n.hasPort("int1"));
+        assertTrue(n.hasInput("int1"));
         assertEquals(0, render(mathRepository, n));
-        Node n42 = n.withPortValue("int1", 42);
+        Node n42 = n.withInputValue("int1", 42);
         assertEquals(-42, render(mathRepository, n42));
     }
 
@@ -218,12 +218,12 @@ public class NodeTest {
     public void testChangeValueOnPrototype() {
         Node addNode = mathRepository.nodeForFunction("math/add");
         Node addInstance = addNode.extend();
-        assertTrue(addInstance.hasPort("int1"));
-        assertTrue(addInstance.hasPort("int2"));
+        assertTrue(addInstance.hasInput("int1"));
+        assertTrue(addInstance.hasInput("int2"));
 
-        Node newInstance = addInstance.withPortValue("int1", 42);
-        assertTrue(newInstance.hasPort("int1"));
-        assertTrue(newInstance.hasPort("int2"));
+        Node newInstance = addInstance.withInputValue("int1", 42);
+        assertTrue(newInstance.hasInput("int1"));
+        assertTrue(newInstance.hasInput("int2"));
         assertEquals(42, render(mathRepository, newInstance));
     }
 
@@ -231,14 +231,14 @@ public class NodeTest {
     public void testWithValueUnknownPort() {
         Node addNode = mathRepository.nodeForFunction("math/add");
         Node addInstance = addNode.extend();
-        addInstance.withPortValue("foo", 55);
+        addInstance.withInputValue("foo", 55);
     }
 
     @Test
     public void testChangePortType() {
         Node addNode = mathRepository.nodeForFunction("math/add");
-        Node newInstance = addNode.withPortChanged("int1", Port.stringPort("int1", "hello"));
-        Port p = newInstance.getPort("int1");
+        Node newInstance = addNode.withInputChanged("int1", Port.stringPort("int1", "hello"));
+        Port p = newInstance.getInput("int1");
         assertEquals(Port.TYPE_STRING, p.getType());
         assertEquals("hello", p.getValue());
     }
@@ -377,7 +377,7 @@ public class NodeTest {
         Node nodeA = Node.ROOT_NODE.newInstance(testLibrary, "A", Polygon.class);
         nodeA.addPort("polygon");
         Node nodeB = nodeA.newInstance(testLibrary, "B");
-        assertTrue(nodeB.hasPort("polygon"));
+        assertTrue(nodeB.hasInput("polygon"));
         assertEquals(Polygon.class, nodeB.getDataClass());
     }
 
@@ -516,7 +516,7 @@ public class NodeTest {
         Node net = testNetworkNode.newInstance(testLibrary, "net");
         Node negate1 = net.create(negateNode);
         Node crash1 = net.create(crashNode);
-        negate1.getPort("value").connect(crash1);
+        negate1.getInput("value").connect(crash1);
         try {
             negate1.update();
         } catch (ProcessingError e) {
@@ -590,7 +590,7 @@ public class NodeTest {
         assertSame(beta1.getDataClass(), beta2.getDataClass());
         assertTrue(beta2.hasParameter("value"));
         assertEquals(originalValue, beta2.asInt("value"));
-        assertTrue(beta2.hasPort("betaPort1"));
+        assertTrue(beta2.hasInput("betaPort1"));
 
         // Some other properties.
         assertEquals(20.0, beta2.getX());
@@ -606,7 +606,7 @@ public class NodeTest {
         // It does not retain connections to the downstream nodes since
         // that would replace existing connections.
         assertTrue(beta2.isConnectedTo(alpha1));
-        Connection newConn = beta2.getPort("betaPort1").getConnections().get(0);
+        Connection newConn = beta2.getInput("betaPort1").getConnections().get(0);
         assertNotSame(betaPort1.getConnections().get(0), newConn);
         assertFalse(beta2.isConnectedTo(gamma1));
 
@@ -643,9 +643,9 @@ public class NodeTest {
         Node addConstant1 = net1.create(addConstantNode);
         Node multiAdd1 = net1.create(multiAddNode);
         // Wire up the network.
-        multiAdd1.getPort("values").connect(addConstant1);
-        addConstant1.getPort("value").connect(negate1);
-        negate1.getPort("value").connect(number1);
+        multiAdd1.getInput("values").connect(addConstant1);
+        addConstant1.getInput("value").connect(negate1);
+        negate1.getInput("value").connect(number1);
         // Set some values.
         number1.setValue("value", 42);
         addConstant1.setValue("constant", 2);
@@ -668,7 +668,7 @@ public class NodeTest {
         assertFalse(addConstant2.isConnectedTo(negate1));
         assertFalse(multiAdd1.isConnectedTo(addConstant2));
         // Connect the copies to multiAdd1 and update.
-        multiAdd1.getPort("values").connect(addConstant2);
+        multiAdd1.getInput("values").connect(addConstant2);
         net1.update();
         assertEquals(-80, net1.getOutputValue());
         // Copy negate1 and addConstant1 into a different network.
@@ -691,7 +691,7 @@ public class NodeTest {
         Node negate1 = net1.create(negateNode);
         Node subnet1 = net1.create(testNetworkNode, "subnet1");
         Node subNumber1 = subnet1.create(numberNode);
-        negate1.getPort("value").connect(number1);
+        negate1.getInput("value").connect(number1);
         negate1.setRendered();
         number1.setValue("value", 42);
         subNumber1.setValue("value", 33);
@@ -708,7 +708,7 @@ public class NodeTest {
         Node net2number1 = net2.getChild("number1");
         Node net2negate1 = net2.getChild("negate1");
         assertEquals("negate1", net2negate1.getName());
-        assertTrue(net2negate1.getPort("value").isConnectedTo(net2number1));
+        assertTrue(net2negate1.getInput("value").isConnectedTo(net2number1));
         assertEquals(33, net2.getChild("subnet1").getChild("number1").getValue("value"));
         // Not updated yet.
         assertNull(net2.getOutputValue());
@@ -723,7 +723,7 @@ public class NodeTest {
         Node number1 = protoNet.create(numberNode);
         Node negate1 = protoNet.create(negateNode);
         number1.setExpression("value", "40+2");
-        negate1.getPort("value").connect(number1);
+        negate1.getInput("value").connect(number1);
         negate1.setRendered();
         // Create new node based on prototype.
         Node protoNet1 = root.create(protoNet);
@@ -756,11 +756,11 @@ public class NodeTest {
         Node multiAdd1 = net1.create(multiAddNode);
         number1.setValue("value", 5);
         number2.setValue("value", 8);
-        multiAdd1.getPort("values").connect(number1);
-        multiAdd1.getPort("values").connect(number2);
+        multiAdd1.getInput("values").connect(number1);
+        multiAdd1.getInput("values").connect(number2);
         multiAdd1.update();
         assertFalse(multiAdd1.isDirty());
-        assertEquals(2, multiAdd1.getPort("values").getValues().size());
+        assertEquals(2, multiAdd1.getInput("values").getValues().size());
         assertEquals(13, multiAdd1.getOutputValue());
         multiAdd1.disconnect();
         assertTrue(multiAdd1.isDirty());
@@ -768,7 +768,7 @@ public class NodeTest {
         assertFalse(number1.isConnected());
         assertFalse(number2.isConnected());
         multiAdd1.update();
-        assertEquals(0, multiAdd1.getPort("values").getValues().size());
+        assertEquals(0, multiAdd1.getInput("values").getValues().size());
         assertEquals(0, multiAdd1.getOutputValue());
     }
 
@@ -858,7 +858,7 @@ public class NodeTest {
         Node number1 = numberNode.newInstance(testLibrary, "number1");
         Node stamp1 = Node.ROOT_NODE.newInstance(testLibrary, "stamp1", Integer.class);
         stamp1.addPort("value");
-        stamp1.getPort("value").connect(number1);
+        stamp1.getInput("value").connect(number1);
         // The code prepares upstream dependencies for stamping, processes them and negates the output.
         String stampCode = "def cook(self):\n" +
                 "  context.put('my_a', 99)\n" +

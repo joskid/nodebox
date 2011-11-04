@@ -37,14 +37,14 @@ public class PythonCode implements NodeCode {
         // Monkey patch to facilitate access to a node's prototype cook code.
         PythonInterpreter interpreter = new PythonInterpreter();
         interpreter.exec("from nodebox.node import Node, PythonCode\n" +
-            "_cook = Node.cook\n" +
-            "def cook(self, *args):\n" +
-            "    if len(args) == 1 and isinstance(args[0], PythonCode.SelfWrapper):\n" +
-            "        wrapper = args[0]\n" +
-            "        return self.asCode(\"_code\").cook(wrapper.node, wrapper.context)\n" +
-            "    else:\n" +
-            "        return _cook(self, *args)\n" +
-            "Node.cook = cook");
+                "_cook = Node.cook\n" +
+                "def cook(self, *args):\n" +
+                "    if len(args) == 1 and isinstance(args[0], PythonCode.SelfWrapper):\n" +
+                "        wrapper = args[0]\n" +
+                "        return self.asCode(\"_code\").cook(wrapper.node, wrapper.context)\n" +
+                "    else:\n" +
+                "        return _cook(self, *args)\n" +
+                "Node.cook = cook");
     }
 
     public PythonCode(String source) {
@@ -189,7 +189,7 @@ public class PythonCode implements NodeCode {
             if ("context".equals(name)) return Py.java2py(context);
             Parameter p = node.getParameter(name);
             if (p == null) {
-                Port port = node.getPort(name);
+                Port port = node.getInput(name);
                 if (port == null) {
                     // This will throw an error that we explicitly do not catch.
                     noParameterOrPortError(name);

@@ -131,7 +131,7 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         controlMap.clear();
         if (activeNode == null) return;
         int rowIndex = 0;
-        for (Port p : activeNode.getPorts()) {
+        for (Port p : activeNode.getInputs()) {
             // Ports starting with underscores are hidden.
             if (p.getName().startsWith("_")) continue;
             Class widgetClass = CONTROL_MAP.get(p.getWidget());

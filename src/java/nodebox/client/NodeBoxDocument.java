@@ -1,6 +1,7 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
+import nodebox.function.CoreVectorFunctions;
 import nodebox.function.FunctionRepository;
 import nodebox.function.MathFunctions;
 import nodebox.handle.HandleDelegate;
@@ -92,17 +93,25 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withFunction("math/add")
                 .withPortAdded(Port.intPort("v1", 5))
                 .withPortAdded(Port.intPort("v2", 7));
+        Node rect = Node.ROOT.withName("rect")
+                .withPosition(new nodebox.graphics.Point(180, 20))
+                .withFunction("corevector/rect")
+                .withPortAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
+                .withPortAdded(Port.floatPort("width", 100))
+                .withPortAdded(Port.floatPort("height", 100));
+
         demoRoot = Node.ROOT
                 .withPortAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
                 .withPortAdded(Port.floatPort("width", 500))
                 .withPortAdded(Port.floatPort("height", 500))
                 .withChildAdded(zero)
                 .withChildAdded(number)
+                .withChildAdded(rect)
                 .withRenderedChildName("zero");
     }
 
     public NodeBoxDocument() {
-        this(NodeLibrary.create("untitled", demoRoot, FunctionRepository.of(MathFunctions.LIBRARY)));
+        this(NodeLibrary.create("untitled", demoRoot, FunctionRepository.of(MathFunctions.LIBRARY, CoreVectorFunctions.LIBRARY)));
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {

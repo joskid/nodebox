@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.*;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class Node {
 
@@ -336,13 +335,14 @@ public final class Node {
         Port oldPort = getPort(portName);
         checkNotNull(oldPort, "Port %s does not exist on node %s.", portName, this);
         ImmutableList.Builder<Port> b = ImmutableList.builder();
-        // Skip over the old Port.
+        // Add all ports back in the correct order.
         for (Port port : getPorts()) {
-            if (port != oldPort) {
+            if (port == oldPort) {
+                b.add(newPort);
+            } else {
                 b.add(port);
             }
         }
-        b.add(newPort);
         return newNodeWithAttribute(Attribute.PORTS, b.build());
     }
 
@@ -399,13 +399,13 @@ public final class Node {
         return newNodeWithAttribute(Attribute.CHILDREN, b.build());
     }
 
-     /**
+    /**
      * Create a new node with the child replaced by the given node.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
      * @param childName The name of the child node to replace.
-      * @param newChild The new child node.
+     * @param newChild  The new child node.
      * @return A new Node.
      */
     public Node withChildReplaced(String childName, Node newChild) {

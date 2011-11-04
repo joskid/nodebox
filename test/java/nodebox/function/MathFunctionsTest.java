@@ -33,9 +33,9 @@ public class MathFunctionsTest {
     public void testCallInvert() {
         Node invertNode = Node.ROOT
                 .withFunction("math/invert")
-                .withInputAdded(Port.intPort("value", 5));
-        Object result = context.renderChildNode(functionRepository, invertNode);
-        assertEquals(-5, result);
+                .withInputAdded(Port.intPort("value", 5))
+                .withOutputAdded(Port.intPort("output", 0));
+        assertEquals(-5, context.firstOutputOfRender(functionRepository, invertNode));
     }
 
     /**
@@ -48,14 +48,16 @@ public class MathFunctionsTest {
         Node subtract1 = Node.ROOT
                 .withFunction("math/subtract")
                 .withInputAdded(Port.intPort("a", 10))
-                .withInputAdded(Port.intPort("b", 3));
-        assertEquals(7, context.renderChildNode(functionRepository, subtract1));
+                .withInputAdded(Port.intPort("b", 3))
+                .withOutputAdded(Port.intPort("output", 0));
+        assertEquals(7, context.firstOutputOfRender(functionRepository, subtract1));
 
         Node subtract2 = Node.ROOT
                 .withFunction("math/subtract")
                 .withInputAdded(Port.intPort("b", 3))
-                .withInputAdded(Port.intPort("a", 10));
-        assertEquals(-7, context.renderChildNode(functionRepository, subtract2));
+                .withInputAdded(Port.intPort("a", 10))
+                .withOutputAdded(Port.intPort("output", 0));
+        assertEquals(-7, context.firstOutputOfRender(functionRepository, subtract2));
     }
 
 }

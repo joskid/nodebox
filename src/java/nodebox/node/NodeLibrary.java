@@ -14,9 +14,7 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.*;
 
 public class NodeLibrary {
 
@@ -153,11 +151,10 @@ public class NodeLibrary {
         String prototypeId = reader.getAttributeValue(null, "prototype");
         String name = reader.getAttributeValue(null, "name");
         String function = reader.getAttributeValue(null, "function");
-        String outputType = reader.getAttributeValue(null, "outputType");
 
         Node prototype = nodeRepository.getNode(prototypeId);
         prototype = prototype != null ? prototype : Node.ROOT;
-        Node node = prototype.extend().withName(name).withFunction(function).withOutputType(outputType);
+        Node node = prototype.extend().withName(name).withFunction(function);
         while (true) {
             int eventType = reader.next();
             if (eventType == XMLStreamConstants.START_ELEMENT) {
@@ -226,6 +223,7 @@ public class NodeLibrary {
 
     /**
      * Write the NodeLibrary to a file.
+     *
      * @param file The file to save.
      */
     public void store(File file) throws IOException {

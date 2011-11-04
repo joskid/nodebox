@@ -373,7 +373,8 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                     Node outputNode = networkView.getConnectionSource().getNode();
                     Node inputNode = networkView.getConnectionTarget().getNode();
                     // Look for compatible ports.
-                    java.util.List<Port> compatiblePorts = inputNode.getInputsOfType(outputNode.getOutputType());
+                    // TODO Use all compatible ports.
+                    java.util.List<Port> compatiblePorts = inputNode.getInputsOfType(outputNode.getOutputs().get(0).getType());
                     if (compatiblePorts.isEmpty()) {
                         // There are no compatible parameters.
                     } else if (compatiblePorts.size() == 1) {

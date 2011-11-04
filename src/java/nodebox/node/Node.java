@@ -19,9 +19,9 @@ public final class Node {
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_FUNCTION = "function";
-    public static final String KEY_OUTPUT_TYPE = "outputType";
     public static final String KEY_POSITION = "position";
     public static final String KEY_INPUTS = "inputs";
+    public static final String KEY_OUTPUTS = "outputs";
     public static final String KEY_CHILDREN = "children";
     public static final String KEY_RENDERED_CHILD_NAME = "renderedChildName";
     public static final String KEY_CONNECTIONS = "connections";
@@ -42,7 +42,7 @@ public final class Node {
         }
     }
 
-    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, OUTPUT_TYPE, POSITION, INPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final PrototypeMap properties;
@@ -60,9 +60,9 @@ public final class Node {
         m.put(KEY_DESCRIPTION, "");
         m.put(KEY_IMAGE, "");
         m.put(KEY_FUNCTION, "core/zero");
-        m.put(KEY_OUTPUT_TYPE, Port.TYPE_INT);
         m.put(KEY_POSITION, Point.ZERO);
         m.put(KEY_INPUTS, ImmutableList.<Port>of());
+        m.put(KEY_OUTPUTS, ImmutableList.<Port>of());
         m.put(KEY_CHILDREN, ImmutableMap.<String, Node>of());
         m.put(KEY_RENDERED_CHILD_NAME, "");
         m.put(KEY_CONNECTIONS, ImmutableList.<Connection>of());
@@ -104,10 +104,6 @@ public final class Node {
 
     public String getFunction() {
         return (String) getProperty(KEY_FUNCTION);
-    }
-
-    public String getOutputType() {
-        return (String) getProperty(KEY_OUTPUT_TYPE);
     }
 
     public Point getPosition() {
@@ -169,6 +165,35 @@ public final class Node {
 
     public boolean hasInput(String name) {
         return getInput(name) != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Port> getOutputs() {
+        return (List<Port>) getProperty(KEY_OUTPUTS);
+    }
+
+    public Port getOutput(String name) {
+        checkNotNull(name, "Port name cannot be null.");
+        for (Port p : getOutputs()) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public ImmutableList<Port> getOutputsOfType(String type) {
+        ImmutableList.Builder<Port> b = ImmutableList.builder();
+        for (Port p : getOutputs()) {
+            if (p.getType().equals(type)) {
+                b.add(p);
+            }
+        }
+        return b.build();
+    }
+
+    public boolean hasOutput(String name) {
+        return getOutput(name) != null;
     }
 
     /**
@@ -262,18 +287,6 @@ public final class Node {
     }
 
     /**
-     * Create a new node with the given output type.
-     * <p/>
-     * If you call this on ROOT, extend() is called implicitly.
-     *
-     * @param outputType The new output type.
-     * @return A new Node.
-     */
-    public Node withOutputType(String outputType) {
-        return newNodeWithAttribute(Attribute.OUTPUT_TYPE, outputType);
-    }
-
-    /**
      * Create a new node with the given position.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
@@ -333,7 +346,7 @@ public final class Node {
      */
     public Node withInputChanged(String portName, Port newPort) {
         Port oldPort = getInput(portName);
-        checkNotNull(oldPort, "Port %s does not exist on node %s.", portName, this);
+        checkNotNull(oldPort, "Input port %s does not exist on node %s.", portName, this);
         ImmutableList.Builder<Port> b = ImmutableList.builder();
         // Add all ports back in the correct order.
         for (Port port : getInputs()) {
@@ -361,6 +374,67 @@ public final class Node {
         checkArgument(p != null, "Input port %s does not exist on node %s.", portName, this);
         p = p.withValue(value);
         return withInputChanged(portName, p);
+    }
+
+    /**
+     * Create a new node with the given output port added.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param port The port to add.
+     * @return A new Node.
+     */
+    public Node withOutputAdded(Port port) {
+        checkNotNull(port, "Port cannot be null.");
+        checkArgument(!hasInput(port.getName()), "An output port named %s already exists on node %s.", port.getName(), this);
+        ImmutableList.Builder<Port> b = ImmutableList.builder();
+        b.addAll(getOutputs());
+        b.add(port);
+        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
+    }
+
+    /**
+     * Create a new node with the given output port removed.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param portName The name of the port to remove.
+     * @return A new Node.
+     */
+    public Node withOutputRemoved(String portName) {
+        Port portToRemove = getOutput(portName);
+        checkArgument(portToRemove != null, "Output port %s does not exist on node %s.", portName, this);
+
+        ImmutableList.Builder<Port> b = ImmutableList.builder();
+        for (Port port : getOutputs()) {
+            if (portToRemove != port)
+                b.add(port);
+        }
+        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
+    }
+
+    /**
+     * Create a new node with the given output port replaced.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param portName The name of the port to replace.
+     * @param newPort  The new Port instance.
+     * @return A new Node.
+     */
+    public Node withOutputChanged(String portName, Port newPort) {
+        Port oldPort = getOutput(portName);
+        checkNotNull(oldPort, "Output port %s does not exist on node %s.", portName, this);
+        ImmutableList.Builder<Port> b = ImmutableList.builder();
+        // Add all ports back in the correct order.
+        for (Port port : getOutputs()) {
+            if (port == oldPort) {
+                b.add(newPort);
+            } else {
+                b.add(port);
+            }
+        }
+        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
     }
 
     /**
@@ -466,15 +540,15 @@ public final class Node {
             case FUNCTION:
                 checkArgument(value instanceof String, "Changing the function name requires a String, not %s.", value);
                 return newNode(KEY_FUNCTION, value);
-            case OUTPUT_TYPE:
-                checkArgument(value instanceof String, "Changing the outputType requires a String, not %s.", value);
-                return newNode(KEY_OUTPUT_TYPE, value);
             case POSITION:
                 checkArgument(value instanceof Point, "Changing the position requires a Point, not %s.", value);
                 return newNode(KEY_POSITION, value);
             case INPUTS:
-                checkArgument(value instanceof ImmutableList, "Changing the ports requires an ImmutableList, not %s.", value);
+                checkArgument(value instanceof ImmutableList, "Changing the inputs requires an ImmutableList, not %s.", value);
                 return newNode(KEY_INPUTS, value);
+            case OUTPUTS:
+                checkArgument(value instanceof ImmutableList, "Changing the outputs requires an ImmutableList, not %s.", value);
+                return newNode(KEY_OUTPUTS, value);
             case CHILDREN:
                 checkArgument(value instanceof ImmutableMap, "Changing the children requires an ImmutableMap, not %s.", value);
                 return newNode(KEY_CHILDREN, value);

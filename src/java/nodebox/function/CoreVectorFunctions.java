@@ -17,7 +17,7 @@ public class CoreVectorFunctions {
 
     static {
         LIBRARY = JavaLibrary.ofClass("corevector", CoreVectorFunctions.class,
-                "rect");
+                "rect", "pointToValues", "valuesToPoint");
     }
 
     public static Geometry rect(Point position, double width, double height) {
@@ -26,8 +26,12 @@ public class CoreVectorFunctions {
         return p.asGeometry();
     }
 
-    public static List<Double> pointToNumbers(Point point) {
+    public static List<Double> pointToValues(Point point) {
         return ImmutableList.of(point.getX(), point.getY());
+    }
+
+    public static Point valuesToPoint(double x, double y) {
+        return new Point(x, y);
     }
 
 }

@@ -39,6 +39,7 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         CONTROL_MAP.put(Port.Widget.STRING, StringControl.class);
         CONTROL_MAP.put(Port.Widget.TEXT, StringControl.class); // TODO TextControl
         CONTROL_MAP.put(Port.Widget.TOGGLE, ToggleControl.class);
+        CONTROL_MAP.put(Port.Widget.POINT, PointControl.class);
     }
 
     private final NodeBoxDocument document;
@@ -99,8 +100,8 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
      * <p/>
      * Display the new value in the port's control UI.
      *
-     * @param port The changed port.
-     * @param value     The new port value.
+     * @param port  The changed port.
+     * @param value The new port value.
      */
     public void updatePortValue(Port port, Object value) {
         // Nodes that have expressions set don't display the actual value but the expression.
@@ -117,12 +118,12 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
      */
     public void updateEnabledState() {
         for (Component c : controlPanel.getComponents())
-        if (c instanceof PortRow) {
-            PortRow row = (PortRow) c;
-            if (row.isEnabled() != row.getPort().isEnabled()) {
-                row.setEnabled(row.getPort().isEnabled());
+            if (c instanceof PortRow) {
+                PortRow row = (PortRow) c;
+                if (row.isEnabled() != row.getPort().isEnabled()) {
+                    row.setEnabled(row.getPort().isEnabled());
+                }
             }
-        }
     }
 
     private void rebuildInterface() {
@@ -148,9 +149,9 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
             rowConstraints.gridy = rowIndex;
             rowConstraints.fill = GridBagConstraints.HORIZONTAL;
             rowConstraints.weightx = 1.0;
-                PortRow portRow = new PortRow(getDocument(), p, control);
-                portRow.setEnabled(p.isEnabled());
-                controlPanel.add(portRow, rowConstraints);
+            PortRow portRow = new PortRow(getDocument(), p, control);
+            portRow.setEnabled(p.isEnabled());
+            controlPanel.add(portRow, rowConstraints);
             rowIndex++;
         }
 

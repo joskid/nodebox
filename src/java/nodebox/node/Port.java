@@ -20,7 +20,7 @@ public final class Port {
      * The UI control for this port. This defines how the port is represented in the user interface.
      */
     public enum Widget {
-        ANGLE, COLOR, FILE, FLOAT, FONT, GRADIENT, IMAGE, INT, MENU, SEED, STRING, TEXT, TOGGLE
+        ANGLE, COLOR, FILE, FLOAT, FONT, GRADIENT, IMAGE, INT, MENU, SEED, STRING, TEXT, TOGGLE, POINT
     }
 
     public static final ImmutableMap<String, Object> DEFAULT_VALUES;
@@ -260,7 +260,7 @@ public final class Port {
         } else if (getType().equals(TYPE_STRING)) {
             return Widget.STRING;
         } else if (getType().equals(TYPE_POINT)) {
-            throw new UnsupportedOperationException("No widget available for point type.");
+            return Widget.POINT;
         } else if (getType().equals(TYPE_COLOR)) {
             return Widget.COLOR;
         } else {

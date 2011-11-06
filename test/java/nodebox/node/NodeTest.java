@@ -29,7 +29,7 @@ public class NodeTest {
         ImmutableList<String> orderedPortNames = ImmutableList.of("alpha", "beta");
         assertEquals(orderedPortNames, portNames(original));
 
-        Node alphaChanged = original.withInputValue("alpha", 11);
+        Node alphaChanged = original.withInputValue("alpha", 11L);
         assertEquals(orderedPortNames, portNames(alphaChanged));
     }
 

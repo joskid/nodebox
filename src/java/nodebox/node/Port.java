@@ -28,7 +28,7 @@ public final class Port {
 
     static {
         DEFAULT_VALUES = ImmutableMap.of(
-                TYPE_INT, 0,
+                TYPE_INT, 0L,
                 TYPE_FLOAT, 0.0,
                 TYPE_STRING, "",
                 TYPE_POINT, Point.ZERO,
@@ -41,7 +41,7 @@ public final class Port {
     private final String type;
     private final Object value;
 
-    public static Port intPort(String name, int value) {
+    public static Port intPort(String name, long value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
         return new Port(name, TYPE_INT, value);
@@ -106,7 +106,7 @@ public final class Port {
         checkArgument(STANDARD_TYPES.contains(type), "Given type %s is not a standard type.");
         Object value;
         if (type.equals("int")) {
-            value = Integer.valueOf(stringValue);
+            value = Long.valueOf(stringValue);
         } else if (type.equals("float")) {
             value = Double.valueOf(stringValue);
         } else if (type.equals("point")) {
@@ -147,23 +147,23 @@ public final class Port {
     }
 
     /**
-     * Return the value stored in the port as an Integer.
+     * Return the value stored in the port as a long.
      * <ul>
      * <li>Integers are returned as-is.</li>
      * <li>Floats are rounded using Math.round().</li>
      * <li>Other types return 0.</li>
      * </ul>
      *
-     * @return The value as an Integer or 0 if the value cannot be converted.
+     * @return The value as a long or 0 if the value cannot be converted.
      */
-    public int intValue() {
+    public long intValue() {
         checkValueType();
         if (type.equals(TYPE_INT)) {
-            return (Integer) value;
+            return (Long) value;
         } else if (type.equals(TYPE_FLOAT)) {
-            return (int) Math.round((Double) value);
+            return Math.round((Double) value);
         } else {
-            return 0;
+            return 0L;
         }
     }
 
@@ -180,7 +180,7 @@ public final class Port {
     public double floatValue() {
         checkValueType();
         if (type.equals(TYPE_INT)) {
-            return ((Integer) value).doubleValue();
+            return ((Long) value).doubleValue();
         } else if (type.equals(TYPE_FLOAT)) {
             return (Double) value;
         } else {
@@ -289,7 +289,7 @@ public final class Port {
 
     private boolean correctValueForType(Object value) {
         if (type.equals(TYPE_INT)) {
-            return value instanceof Integer;
+            return value instanceof Long;
         } else if (type.equals(TYPE_FLOAT)) {
             return value instanceof Double;
         } else if (type.equals(TYPE_STRING)) {

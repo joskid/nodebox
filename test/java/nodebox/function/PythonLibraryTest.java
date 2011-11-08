@@ -3,6 +3,7 @@ package nodebox.function;
 import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.Port;
+import nodebox.util.LoadException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -58,5 +59,10 @@ public class PythonLibraryTest {
                 .withOutputAdded(Port.intPort("output", 0));
         Object result = context.renderPort(multiplyNode, "output");
         assertEquals("spamspamspam", result);
+    }
+
+    @Test(expected = LoadException.class)
+    public void testNoVarAtEnd() {
+        PythonLibrary.loadScript("py-error", "test/python/nonexisting.py");
     }
 }

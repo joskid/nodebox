@@ -10,7 +10,11 @@ public class PythonLibrary extends FunctionLibrary {
 
     public static PythonLibrary loadScript(String namespace, String fileName) throws LoadException {
         PythonInterpreter interpreter = new PythonInterpreter();
-        interpreter.execfile(fileName);
+        try {
+            interpreter.execfile(fileName);
+        } catch (PyException e) {
+            throw new LoadException(fileName, e);
+        }
         PyStringMap map = (PyStringMap) interpreter.getLocals();
 
         ImmutableMap.Builder<String, Function> builder = ImmutableMap.builder();
@@ -74,6 +78,7 @@ public class PythonLibrary extends FunctionLibrary {
             PyObject pyResult = fn.__call__(pyArgs);
             if (pyResult == null)
                 return null;
+            // todo: number conversions should be handled higher up in the code, and not at the Jython level.
             if (pyResult instanceof PyLong || pyResult instanceof PyInteger)
                 return pyResult.__tojava__(Long.class);
 

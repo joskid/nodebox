@@ -134,6 +134,8 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         for (Port p : activeNode.getInputs()) {
             // Ports starting with underscores are hidden.
             if (p.getName().startsWith("_")) continue;
+            // Ports of which the values aren't persisted are hidden as well.
+            if (p.isCustomType()) continue;
             Class widgetClass = CONTROL_MAP.get(p.getWidget());
             JComponent control;
             if (widgetClass != null) {

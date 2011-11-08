@@ -1,9 +1,7 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
-import nodebox.function.CoreVectorFunctions;
-import nodebox.function.FunctionRepository;
-import nodebox.function.MathFunctions;
+import nodebox.function.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -103,9 +101,18 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
                 .withInputAdded(Port.floatPort("width", 100))
                 .withInputAdded(Port.floatPort("height", 100))
-                .withOutputAdded(Port.intPort("geometry", 0));
-        Node sleepy = Node.ROOT.withName("sleepy")
+                .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO))
+                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+        Node color = Node.ROOT.withName("color")
                 .withPosition(new nodebox.graphics.Point(320, 20))
+                .withFunction("corevector/color")
+                .withInputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"))
+                .withInputAdded(Port.colorPort("fill", nodebox.graphics.Color.BLACK))
+                .withInputAdded(Port.colorPort("stroke", nodebox.graphics.Color.BLACK))
+                .withInputAdded(Port.floatPort("strokeWidth", 0))
+                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+        Node sleepy = Node.ROOT.withName("sleepy")
+                .withPosition(new nodebox.graphics.Point(320, 100))
                 .withFunction("math/slowNumber")
                 .withInputAdded(Port.floatPort("value", 0))
                 .withOutputAdded(Port.floatPort("value", 0));
@@ -118,14 +125,19 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(value2)
                 .withChildAdded(add)
                 .withChildAdded(rect)
+                .withChildAdded(color)
                 .withChildAdded(sleepy)
                 .connect("value1", "number", "add", "v1")
                 .connect("value2", "number", "add", "v2")
+                .connect("rect", "geometry", "color", "geometry")
                 .withRenderedChildName("add");
     }
 
     public NodeBoxDocument() {
-        this(NodeLibrary.create("untitled", demoRoot, FunctionRepository.of(MathFunctions.LIBRARY, CoreVectorFunctions.LIBRARY)));
+        this(NodeLibrary.create("untitled", demoRoot,
+                FunctionRepository.of(
+                        MathFunctions.LIBRARY,
+                        PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"))));
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {

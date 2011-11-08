@@ -147,6 +147,15 @@ public final class Port {
     }
 
     /**
+     * Check if the Port type is a custom type.
+     *
+     * @return true if this is a custom type.
+     */
+    public boolean isCustomType() {
+        return ! isStandardType();
+    }
+
+    /**
      * Return the value stored in the port as a long.
      * <ul>
      * <li>Integers are returned as-is.</li>

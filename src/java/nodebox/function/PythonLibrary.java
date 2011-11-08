@@ -8,6 +8,14 @@ import org.python.util.PythonInterpreter;
 
 public class PythonLibrary extends FunctionLibrary {
 
+    /**
+     * Run the Python register-nodes function in the library.
+     *
+     * @param namespace The name space in which the library resides.
+     * @param fileName The file name.
+     * @return The new Python library.
+     * @throws LoadException If the script could not be loaded.
+     */
     public static PythonLibrary loadScript(String namespace, String fileName) throws LoadException {
         PythonInterpreter interpreter = new PythonInterpreter();
         try {
@@ -89,6 +97,7 @@ public class PythonLibrary extends FunctionLibrary {
         }
 
         public ImmutableList<Argument> getArguments() {
+            // todo: check if keeping a list of arguments makes sense in a python environment.
             return ImmutableList.of();
         }
     }

@@ -67,13 +67,20 @@ public class PythonLibrary extends FunctionLibrary {
         }
 
         public Object invoke(Object... args) throws Exception {
-            PyObject[] pyargs = new PyObject[args.length];
+            PyObject[] pyArgs = new PyObject[args.length];
             for (int i = 0; i < args.length; i++)
-                pyargs[i] = Py.java2py(args[i]);
-            PyObject pyresult = fn.__call__(pyargs);
-            if (pyresult instanceof PyLong || pyresult instanceof PyInteger)
-                return pyresult.__tojava__(Long.class);
-            return pyresult.__tojava__(Object.class);
+                pyArgs[i] = Py.java2py(args[i]);
+
+            PyObject pyResult = fn.__call__(pyArgs);
+            if (pyResult == null)
+                return null;
+            if (pyResult instanceof PyLong || pyResult instanceof PyInteger)
+                return pyResult.__tojava__(Long.class);
+
+            Object result = pyResult.__tojava__(Object.class);
+            if (result == Py.NoConversion)
+                throw new RuntimeException("Cannot convert Python object " + pyResult + " to java.");
+            return result;
         }
 
         public ImmutableList<Argument> getArguments() {

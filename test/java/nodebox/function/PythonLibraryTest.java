@@ -62,7 +62,7 @@ public class PythonLibraryTest {
     }
 
     @Test(expected = LoadException.class)
-    public void testNoVarAtEnd() {
+    public void testLoadError() {
         PythonLibrary.loadScript("py-error", "test/python/nonexisting.py");
     }
 }

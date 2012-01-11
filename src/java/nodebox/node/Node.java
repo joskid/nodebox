@@ -19,6 +19,7 @@ public final class Node {
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_FUNCTION = "function";
+    public static final String KEY_LIST_AWARE = "listAware";
     public static final String KEY_POSITION = "position";
     public static final String KEY_INPUTS = "inputs";
     public static final String KEY_OUTPUTS = "outputs";
@@ -42,7 +43,7 @@ public final class Node {
         }
     }
 
-    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_AWARE, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final PrototypeMap properties;
@@ -60,6 +61,7 @@ public final class Node {
         m.put(KEY_DESCRIPTION, "");
         m.put(KEY_IMAGE, "");
         m.put(KEY_FUNCTION, "core/zero");
+        m.put(KEY_LIST_AWARE, false);
         m.put(KEY_POSITION, Point.ZERO);
         m.put(KEY_INPUTS, ImmutableList.<Port>of());
         m.put(KEY_OUTPUTS, ImmutableList.<Port>of());
@@ -104,6 +106,10 @@ public final class Node {
 
     public String getFunction() {
         return (String) getProperty(KEY_FUNCTION);
+    }
+
+    public boolean isListAware() {
+        return (Boolean) getProperty(KEY_LIST_AWARE);
     }
 
     public Point getPosition() {
@@ -284,6 +290,21 @@ public final class Node {
      */
     public Node withFunction(String function) {
         return newNodeWithAttribute(Attribute.FUNCTION, function);
+    }
+
+    /**
+     * Create a new node with the given list awareness.
+     * List-aware nodes operate on the input and output lists directly.
+     * Nodes that are not list-aware operate on one value, and NodeBox takes care of feeding the input of a list to
+     * the function and re-assembling the outputs into a new list.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param listAware The new list awareness.
+     * @return A new Node.
+     */
+    public Node withListAwareness(boolean listAware) {
+        return newNodeWithAttribute(Attribute.LIST_AWARE, listAware);
     }
 
     /**
@@ -525,8 +546,8 @@ public final class Node {
      * @return A new Node.
      */
     public Node connect(String outputNode, String outputPort, String inputNode, String inputPort) {
-        checkArgument(hasChild(outputNode), "Node does not have a child named %s.", outputNode);
-        checkArgument(hasChild(inputNode), "Node does not have a child named %s.", inputNode);
+        checkArgument(hasChild(outputNode), "Node %s does not have a child named %s.", this, outputNode);
+        checkArgument(hasChild(inputNode), "Node %s does not have a child named %s.", this, inputNode);
         Node output = getChild(outputNode);
         Node input = getChild(inputNode);
         checkArgument(output.hasOutput(outputPort), "Node %s does not have an output port %s.", outputNode, outputPort);
@@ -578,6 +599,9 @@ public final class Node {
             case FUNCTION:
                 checkArgument(value instanceof String, "Changing the function name requires a String, not %s.", value);
                 return newNode(KEY_FUNCTION, value);
+            case LIST_AWARE:
+                checkArgument(value instanceof Boolean, "Changing the list awareness requires a Boolean, not %s.", value);
+                return newNode(KEY_LIST_AWARE, value);
             case POSITION:
                 checkArgument(value instanceof Point, "Changing the position requires a Point, not %s.", value);
                 return newNode(KEY_POSITION, value);

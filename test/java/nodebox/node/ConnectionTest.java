@@ -5,6 +5,7 @@ import nodebox.function.MathFunctions;
 import org.junit.Before;
 import org.junit.Test;
 
+import static nodebox.util.Assertions.assertResultsEqual;
 import static org.junit.Assert.*;
 
 public class ConnectionTest {
@@ -69,7 +70,7 @@ public class ConnectionTest {
                 .connect("value42", "number", "add", "v1")
                 .connect("value5", "number", "add", "v2");
         context.renderNetwork(n);
-        assertEquals(47.0, context.getResult(addNode, "number"));
+        assertResultsEqual(context.getResults(addNode, "number"), 47.0);
     }
 
     @Test
@@ -80,8 +81,7 @@ public class ConnectionTest {
                 .connect("add", "number", "value42", "number");
         // Infinite loops are allowed: each node is only executed once.
         context.renderNetwork(n);
-        assertEquals(42.0, context.getResult(addNode, "number"));
+        assertResultsEqual(context.getResults(addNode, "number"), 42.0);
     }
-
 
 }

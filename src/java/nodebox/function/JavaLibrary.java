@@ -4,9 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
-final class JavaLibrary extends FunctionLibrary {
+import static com.google.common.base.Preconditions.checkArgument;
+
+public final class JavaLibrary extends FunctionLibrary {
 
     public static JavaLibrary ofClass(String namespace, Class c, String... methodNames) {
         ArrayList<Function> functions = new ArrayList<Function>();
@@ -52,6 +55,7 @@ final class JavaLibrary extends FunctionLibrary {
         private final ImmutableList<Argument> arguments;
 
         public StaticMethodFunction(Method method) {
+            checkArgument(Modifier.isStatic(method.getModifiers()), "Method %s is not a static method.", method);
             this.method = method;
             this.arguments = Functions.introspect(method);
         }

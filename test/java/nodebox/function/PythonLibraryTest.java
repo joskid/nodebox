@@ -6,7 +6,9 @@ import nodebox.node.Port;
 import nodebox.util.LoadException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.List;
+
+import static nodebox.util.Assertions.assertResultsEqual;
 
 public class PythonLibraryTest {
 
@@ -20,8 +22,8 @@ public class PythonLibraryTest {
                 .withName("add")
                 .withFunction("py-functions/add")
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.renderPort(addNode, "output");
-        assertEquals(0L, result);
+        List<Object> results = context.renderPort(addNode, "output");
+        assertResultsEqual(results, 0L);
     }
 
     @Test
@@ -33,8 +35,8 @@ public class PythonLibraryTest {
                 .withInputAdded(Port.intPort("v2", 2))
                 .withInputAdded(Port.intPort("v3", 3))
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.renderPort(addNode, "output");
-        assertEquals(6L, result);
+        List<Object> results = context.renderPort(addNode, "output");
+        assertResultsEqual(results, 6L);
     }
 
     @Test
@@ -45,8 +47,8 @@ public class PythonLibraryTest {
                 .withInputAdded(Port.floatPort("v1", 10))
                 .withInputAdded(Port.floatPort("v2", 2))
                 .withOutputAdded(Port.floatPort("output", 0));
-        Object result = context.renderPort(multiplyNode, "output");
-        assertEquals(20.0, result);
+        List<Object> results = context.renderPort(multiplyNode, "output");
+        assertResultsEqual(results, 20.0);
     }
 
     @Test
@@ -57,8 +59,8 @@ public class PythonLibraryTest {
                 .withInputAdded(Port.stringPort("v1", "spam"))
                 .withInputAdded(Port.intPort("v2", 3))
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.renderPort(multiplyNode, "output");
-        assertEquals("spamspamspam", result);
+        List<Object> results = context.renderPort(multiplyNode, "output");
+        assertResultsEqual(results, "spamspamspam");
     }
 
     @Test(expected = LoadException.class)

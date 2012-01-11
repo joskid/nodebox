@@ -683,7 +683,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
                 Port firstOutputPort = renderedChild.getOutputs().iterator().next();
-                Object result = context.getResult(firstOutputPort);
+                Object result = context.getResults(renderedChild, firstOutputPort);
                 addressBar.setProgressVisible(false);
                 viewer.setOutputValue(result);
                 networkView.checkErrorAndRepaint();
@@ -1081,7 +1081,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                         context.renderNetwork(exportNetwork);
                         Node renderedChild = exportNetwork.getRenderedChild();
                         Port firstOutputPort = renderedChild.getOutputs().iterator().next();
-                        Object result = context.getResult(firstOutputPort);
+                        Object result = context.getResults(renderedChild, firstOutputPort);
                         viewer.setOutputValue(result);
                         exportDelegate.frameDone(frame, result);
 

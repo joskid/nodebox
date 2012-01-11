@@ -1,5 +1,6 @@
 package nodebox.function;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.NodeRenderException;
@@ -41,7 +42,7 @@ public class MathFunctionsTest {
                 .withFunction("math/invert")
                 .withInputAdded(Port.floatPort("value", 5))
                 .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(-5.0, context.renderPort(invertNode, "output"));
+        assertEquals(ImmutableList.of(-5.0), context.renderPort(invertNode, "output"));
     }
 
     /**
@@ -56,14 +57,14 @@ public class MathFunctionsTest {
                 .withInputAdded(Port.floatPort("a", 10))
                 .withInputAdded(Port.floatPort("b", 3))
                 .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(7.0, context.renderPort(subtract1, "output"));
+        assertEquals(ImmutableList.of(7.0), context.renderPort(subtract1, "output"));
 
         Node subtract2 = Node.ROOT
                 .withFunction("math/subtract")
                 .withInputAdded(Port.floatPort("b", 3))
                 .withInputAdded(Port.floatPort("a", 10))
                 .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(-7.0, context.renderPort(subtract2, "output"));
+        assertEquals(ImmutableList.of(-7.0), context.renderPort(subtract2, "output"));
     }
 
 }

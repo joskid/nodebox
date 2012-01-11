@@ -1,5 +1,7 @@
 package nodebox.function;
 
+import java.util.ArrayList;
+
 /**
  * Basic math function library.
  */
@@ -8,7 +10,7 @@ public class MathFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "add", "subtract", "invert", "slowNumber");
+        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "add", "subtract", "invert", "slowNumber", "toNumbers");
     }
 
     public static double value(double v) {
@@ -34,6 +36,16 @@ public class MathFunctions {
             return -999;
         }
         return v;
+    }
+
+    public static Iterable<Double> toNumbers(Iterable<String> strings) {
+        ArrayList<Double> numbers = new ArrayList<Double>();
+        for (String s : strings) {
+            for (String part : s.split(" ")) {
+                numbers.add(Double.parseDouble(part));
+            }
+        }
+        return numbers;
     }
 
 }

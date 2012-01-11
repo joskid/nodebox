@@ -1,12 +1,17 @@
 package nodebox.function;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.Port;
 import nodebox.util.LoadException;
 import org.junit.Test;
 
+import java.util.List;
+
+import static nodebox.util.Assertions.assertResultsEqual;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ClojureLibraryTest {
 
@@ -20,8 +25,8 @@ public class ClojureLibraryTest {
                 .withName("add")
                 .withFunction("clojure-math/add")
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.renderPort(addNode, "output");
-        assertEquals(0L, result);
+        List<Object> results = context.renderPort(addNode, "output");
+        assertResultsEqual(results, 0L);
     }
 
     @Test
@@ -33,8 +38,8 @@ public class ClojureLibraryTest {
                 .withInputAdded(Port.intPort("v2", 2))
                 .withInputAdded(Port.intPort("v3", 3))
                 .withOutputAdded(Port.intPort("output", 0));
-        Object result = context.renderPort(addNode, "output");
-        assertEquals(6L, result);
+        List<Object> results = context.renderPort(addNode, "output");
+        assertResultsEqual(results, 6L);
     }
 
     @Test(expected = LoadException.class)

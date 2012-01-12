@@ -33,6 +33,17 @@ public class NodeTest {
         assertEquals(orderedPortNames, portNames(alphaChanged));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testOnlyConnectSameType() {
+        Node floatNode = Node.ROOT.withName("float1").withOutputAdded(Port.floatPort("float", 0));
+        Node intNode = Node.ROOT.withName("int1").withInputAdded(Port.intPort("int", 0));
+        Node.ROOT
+                .withChildAdded(floatNode)
+                .withChildAdded(intNode)
+                .connect("float1", "float", "int1", "int");
+    }
+
+
     public List<String> portNames(Node n) {
         List<String> portNames = new LinkedList<String>();
         for (Port p : n.getInputs()) {

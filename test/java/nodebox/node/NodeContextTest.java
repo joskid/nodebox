@@ -152,6 +152,19 @@ public class NodeContextTest {
         context.renderNode(setNumberNode);
         assertEquals(SideEffects.theOutput, 42L);
     }
+    
+    @Test
+    public void testNodeTwice() {
+        Node invert1Node = invertNode.withName("invert1").withInputValue("value", 42.0);
+        Node invert2Node = invertNode.withName("invert2");
+        Node net = Node.ROOT
+                .withChildAdded(invert1Node)
+                .withChildAdded(invert2Node)
+                .connect("invert1", "output", "invert2", "value");
+        context.renderChild(net, invert2Node);
+        List<Object> results = context.getResults(invert2Node, "output");
+        assertResultsEqual(results, 42.0);
+     }
 
     // TODO Check that the node function is executed the exact amount we expect.
 

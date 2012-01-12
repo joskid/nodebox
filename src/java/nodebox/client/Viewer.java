@@ -26,6 +26,9 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMotionListener, KeyListener {
 
     public static final float POINT_SIZE = 4f;
@@ -39,7 +42,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
     private static Cursor defaultCursor, panCursor;
 
     private final NodeBoxDocument document;
-    private Object outputValue;
+    private java.util.List<Object> outputValues;
     private Handle handle;
     private boolean showHandle = true;
     private boolean handleEnabled = true;
@@ -179,20 +182,48 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
     //// Network data events ////
 
 
-    public Object getOutputValue() {
-        return outputValue;
+    public java.util.List getOutputValues() {
+        return outputValues;
     }
 
-    public void setOutputValue(Object outputValue) {
-        this.outputValue = outputValue;
-        if (outputValue != null && outputClass != outputValue.getClass()) {
-            if (outputValue instanceof Canvas) {
+    /**
+     * Get the class of elements of the given list.
+     * If a list is null, is empty, or has many different types, returns Object.class.
+     *
+     * @param list The list to get.
+     * @return the class of all items in the list or Object. Never null.
+     */
+    private Class listClass(java.util.List<Object> list) {
+        if (list == null || list.isEmpty()) {
+            return Object.class;
+        }
+        Class c = null;
+        for (int i = 0; i < list.size(); i++) {
+            Object o = list.get(i);
+            if (i == 0) {
+                c = o.getClass();
+            } else {
+                if (o.getClass() != c) {
+                    return Object.class;
+                }
+            }
+        }
+        checkNotNull(c);
+        return c;
+    }
+
+    public void setOutputValues(java.util.List<Object> outputValues) {
+        this.outputValues = outputValues;
+        Class listClass = listClass(outputValues);
+        if (listClass != outputClass) {
+            if (Canvas.class.isAssignableFrom(listClass)) {
                 // The canvas is placed in the top-left corner, as in NodeBox 1.
                 resetView();
-                Canvas canvas = (Canvas) outputValue;
-                viewerLayer.setBounds(canvas.getBounds().getRectangle2D());
+                checkState(!outputValues.isEmpty(), "When assigning a canvas, the list cannot be empty.");
+                Canvas firstCanvas = (Canvas) outputValues.get(0);
+                viewerLayer.setBounds(firstCanvas.getBounds().getRectangle2D());
                 viewerLayer.setOffset(getWidth() / 2, getHeight() / 2);
-            } else if (outputValue instanceof Grob) {
+            } else if (Grob.class.isAssignableFrom(listClass)) {
                 // Other graphic objects are displayed in the center.
                 resetView();
                 viewerLayer.setBounds(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2, Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -203,7 +234,7 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
                 viewerLayer.setBounds(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE);
                 viewerLayer.setOffset(5, 5);
             }
-            outputClass = outputValue.getClass();
+            outputClass = listClass;
         }
         repaint();
     }
@@ -358,35 +389,39 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
         protected void paint(PPaintContext paintContext) {
             Graphics2D g2 = paintContext.getGraphics();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            // If the output value is geometry, store it in a geometry object.
-            // This is used to draw the points / point numbers.
-            IGeometry geo = null;
             // Draw the canvas bounds
-            if (outputValue instanceof Canvas) {
-                Canvas c = (Canvas) outputValue;
-                geo = c.asGeometry(false);
-                Rectangle2D canvasBounds = c.getBounds().getRectangle2D();
+            if (Canvas.class.isAssignableFrom(outputClass)) {
+                // TODO How do we render multiple canvases?
+                checkState(!outputValues.isEmpty());
+                Canvas firstCanvas = (Canvas) outputValues.get(0);
+                Rectangle2D canvasBounds = firstCanvas.getBounds().getRectangle2D();
                 g2.setColor(Color.DARK_GRAY);
                 g2.setStroke(new BasicStroke(1f));
                 g2.draw(canvasBounds);
             }
-            if (outputValue instanceof Grob) {
-                Grob g = (Grob) outputValue;
-                if (g instanceof IGeometry) {
-                    geo = (IGeometry) outputValue;
+            if (Grob.class.isAssignableFrom(outputClass)) {
+                for (Object o : outputValues) {
+                    Grob g = (Grob) o;
+                    Shape oldClip = g2.getClip();
+                    g.draw(g2);
+                    g2.setClip(oldClip);
                 }
-                Shape oldClip = g2.getClip();
-                g.draw(g2);
-                g2.setClip(oldClip);
-            } else if (outputValue != null) {
-                g2.setColor(Theme.TEXT_NORMAL_COLOR);
-                g2.setFont(Theme.EDITOR_FONT);
-                String s = outputValue.toString();
-                int y = 20;
-                for (String line : s.split("\n")) {
-                    g2.drawString(line, 5, y);
-                    y += 14;
+            } else {
+                AffineTransform t = g2.getTransform();
+                if (outputValues != null) {
+                    for (Object o : outputValues) {
+                        g2.setColor(Theme.TEXT_NORMAL_COLOR);
+                        g2.setFont(Theme.EDITOR_FONT);
+                        String s = o.toString();
+                        for (String line : s.split("\n")) {
+                            g2.drawString(line, 5, 20);
+                            g2.translate(0, 14);
+                        }
+                        g2.drawLine(-100, 10, 1000, 10);
+                        g2.translate(0, 14);
+                    }
                 }
+                g2.setTransform(t);
             }
 
             // Draw the handle.
@@ -404,17 +439,20 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
             }
 
             // Draw the points.
-            if (showPoints && geo != null) {
+            if (showPoints && IGeometry.class.isAssignableFrom(outputClass)) {
                 // Create a canvas with a transparent background
                 Path onCurves = new Path();
                 Path offCurves = new Path();
                 onCurves.setFill(new nodebox.graphics.Color(0f, 0f, 1f));
                 offCurves.setFill(new nodebox.graphics.Color(1f, 0f, 0f));
-                for (nodebox.graphics.Point pt : geo.getPoints()) {
-                    if (pt.isOnCurve()) {
-                        onCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
-                    } else {
-                        offCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
+                for (Object o : outputValues) {
+                    IGeometry geo = (IGeometry) o;
+                    for (nodebox.graphics.Point pt : geo.getPoints()) {
+                        if (pt.isOnCurve()) {
+                            onCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
+                        } else {
+                            offCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
+                        }
                     }
                 }
                 onCurves.draw(g2);
@@ -422,19 +460,22 @@ public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMot
             }
 
             // Draw the point numbers.
-            if (showPointNumbers && geo != null) {
+            if (showPointNumbers && IGeometry.class.isAssignableFrom(outputClass)) {
                 g2.setFont(Theme.SMALL_MONO_FONT);
                 g2.setColor(Color.BLUE);
                 // Create a canvas with a transparent background
                 int index = 0;
-                for (nodebox.graphics.Point pt : geo.getPoints()) {
-                    if (pt.isOnCurve()) {
-                        g2.setColor(Color.BLUE);
-                    } else {
-                        g2.setColor(Color.RED);
+                for (Object o : outputValues) {
+                    IGeometry geo = (IGeometry) o;
+                    for (nodebox.graphics.Point pt : geo.getPoints()) {
+                        if (pt.isOnCurve()) {
+                            g2.setColor(Color.BLUE);
+                        } else {
+                            g2.setColor(Color.RED);
+                        }
+                        g2.drawString(index + "", (int) (pt.x + 3), (int) (pt.y - 2));
+                        index++;
                     }
-                    g2.drawString(index + "", (int)(pt.x + 3), (int)(pt.y - 2));
-                    index++;
                 }
             }
         }

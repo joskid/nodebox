@@ -169,7 +169,7 @@ public class NetworkTest extends NodeTestCase {
         towerType.setValue("floorHeight", 20.0);
         towerType.setValue("buildingHeight", 8);
         towerType.update();
-        Grob g = (Grob) towerType.getOutputValue();
+        Grob g = (Grob) towerType.getOutputValues();
         assertEquals(new Rect(0, 0, 50.0, 160.0), g.getBounds());
         */
     }

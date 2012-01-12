@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.*;
 public class NodeContext {
 
     /**
-     * This is used as the key for the results map.
+     * This is used as the key for the outputValuesMap.
      * <p/>
      * We can't just use the Port, since Port instances are re-used across nodes. Using the node / port combination
      * is unique.
@@ -38,15 +38,10 @@ public class NodeContext {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            NodePort nodePort = (NodePort) o;
-
-            if (!node.equals(nodePort.node)) return false;
-            if (!port.equals(nodePort.port)) return false;
-
-            return true;
+            if (!(o instanceof NodePort)) return false;
+            final NodePort other = (NodePort) o;
+            return Objects.equal(node, other.node)
+                    && Objects.equal(port, other.port);
         }
 
         @Override
@@ -57,7 +52,8 @@ public class NodeContext {
 
     private final FunctionRepository repository;
     private final double frame;
-    private final Map<NodePort, List<Object>> results = new HashMap<NodePort, List<Object>>();
+    private final Map<NodePort, List<Object>> outputValuesMap = new HashMap<NodePort, List<Object>>();
+    private final Map<NodePort, List<Object>> inputValuesMap = new HashMap<NodePort, List<Object>>();
     private final Set<Node> renderedNodes = new HashSet<Node>();
 
     public NodeContext(FunctionRepository repository) {
@@ -71,16 +67,16 @@ public class NodeContext {
     }
 
     public Map<NodePort, List<Object>> getResultsMap() {
-        return results;
+        return outputValuesMap;
     }
 
     public List<Object> getResults(Node node, String outputPort) {
         checkArgument(node.hasOutput(outputPort), "Node %s does not have an output port named %s.", node, outputPort);
-        return results.get(NodePort.of(node, outputPort));
+        return outputValuesMap.get(NodePort.of(node, outputPort));
     }
 
     public List<Object> getResults(Node node, Port port) {
-        return results.get(new NodePort(node, port));
+        return outputValuesMap.get(new NodePort(node, port));
     }
 
     /**
@@ -117,10 +113,10 @@ public class NodeContext {
                 renderChild(network, outputNode);
                 Port outputPort = outputNode.getOutput(c.getOutputPort());
                 Port inputPort = child.getInput(c.getInputPort());
-                List<Object> result = results.get(NodePort.of(outputNode, outputPort));
+                List<Object> result = outputValuesMap.get(NodePort.of(outputNode, outputPort));
                 // Check if the result is null. This can happen if there is a cycle in the network.
                 if (result != null) {
-                    results.put(NodePort.of(child, inputPort), result);
+                    inputValuesMap.put(NodePort.of(child, inputPort), result);
                 }
             }
         }
@@ -148,8 +144,8 @@ public class NodeContext {
         // Get the input values.
         ArrayList<List> inputValues = new ArrayList<List>();
         for (Port p : node.getInputs()) {
-            if (results.containsKey(NodePort.of(node, p))) {
-                inputValues.add(results.get(NodePort.of(node, p)));
+            if (inputValuesMap.containsKey(NodePort.of(node, p))) {
+                inputValues.add(inputValuesMap.get(NodePort.of(node, p)));
             } else {
                 inputValues.add(ImmutableList.of(p.getValue()));
             }
@@ -185,8 +181,8 @@ public class NodeContext {
         Port thePort = node.getOutputs().get(0);
 
         NodePort np = NodePort.of(node, thePort);
-        checkState(!results.containsKey(np), "This value should not have been set yet.");
-        results.put(np, ImmutableList.copyOf((Iterable<? extends Object>) returnValues));
+        checkState(!outputValuesMap.containsKey(np), "This value should not have been set yet.");
+        outputValuesMap.put(np, ImmutableList.copyOf((Iterable<? extends Object>) returnValues));
     }
 
     private int listMin(List<List> ll) {
@@ -217,13 +213,13 @@ public class NodeContext {
 
         List<Port> outputs = node.getOutputs();
         for (Port output : outputs) {
-            checkState(!results.containsKey(NodePort.of(node, output)), "This value should not have been set yet.");
+            checkState(!outputValuesMap.containsKey(NodePort.of(node, output)), "This value should not have been set yet.");
         }
         if (minSpan == 0) {
             // Execute the node once if there are no input nodes.
             Map<Port, Object> returnValues = invokeListUnawareFunction(node, function, ImmutableList.of());
             for (Map.Entry<Port, Object> returnValue : returnValues.entrySet()) {
-                results.put(NodePort.of(node, returnValue.getKey()), ImmutableList.of(returnValue.getValue()));
+                outputValuesMap.put(NodePort.of(node, returnValue.getKey()), ImmutableList.of(returnValue.getValue()));
             }
         } else {
             Multimap<Port, Object> resultsMultimap = LinkedListMultimap.create();
@@ -240,8 +236,8 @@ public class NodeContext {
             }
             for (Port port : resultsMultimap.keySet()) {
                 NodePort np = NodePort.of(node, port);
-                checkState(!results.containsKey(np), "This value should not have been set yet.");
-                results.put(NodePort.of(node, port), ImmutableList.copyOf(resultsMultimap.get(port)));
+                checkState(!outputValuesMap.containsKey(np), "This value should not have been set yet.");
+                outputValuesMap.put(NodePort.of(node, port), ImmutableList.copyOf(resultsMultimap.get(port)));
             }
         }
     }
@@ -281,7 +277,7 @@ public class NodeContext {
 
     public List<Object> renderPort(Node node, String outputPort) throws NodeRenderException {
         renderNode(node);
-        return results.get(NodePort.of(node, outputPort));
+        return outputValuesMap.get(NodePort.of(node, outputPort));
     }
 
     public double getFrame() {

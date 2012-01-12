@@ -79,16 +79,24 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final Node demoRoot;
 
     static {
-        Node value1 = Node.ROOT.withName("value1")
+        Node value1 = Node.ROOT.withName("toNumbers1")
                 .withPosition(new nodebox.graphics.Point(20, 20))
-                .withFunction("math/value")
-                .withInputAdded(Port.floatPort("number", 5))
-                .withOutputAdded(Port.floatPort("number", 0));
-        Node value2 = Node.ROOT.withName("value2")
+                .withFunction("math/toNumbers")
+                .withListAwareness(true)
+                .withInputAdded(Port.stringPort("s", "1 2 3"))
+                .withOutputAdded(Port.floatPort("numbers", 0));
+        Node value2 = Node.ROOT.withName("toNumbers2")
                 .withPosition(new nodebox.graphics.Point(20, 100))
-                .withFunction("math/value")
-                .withInputAdded(Port.floatPort("number", 7))
-                .withOutputAdded(Port.floatPort("number", 0));
+                .withFunction("math/toNumbers")
+                .withListAwareness(true)
+                .withInputAdded(Port.stringPort("s", "100 200 300"))
+                .withOutputAdded(Port.floatPort("numbers", 0));
+        Node makePoint1 = Node.ROOT.withName("makePoint1")
+                .withPosition(new nodebox.graphics.Point(120, 120))
+                .withFunction("corevector/makePoint")
+                .withInputAdded(Port.floatPort("x", 0))
+                .withInputAdded(Port.floatPort("y", 0))
+                .withOutputAdded(Port.pointPort("point", nodebox.graphics.Point.ZERO));
         Node add = Node.ROOT.withName("add")
                 .withPosition(new nodebox.graphics.Point(120, 20))
                 .withFunction("math/add")
@@ -124,11 +132,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(value1)
                 .withChildAdded(value2)
                 .withChildAdded(add)
+                .withChildAdded(makePoint1)
                 .withChildAdded(rect)
                 .withChildAdded(color)
                 .withChildAdded(sleepy)
-                .connect("value1", "number", "add", "v1")
-                .connect("value2", "number", "add", "v2")
+                .connect("toNumbers1", "numbers", "add", "v1")
+                .connect("toNumbers2", "numbers", "add", "v2")
                 .connect("rect", "geometry", "color", "geometry")
                 .withRenderedChildName("add");
     }
@@ -683,9 +692,9 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
                 Port firstOutputPort = renderedChild.getOutputs().iterator().next();
-                Object result = context.getResults(renderedChild, firstOutputPort);
+                java.util.List<Object> results = context.getResults(renderedChild, firstOutputPort);
                 addressBar.setProgressVisible(false);
-                viewer.setOutputValue(result);
+                viewer.setOutputValues(results);
                 networkView.checkErrorAndRepaint();
             }
         });
@@ -720,13 +729,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             public void run() {
                 final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
                 startRendering(context);
-                Map<String, Object> outputValues = null;
                 try {
                     context.renderNetwork(renderNetwork);
                 } catch (NodeRenderException e) {
                     LOG.log(Level.WARNING, "Error while processing", e);
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Other error while processing", e);
                 }
-
 
                 // We finished rendering so set the renderNetwork flag off.
                 isRendering.set(false);

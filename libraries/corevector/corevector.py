@@ -1,5 +1,5 @@
 from math import pi, sin, cos, radians
-from nodebox.graphics import Geometry, Path, Color, Transform, Text
+from nodebox.graphics import Geometry, Path, Color, Transform, Text, Point
 from nodebox.util.Geometry import coordinates, angle, distance
 
 def color(shape, fill, stroke, strokeWidth):
@@ -145,3 +145,6 @@ def copy(shape, copies, order, translation, rotation, scale):
         sx += scale.x / 100.0
         sy += scale.y / 100.0
     return g
+
+def makePoint(x, y):
+    return Point(x, y)

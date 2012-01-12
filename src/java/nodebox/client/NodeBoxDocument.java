@@ -82,13 +82,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         Node value1 = Node.ROOT.withName("toNumbers1")
                 .withPosition(new nodebox.graphics.Point(20, 20))
                 .withFunction("math/toNumbers")
-                .withListAwareness(true)
-                .withInputAdded(Port.stringPort("s", "1 2 3"))
+                .withListPolicy(ListPolicy.LIST_AWARE)
+                .withInputAdded(Port.stringPort("s", "11 22 33"))
                 .withOutputAdded(Port.floatPort("numbers", 0));
         Node value2 = Node.ROOT.withName("toNumbers2")
                 .withPosition(new nodebox.graphics.Point(20, 100))
                 .withFunction("math/toNumbers")
-                .withListAwareness(true)
+                .withListPolicy(ListPolicy.LIST_AWARE)
                 .withInputAdded(Port.stringPort("s", "100 200 300"))
                 .withOutputAdded(Port.floatPort("numbers", 0));
         Node makePoint1 = Node.ROOT.withName("makePoint1")
@@ -138,6 +138,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(sleepy)
                 .connect("toNumbers1", "numbers", "add", "v1")
                 .connect("toNumbers2", "numbers", "add", "v2")
+                .connect("toNumbers1", "numbers", "makePoint1", "x")
+                .connect("toNumbers2", "numbers", "makePoint1", "y")
                 .connect("rect", "geometry", "color", "geometry")
                 .withRenderedChildName("add");
     }

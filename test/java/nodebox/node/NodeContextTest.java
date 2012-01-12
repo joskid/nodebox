@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.function.CoreVectorFunctions;
 import nodebox.function.FunctionRepository;
 import nodebox.function.MathFunctions;
@@ -8,10 +9,12 @@ import nodebox.util.SideEffects;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class NodeContextTest {
@@ -30,6 +33,13 @@ public class NodeContextTest {
             .withInputAdded(Port.floatPort("y", 0))
             .withOutputAdded(Port.pointPort("point", Point.ZERO));
 
+    public static final Node addNode = Node.ROOT
+            .withName("add")
+            .withFunction("math/add")
+            .withInputAdded(Port.floatPort("v1", 0.0))
+            .withInputAdded(Port.floatPort("v2", 0.0))
+            .withOutputAdded(Port.floatPort("number", 0.0));
+
     public static final Node invertNode = Node.ROOT
             .withName("invert")
             .withFunction("math/invert")
@@ -39,9 +49,19 @@ public class NodeContextTest {
     public static final Node toNumbersNode = Node.ROOT
             .withName("toNumbers")
             .withFunction("math/toNumbers")
-            .withListAwareness(true)
+            .withListPolicy(ListPolicy.LIST_AWARE)
             .withInputAdded(Port.stringPort("string", ""))
             .withOutputAdded(Port.floatPort("numbers", 0.0));
+
+    public static final Node threeNumbers = toNumbersNode
+            .extend()
+            .withName("threeNumbers")
+            .withInputValue("string", "1 2 3");
+
+    public static final Node fiveNumbers = toNumbersNode
+            .extend()
+            .withName("fiveNumbers")
+            .withInputValue("string", "100 200 300 400 500");
 
     public static final FunctionRepository functions = FunctionRepository.of(CoreVectorFunctions.LIBRARY, MathFunctions.LIBRARY, SideEffects.LIBRARY);
     private NodeContext context;
@@ -128,6 +148,19 @@ public class NodeContextTest {
         assertResultsEqual(results, -1.0, -2.0, -3.0, -4.0);
     }
 
+    @Test
+    public void testEmptyListProcessing() {
+        Node noNumbers = toNumbersNode.extend().withName("noNumbers").withInputValue("string", "");
+        Node add1 = addNode.extend().withName("add1");
+        Node net = Node.ROOT
+                .withChildAdded(noNumbers)
+                .withChildAdded(add1)
+                .connect("noNumbers", "numbers", "add1", "v1");
+        context.renderChild(net, add1);
+        List<Object> results = context.getResults(add1, "number");
+        assertTrue(results.isEmpty());
+    }
+
     /**
      * Some nodes are not "pure" but produce side-effects, for example by fetching from an input device
      * or writing to an output device. Those nodes typically do not have inputs or outputs.
@@ -151,7 +184,7 @@ public class NodeContextTest {
         context.renderNode(setNumberNode);
         assertEquals(SideEffects.theOutput, 42L);
     }
-    
+
     @Test
     public void testSamePrototypeTwice() {
         Node invert1Node = invertNode.withName("invert1").withInputValue("value", 42.0);
@@ -163,7 +196,7 @@ public class NodeContextTest {
         context.renderChild(net, invert2Node);
         List<Object> results = context.getResults(invert2Node, "output");
         assertResultsEqual(results, 42.0);
-     }
+    }
 
     /**
      * Test that the node function is executed the exact amount we expect.
@@ -185,6 +218,104 @@ public class NodeContextTest {
         List<Object> results = context.getResults(incNode, "number");
         assertResultsEqual(results, 2.0, 3.0, 4.0);
     }
+
+    /**
+     * Test the combination of a list input and port value.
+     */
+    @Test
+    public void testListWithValue() {
+        Node toNumbers1Node = toNumbersNode.withName("toNumbers1").withInputValue("string", "1 2 3");
+        Node add1 = addNode.extend().withName("add1").withInputValue("v2", 100.0);
+        Node net = Node.ROOT
+                .withChildAdded(toNumbers1Node)
+                .withChildAdded(add1)
+                .connect("toNumbers1", "numbers", "add1", "v1");
+        context.renderChild(net, add1);
+        List<Object> results = context.getResults(add1, "number");
+        assertResultsEqual(results, 101.0, 102.0, 103.0);
+    }
+    
+    @Test
+    public void testListPolicies() {
+        // With shortest list policy we stop when the shortest list runs out of values.
+        Node addShortest = addNode.extend().withName("addShortest").withListPolicy(ListPolicy.SHORTEST_LIST);
+        assertResultsEqual(renderAddNode(addShortest), 101.0, 202.0, 303.0);
+        // With longest list policy shorter lists wraps around.
+        Node addLongest = addNode.extend().withName("addLongest").withListPolicy(ListPolicy.LONGEST_LIST);
+        assertResultsEqual(renderAddNode(addLongest), 101.0, 202.0, 303.0, 401.0, 502.0);
+        // With cross-reference list policy we combine everything with everything.
+        Node addCrossReference = addNode.extend().withName("addLongest").withListPolicy(ListPolicy.CROSS_REFERENCE);
+        assertResultsEqual(renderAddNode(addCrossReference),
+                101.0, 201.0, 301.0, 401.0, 501.0,
+                102.0, 202.0, 302.0, 402.0, 502.0,
+                103.0, 203.0, 303.0, 403.0, 503.0);
+    }
+
+    @Test
+    public void testGetValueAtIndexWrapped() {
+        List<Integer> numbers = ImmutableList.of(1, 2, 3);
+        assertEquals(1, NodeContext.getValueAtIndexWrapped(numbers, 0));
+        assertEquals(2, NodeContext.getValueAtIndexWrapped(numbers, 1));
+        assertEquals(3, NodeContext.getValueAtIndexWrapped(numbers, 2));
+        assertEquals(1, NodeContext.getValueAtIndexWrapped(numbers, 3));
+        assertEquals(2, NodeContext.getValueAtIndexWrapped(numbers, 4));
+        List<Integer> emptyNumbers = ImmutableList.of();
+        assertEquals(null, NodeContext.getValueAtIndexWrapped(emptyNumbers, 4));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetValueAtIndexWrappedNull() {
+        NodeContext.getValueAtIndexWrapped(ImmutableList.of(), -1);
+    }
+
+
+    /**
+     * Construct a network with three numbers and five numbers and add them using the given add node.
+     *
+     * @param addNode The add node to connect.
+     * @return The results of the add node.
+     */
+    private List<Object> renderAddNode(Node addNode) {
+        Node net = Node.ROOT
+                .withChildAdded(threeNumbers)
+                .withChildAdded(fiveNumbers)
+                .withChildAdded(addNode)
+                .connect("threeNumbers", "numbers", addNode.getName(), "v1")
+                .connect("fiveNumbers", "numbers", addNode.getName(), "v2");
+        context.renderChild(net, addNode);
+        return context.getResults(addNode, "number");
+    }
+
+    @Test
+    public void testListOfListsIterator() {
+        List<? extends Object> threeNumbers = ImmutableList.of(1, 2, 3);
+        List<? extends Object> fiveNumbers = ImmutableList.of(1, 2, 3, 4, 5);
+
+        assertEquals(ImmutableList.of(
+                ImmutableList.of(1, 1),
+                ImmutableList.of(2, 2),
+                ImmutableList.of(3, 3)),
+                realizeIterator(makeListOfListsIterator(NodeContext.ShortestListIterator.class, ImmutableList.of(threeNumbers, fiveNumbers))));
+
+    }
+
+    private NodeContext.ListOfListsIterator makeListOfListsIterator(Class<? extends NodeContext.ListOfListsIterator> c, List<List<? extends Object>> listOfLists) {
+        try {
+            return (NodeContext.ListOfListsIterator) c.getConstructors()[0].newInstance(listOfLists);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private List<List<? extends Object>> realizeIterator(Iterator<List<? extends Object>> iterator) {
+        ImmutableList.Builder<List<? extends Object>> builder = ImmutableList.builder();
+        while (iterator.hasNext()) {
+            builder.add(iterator.next());
+        }
+        return builder.build();
+    }
+
 
     // TODO Check list-aware node with no inputs.
     // TODO Check list-aware node with no outputs.

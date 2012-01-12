@@ -19,7 +19,7 @@ public final class Node {
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_FUNCTION = "function";
-    public static final String KEY_LIST_AWARE = "listAware";
+    public static final String KEY_LIST_POLICY = "listPolicy";
     public static final String KEY_POSITION = "position";
     public static final String KEY_INPUTS = "inputs";
     public static final String KEY_OUTPUTS = "outputs";
@@ -43,7 +43,7 @@ public final class Node {
         }
     }
 
-    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_AWARE, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_POLICY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final PrototypeMap properties;
@@ -61,7 +61,7 @@ public final class Node {
         m.put(KEY_DESCRIPTION, "");
         m.put(KEY_IMAGE, "");
         m.put(KEY_FUNCTION, "core/zero");
-        m.put(KEY_LIST_AWARE, false);
+        m.put(KEY_LIST_POLICY, ListPolicy.LONGEST_LIST);
         m.put(KEY_POSITION, Point.ZERO);
         m.put(KEY_INPUTS, ImmutableList.<Port>of());
         m.put(KEY_OUTPUTS, ImmutableList.<Port>of());
@@ -108,8 +108,12 @@ public final class Node {
         return (String) getProperty(KEY_FUNCTION);
     }
 
+    public ListPolicy getListPolicy() {
+        return (ListPolicy) getProperty(KEY_LIST_POLICY);
+    }
+
     public boolean isListAware() {
-        return (Boolean) getProperty(KEY_LIST_AWARE);
+        return getListPolicy().isListAware();
     }
 
     public Point getPosition() {
@@ -293,18 +297,18 @@ public final class Node {
     }
 
     /**
-     * Create a new node with the given list awareness.
-     * List-aware nodes operate on the input and output lists directly.
+     * Create a new node with the given list policy.
+     * The list policy defines how the node context operates on the input and output lists.
      * Nodes that are not list-aware operate on one value, and NodeBox takes care of feeding the input of a list to
      * the function and re-assembling the outputs into a new list.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
-     * @param listAware The new list awareness.
+     * @param listPolicy The new list policy.
      * @return A new Node.
      */
-    public Node withListAwareness(boolean listAware) {
-        return newNodeWithAttribute(Attribute.LIST_AWARE, listAware);
+    public Node withListPolicy(ListPolicy listPolicy) {
+        return newNodeWithAttribute(Attribute.LIST_POLICY, listPolicy);
     }
 
     /**
@@ -536,6 +540,8 @@ public final class Node {
         return newNodeWithAttribute(Attribute.RENDERED_CHILD_NAME, name);
     }
 
+    // TODO Add a variant that takes in Node objects.
+
     /**
      * Create a new node that connects the given child nodes.
      *
@@ -602,9 +608,9 @@ public final class Node {
             case FUNCTION:
                 checkArgument(value instanceof String, "Changing the function name requires a String, not %s.", value);
                 return newNode(KEY_FUNCTION, value);
-            case LIST_AWARE:
-                checkArgument(value instanceof Boolean, "Changing the list awareness requires a Boolean, not %s.", value);
-                return newNode(KEY_LIST_AWARE, value);
+            case LIST_POLICY:
+                checkArgument(value instanceof ListPolicy, "Changing the list policy requires a ListPolicy, not %s.", value);
+                return newNode(KEY_LIST_POLICY, value);
             case POSITION:
                 checkArgument(value instanceof Point, "Changing the position requires a Point, not %s.", value);
                 return newNode(KEY_POSITION, value);

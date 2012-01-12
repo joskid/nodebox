@@ -41,8 +41,10 @@ public class MathFunctions {
     public static Iterable<Double> toNumbers(Iterable<String> strings) {
         ArrayList<Double> numbers = new ArrayList<Double>();
         for (String s : strings) {
-            for (String part : s.split(" ")) {
-                numbers.add(Double.parseDouble(part));
+            if (!s.isEmpty()) {
+                for (String part : s.split(" ")) {
+                    numbers.add(Double.parseDouble(part));
+                }
             }
         }
         return numbers;

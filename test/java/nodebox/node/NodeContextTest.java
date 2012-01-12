@@ -49,6 +49,7 @@ public class NodeContextTest {
     @Before
     public void setUp() throws Exception {
         context = new NodeContext(functions);
+        SideEffects.reset();
     }
 
     @Test
@@ -136,7 +137,6 @@ public class NodeContextTest {
         Node getNumberNode = Node.ROOT
                 .withFunction("side-effects/getNumber")
                 .withOutputAdded(Port.intPort("number", 0));
-        SideEffects.reset();
         SideEffects.theInput = 42;
         context.renderNode(getNumberNode);
         List<Object> results = context.getResults(getNumberNode, "number");
@@ -148,13 +148,12 @@ public class NodeContextTest {
         Node setNumberNode = Node.ROOT
                 .withFunction("side-effects/setNumber")
                 .withInputAdded(Port.intPort("number", 42));
-        SideEffects.reset();
         context.renderNode(setNumberNode);
         assertEquals(SideEffects.theOutput, 42L);
     }
     
     @Test
-    public void testNodeTwice() {
+    public void testSamePrototypeTwice() {
         Node invert1Node = invertNode.withName("invert1").withInputValue("value", 42.0);
         Node invert2Node = invertNode.withName("invert2");
         Node net = Node.ROOT
@@ -166,7 +165,26 @@ public class NodeContextTest {
         assertResultsEqual(results, 42.0);
      }
 
-    // TODO Check that the node function is executed the exact amount we expect.
+    /**
+     * Test that the node function is executed the exact amount we expect.
+     */
+    @Test
+    public void testExecuteAmount() {
+        Node toNumbers1Node = toNumbersNode.withName("toNumbers1").withInputValue("string", "1 2 3");
+        Node incNode = Node.ROOT
+                .withName("inc")
+                .withFunction("side-effects/increaseAndCount")
+                .withInputAdded(Port.floatPort("number", 0))
+                .withOutputAdded(Port.floatPort("number", 0));
+        Node net = Node.ROOT
+                .withChildAdded(toNumbers1Node)
+                .withChildAdded(incNode)
+                .connect("toNumbers1", "numbers", "inc", "number");
+        context.renderChild(net, incNode);
+        assertEquals(3, SideEffects.theCounter);
+        List<Object> results = context.getResults(incNode, "number");
+        assertResultsEqual(results, 2.0, 3.0, 4.0);
+    }
 
     // TODO Check list-aware node with no inputs.
     // TODO Check list-aware node with no outputs.

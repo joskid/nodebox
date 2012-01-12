@@ -1,10 +1,10 @@
 package nodebox.node;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
-import org.python.google.common.base.Objects;
 
 import static com.google.common.base.Preconditions.*;
 

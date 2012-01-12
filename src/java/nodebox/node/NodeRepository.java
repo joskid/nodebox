@@ -1,7 +1,7 @@
 package nodebox.node;
 
-import org.python.google.common.collect.ImmutableList;
-import org.python.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 

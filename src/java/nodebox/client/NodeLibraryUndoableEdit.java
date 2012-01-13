@@ -15,6 +15,12 @@ public class NodeLibraryUndoableEdit extends AbstractUndoableEdit {
     private String command;
     private UndoState undoState, redoState;
 
+    /**
+     * The UndoState captures the current state of the document.
+     * <p/>
+     * Because the NodeLibrary and all objects below it are immutable the UndoState just has to retain a reference
+     * to the given NodeLibrary.
+     */
     private class UndoState {
         private final NodeLibrary nodeLibrary;
         private final String activeNetworkPath;

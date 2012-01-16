@@ -155,6 +155,7 @@ public class Application implements Host {
         } catch (Exception ignored) {
         }
         System.setProperty("apple.laf.useScreenMenuBar", "true");
+        UIManager.put("Table.alternateRowColor", new Color(243, 246, 250));
     }
 
     /**

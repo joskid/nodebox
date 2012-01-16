@@ -79,4 +79,8 @@ public class ViewerPane extends Pane {
     public PaneView getPaneView() {
         return viewer;
     }
+
+    public DataSheet getDataSheet() {
+        return dataSheet;
+    }
 }

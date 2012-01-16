@@ -67,6 +67,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final AnimationBar animationBar;
     private final AddressBar addressBar;
     private final Viewer viewer;
+    private final DataSheet dataSheet;
     private final PortView portView;
     private final NetworkView networkView;
     private JSplitPane parameterNetworkSplit;
@@ -157,6 +158,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         JPanel rootPanel = new JPanel(new BorderLayout());
         ViewerPane viewerPane = new ViewerPane(this);
         viewer = viewerPane.getViewer();
+        dataSheet = viewerPane.getDataSheet();
         PortPane portPane = new PortPane(this);
         portView = portPane.getPortView();
         NetworkPane networkPane = new NetworkPane(this);
@@ -292,6 +294,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             portView.updateAll();
             // Updating the metadata could cause changes to a handle.
             viewer.repaint();
+            dataSheet.repaint();
         }
         requestRender();
     }
@@ -413,6 +416,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         if (node == getActiveNode()) {
             portView.updateAll();
             viewer.repaint();
+            dataSheet.repaint();
         }
     }
 
@@ -529,6 +533,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         //viewer.setHandleEnabled(activeNode != null && activeNode.hasEnabledHandle());
         networkView.updateNodes();
         viewer.repaint();
+        dataSheet.repaint();
         requestRender();
     }
 
@@ -697,6 +702,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 java.util.List<Object> results = context.getResults(renderedChild, firstOutputPort);
                 addressBar.setProgressVisible(false);
                 viewer.setOutputValues(results);
+                dataSheet.setOutputValues(results);
                 networkView.checkErrorAndRepaint();
             }
         });

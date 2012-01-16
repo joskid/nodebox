@@ -5,13 +5,16 @@ import nodebox.ui.Pane;
 import nodebox.ui.PaneHeader;
 import nodebox.ui.PaneView;
 
+import javax.swing.*;
 import java.awt.*;
 
 public class ViewerPane extends Pane {
 
     private final NodeBoxDocument document;
     private final PaneHeader paneHeader;
+    private final JTabbedPane tabbedPane;
     private final Viewer viewer;
+    private final DataSheet dataSheet;
     private final NButton handlesCheck, pointsCheck, pointNumbersCheck, originCheck;
 
     public ViewerPane(final NodeBoxDocument document) {
@@ -31,9 +34,14 @@ public class ViewerPane extends Pane {
         paneHeader.add(pointsCheck);
         paneHeader.add(pointNumbersCheck);
         paneHeader.add(originCheck);
-        viewer = new Viewer(document);
         add(paneHeader, BorderLayout.NORTH);
-        add(viewer, BorderLayout.CENTER);
+
+        viewer = new Viewer(document);
+        dataSheet = new DataSheet(document);
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Viewer", null, viewer);
+        tabbedPane.addTab("Data", null, dataSheet);
+        add(tabbedPane, BorderLayout.CENTER);
     }
 
     public Viewer getViewer() {

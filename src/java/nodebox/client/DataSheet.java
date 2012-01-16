@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.ui.PaneView;
 
 import javax.swing.*;
@@ -10,6 +11,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * The Data Sheet presents data in a spreadsheet view.
@@ -89,30 +92,55 @@ public class DataSheet extends JPanel implements OutputView {
     }
 
     private final class DataTableModel extends AbstractTableModel {
-
-        private List<Object> outputValues;
+        
+        private List<Object> outputValues = ImmutableList.of();
+        private List dataTemplate = ImmutableList.of();
 
         public List<Object> getOutputValues() {
             return outputValues;
         }
 
         public void setOutputValues(List<Object> outputValues) {
-            this.outputValues = outputValues;
-            fireTableChanged(new TableModelEvent(this));
+            if (outputValues == null) {
+                this.outputValues = ImmutableList.of();
+            } else {
+                this.outputValues = outputValues;
+            }
+            if (this.outputValues.size() == 0) {
+                dataTemplate = ImmutableList.of();
+            } else {
+                dataTemplate = seq(this.outputValues.get(0));
+            }
+            fireTableChanged(new TableModelEvent(this, TableModelEvent.ALL_COLUMNS));
         }
-
+        
+        private List seq(Object o) {
+            // Inspect the first object.
+            if (o instanceof Iterable) {
+                return ImmutableList.copyOf((Iterable<? extends Object>) o);
+            } else {
+                return ImmutableList.of(o);
+            }
+        }
+        
         public int getRowCount() {
-            if (outputValues == null) return 0;
             return outputValues.size();
         }
 
         public int getColumnCount() {
-            return 1;
+            return dataTemplate.size();
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
-            if (outputValues == null) return 0;
-            return outputValues.get(rowIndex);
+            checkArgument(rowIndex < outputValues.size(), "The row index %s is larger than the number of values.", rowIndex);
+            checkArgument(columnIndex < dataTemplate.size(), "The column index %s is larger than the number of columns.", columnIndex);
+
+            List o = seq(outputValues.get(rowIndex));
+            if (columnIndex > o.size()) {
+                return "<not found>";
+            } else {
+                return o.get(columnIndex);
+            }
         }
 
         @Override

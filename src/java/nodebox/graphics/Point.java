@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public final class Point {
+public final class Point implements Iterable<Double> {
 
     public final static Point ZERO = new Point(0, 0);
 

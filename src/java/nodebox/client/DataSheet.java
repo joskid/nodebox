@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * The Data Sheet presents data in a spreadsheet view.
  */
-public class DataSheet extends JPanel implements PaneView {
+public class DataSheet extends JPanel implements OutputView {
 
     private final NodeBoxDocument document;
     private final DataTableModel tableModel;
@@ -33,8 +33,8 @@ public class DataSheet extends JPanel implements PaneView {
         add(tableScroll, BorderLayout.CENTER);
     }
 
-    public void setOutputValues(List<Object> outputValues) {
-        tableModel.setOutputValues(outputValues);
+    public void setOutputValues(List<Object> objects) {
+        tableModel.setOutputValues(objects);
         table.setModel(tableModel);
     }
 

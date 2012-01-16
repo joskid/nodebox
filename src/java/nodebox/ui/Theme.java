@@ -13,6 +13,8 @@ public class Theme {
 
     // Viewer
     public static final Color VIEWER_BACKGROUND_COLOR = new Color(232, 232, 232);
+    public static final Color SELECTED_TAB_BACKGROUND_COLOR = new Color(198, 198, 198);
+    public static final Color TAB_BACKGROUND_COLOR = new Color(210, 210, 210);
 
     // Network view
     public static final Color NETWORK_BACKGROUND_COLOR = new Color(69, 69, 69);
@@ -61,6 +63,8 @@ public class Theme {
     public static Border BOTTOM_BORDER;
     public static Border PARAMETER_ROW_BORDER;
     public static Border PARAMETER_NOTES_BORDER;
+    public static Border INNER_SHADOW_BORDER;
+    public static Border EMPTY_BORDER;
 
     // Fonts
     public static Font EDITOR_FONT;
@@ -90,6 +94,8 @@ public class Theme {
         BOTTOM_BORDER = new BottomBorder(whiteColor);
         PARAMETER_ROW_BORDER = new RowBorder();
         PARAMETER_NOTES_BORDER = new NotesBorder();
+        INNER_SHADOW_BORDER = new InnerShadowBorder();
+        EMPTY_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
         // Initialize fonts.
         if (Platform.onMac()) {
@@ -250,6 +256,32 @@ public class Theme {
 
         public Insets getBorderInsets(Component component) {
             return insets;
+        }
+
+        public boolean isBorderOpaque() {
+            return true;
+        }
+    }
+
+    public static class InnerShadowBorder implements Border {
+
+        private static final Color EDGE_COLOR = new Color(166, 166, 166);
+        private static final Color HIGHLIGHT_COLOR = new Color(237, 237, 237);
+        private static final Color SHADOW_COLOR = new Color(119, 119, 119);
+
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            g.setColor(EDGE_COLOR);
+            g.drawRect(x + 1, y + 1, width - 3, height - 3);
+            g.setColor(SHADOW_COLOR);
+            g.drawLine(x, y, x + width - 1, y);
+            g.drawLine(x, y, x, y + height - 1);
+            g.setColor(HIGHLIGHT_COLOR);
+            g.drawLine(x, y + height - 1, x + width - 1, y + height - 1);
+            g.drawLine(x + width - 1, y, x + width - 1, y + height - 1);
+        }
+
+        public Insets getBorderInsets(Component c) {
+            return new Insets(2, 2, 2, 2);
         }
 
         public boolean isBorderOpaque() {

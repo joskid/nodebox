@@ -29,7 +29,7 @@ import java.io.IOException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-public class Viewer extends PCanvas implements PaneView, MouseListener, MouseMotionListener, KeyListener {
+public class Viewer extends PCanvas implements OutputView, MouseListener, MouseMotionListener, KeyListener {
 
     public static final float POINT_SIZE = 4f;
 

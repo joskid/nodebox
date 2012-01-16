@@ -66,7 +66,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final NodeBoxMenuBar menuBar;
     private final AnimationBar animationBar;
     private final AddressBar addressBar;
-    private final Viewer viewer;
+    private final ViewerPane viewerPane;
     private final DataSheet dataSheet;
     private final PortView portView;
     private final NetworkView networkView;
@@ -156,8 +156,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         renderService = Executors.newFixedThreadPool(1);
         controller = NodeLibraryController.withLibrary(nodeLibrary);
         JPanel rootPanel = new JPanel(new BorderLayout());
-        ViewerPane viewerPane = new ViewerPane(this);
-        viewer = viewerPane.getViewer();
+        this.viewerPane = new ViewerPane(this);
         dataSheet = viewerPane.getDataSheet();
         PortPane portPane = new PortPane(this);
         portView = portPane.getPortView();
@@ -293,7 +292,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         if (node == getActiveNode()) {
             portView.updateAll();
             // Updating the metadata could cause changes to a handle.
-            viewer.repaint();
+            viewerPane.repaint();
             dataSheet.repaint();
         }
         requestRender();
@@ -415,7 +414,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
         if (node == getActiveNode()) {
             portView.updateAll();
-            viewer.repaint();
+            viewerPane.repaint();
             dataSheet.repaint();
         }
     }
@@ -493,10 +492,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     public void updateHandle(Node node) {
-        if (viewer.getHandle() != null)
-            viewer.getHandle().update();
+        if (viewerPane.getHandle() != null)
+            viewerPane.getHandle().update();
         // TODO Make viewer repaint more fine-grained.
-        viewer.repaint();
+        viewerPane.repaint();
     }
 
     //// Active network / node ////
@@ -532,7 +531,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         addressBar.setPath(activeNetworkPath);
         //viewer.setHandleEnabled(activeNode != null && activeNode.hasEnabledHandle());
         networkView.updateNodes();
-        viewer.repaint();
+        viewerPane.repaint();
         dataSheet.repaint();
         requestRender();
     }
@@ -594,7 +593,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         Node n = getActiveNode();
         //createHandleForActiveNode();
         //editorPane.setActiveNode(activeNode);
-        viewer.repaint(); // For the handle
+        viewerPane.repaint(); // For the handle
         portView.setActiveNode(n == null ? getActiveNetwork() : n);
         networkView.singleSelect(n);
     }
@@ -701,8 +700,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 Port firstOutputPort = renderedChild.getOutputs().iterator().next();
                 java.util.List<Object> results = context.getResults(renderedChild, firstOutputPort);
                 addressBar.setProgressVisible(false);
-                viewer.setOutputValues(results);
-                dataSheet.setOutputValues(results);
+                viewerPane.setOutputValues(results);
                 networkView.checkErrorAndRepaint();
             }
         });

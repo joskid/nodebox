@@ -1,21 +1,17 @@
 package nodebox.client;
 
+import com.google.common.collect.ImmutableList;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PPaintContext;
-import nodebox.client.visualizer.CanvasVisualizer;
-import nodebox.client.visualizer.GrobVisualizer;
-import nodebox.client.visualizer.LastResortVisualizer;
-import nodebox.client.visualizer.Visualizer;
+import nodebox.client.visualizer.*;
 import nodebox.graphics.CanvasContext;
 import nodebox.graphics.IGeometry;
-import nodebox.graphics.Path;
 import nodebox.handle.Handle;
 import nodebox.ui.Platform;
 import nodebox.ui.Theme;
-import nodebox.util.ListUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,20 +22,22 @@ import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static nodebox.util.ListUtils.listClass;
 
 public class Viewer extends PCanvas implements OutputView, MouseListener, MouseMotionListener, KeyListener {
-
-    public static final float POINT_SIZE = 4f;
 
     public static final float MIN_ZOOM = 0.1f;
     public static final float MAX_ZOOM = 16.0f;
 
     private static final String HANDLE_UNDO_TEXT = "Handle Changes";
     private static final String HANDLE_UNDO_TYPE = "handle";
+
+    private static final ImmutableList<Visualizer> visualizers;
+    private static final Visualizer DEFAULT_VISUALIZER = LastResortVisualizer.INSTANCE;
 
     private static Cursor defaultCursor, panCursor;
 
@@ -54,11 +52,9 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
     private boolean panEnabled = false;
     private PLayer viewerLayer;
     private JPopupMenu viewerMenu;
-    private Class outputClass;
 
-    private java.util.List<Visualizer> visualizers = new ArrayList<Visualizer>();
+    private Class listClass;
     private Visualizer currentVisualizer;
-    private static final Visualizer DEFAULT_VISUALIZER = LastResortVisualizer.INSTANCE;
 
     static {
         Image panCursorImage;
@@ -74,6 +70,8 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        visualizers = ImmutableList.of(CanvasVisualizer.INSTANCE, GrobVisualizer.INSTANCE, PointVisualizer.INSTANCE);
     }
 
     public Viewer(final NodeBoxDocument document) {
@@ -122,9 +120,6 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         getCamera().addLayer(0, viewerLayer);
 
         initMenus();
-
-        visualizers.add(CanvasVisualizer.INSTANCE);
-        visualizers.add(GrobVisualizer.INSTANCE);
     }
 
     private void initMenus() {
@@ -195,10 +190,10 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         return outputValues;
     }
 
-
     public void setOutputValues(java.util.List<Object> outputValues) {
         this.outputValues = outputValues;
-        Visualizer visualizer = getVisualizer(outputValues);
+        listClass = listClass(outputValues);
+        Visualizer visualizer = getVisualizer(outputValues, listClass);
         if (currentVisualizer != visualizer) {
             resetView();
             viewerLayer.setBounds(visualizer.getBounds(outputValues, getSize()));
@@ -209,8 +204,7 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         repaint();
     }
 
-    public Visualizer getVisualizer(List objects) {
-        Class listClass = ListUtils.listClass(outputValues);
+    public Visualizer getVisualizer(List objects, Class listClass) {
         for (Visualizer visualizer : visualizers) {
             if (visualizer.accepts(objects, listClass))
                 return visualizer;
@@ -395,29 +389,19 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         }
 
         private void drawPoints(Graphics2D g) {
-            if (showPoints && IGeometry.class.isAssignableFrom(outputClass)) {
-                // Create a canvas with a transparent background.
-                Path onCurves = new Path();
-                Path offCurves = new Path();
-                onCurves.setFill(new nodebox.graphics.Color(0f, 0f, 1f));
-                offCurves.setFill(new nodebox.graphics.Color(1f, 0f, 0f));
+            if (showPoints && IGeometry.class.isAssignableFrom(listClass)) {
+                // TODO Create a dynamic iterator that combines all output values into one flat sequence.
+                LinkedList<nodebox.graphics.Point> points = new LinkedList<nodebox.graphics.Point>();
                 for (Object o : outputValues) {
                     IGeometry geo = (IGeometry) o;
-                    for (nodebox.graphics.Point pt : geo.getPoints()) {
-                        if (pt.isOnCurve()) {
-                            onCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
-                        } else {
-                            offCurves.ellipse(pt.x, pt.y, POINT_SIZE, POINT_SIZE);
-                        }
-                    }
+                    points.addAll(geo.getPoints());
                 }
-                onCurves.draw(g);
-                offCurves.draw(g);
+                PointVisualizer.drawPoints(g, points);
             }
         }
 
         private void drawPointNumbers(Graphics2D g) {
-            if (showPointNumbers && IGeometry.class.isAssignableFrom(outputClass)) {
+            if (showPointNumbers && IGeometry.class.isAssignableFrom(listClass)) {
                 g.setFont(Theme.SMALL_MONO_FONT);
                 g.setColor(Color.BLUE);
                 // Create a canvas with a transparent background.

@@ -33,16 +33,15 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
     public static final float MIN_ZOOM = 0.1f;
     public static final float MAX_ZOOM = 16.0f;
 
-    private static final String HANDLE_UNDO_TEXT = "Handle Changes";
-    private static final String HANDLE_UNDO_TYPE = "handle";
-
     private static final ImmutableList<Visualizer> visualizers;
     private static final Visualizer DEFAULT_VISUALIZER = LastResortVisualizer.INSTANCE;
 
-    private static Cursor defaultCursor, panCursor;
+    private static final Cursor defaultCursor, panCursor;
 
     private final NodeBoxDocument document;
-    private java.util.List<Object> outputValues;
+    private final PLayer viewerLayer;
+    private final JPopupMenu viewerMenu;
+
     private Handle handle;
     private boolean showHandle = true;
     private boolean handleEnabled = true;
@@ -50,15 +49,13 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
     private boolean showPointNumbers = false;
     private boolean showOrigin = false;
     private boolean panEnabled = false;
-    private PLayer viewerLayer;
-    private JPopupMenu viewerMenu;
 
-    private Class listClass;
+    private java.util.List<Object> outputValues;
+    private Class valuesClass;
     private Visualizer currentVisualizer;
 
     static {
         Image panCursorImage;
-
         try {
             if (Platform.onWindows())
                 panCursorImage = ImageIO.read(new File("res/view-cursor-pan-32.png"));
@@ -119,10 +116,6 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         viewerLayer = new ViewerLayer();
         getCamera().addLayer(0, viewerLayer);
 
-        initMenus();
-    }
-
-    private void initMenus() {
         viewerMenu = new JPopupMenu();
         viewerMenu.add(new ResetViewAction());
         PopupHandler popupHandler = new PopupHandler();
@@ -192,8 +185,8 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
 
     public void setOutputValues(java.util.List<Object> outputValues) {
         this.outputValues = outputValues;
-        listClass = listClass(outputValues);
-        Visualizer visualizer = getVisualizer(outputValues, listClass);
+        valuesClass = listClass(outputValues);
+        Visualizer visualizer = getVisualizer(outputValues, valuesClass);
         if (currentVisualizer != visualizer) {
             resetView();
             viewerLayer.setBounds(visualizer.getBounds(outputValues, getSize()));
@@ -389,7 +382,7 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         }
 
         private void drawPoints(Graphics2D g) {
-            if (showPoints && IGeometry.class.isAssignableFrom(listClass)) {
+            if (showPoints && IGeometry.class.isAssignableFrom(valuesClass)) {
                 // TODO Create a dynamic iterator that combines all output values into one flat sequence.
                 LinkedList<nodebox.graphics.Point> points = new LinkedList<nodebox.graphics.Point>();
                 for (Object o : outputValues) {
@@ -401,7 +394,7 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
         }
 
         private void drawPointNumbers(Graphics2D g) {
-            if (showPointNumbers && IGeometry.class.isAssignableFrom(listClass)) {
+            if (showPointNumbers && IGeometry.class.isAssignableFrom(valuesClass)) {
                 g.setFont(Theme.SMALL_MONO_FONT);
                 g.setColor(Color.BLUE);
                 // Create a canvas with a transparent background.

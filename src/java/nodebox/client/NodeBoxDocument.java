@@ -98,6 +98,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.floatPort("x", 0))
                 .withInputAdded(Port.floatPort("y", 0))
                 .withOutputAdded(Port.pointPort("point", nodebox.graphics.Point.ZERO));
+        Node makePoint2 = Node.ROOT.withName("makePoint2")
+                .withPosition(new nodebox.graphics.Point(120, 220))
+                .withFunction("corevector/makePoint")
+                .withInputAdded(Port.floatPort("x", 0))
+                .withInputAdded(Port.floatPort("y", 0))
+                .withOutputAdded(Port.pointPort("point", nodebox.graphics.Point.ZERO));
         Node add = Node.ROOT.withName("add")
                 .withPosition(new nodebox.graphics.Point(120, 20))
                 .withFunction("math/add")
@@ -134,6 +140,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(value2)
                 .withChildAdded(add)
                 .withChildAdded(makePoint1)
+                .withChildAdded(makePoint2)
                 .withChildAdded(rect)
                 .withChildAdded(color)
                 .withChildAdded(sleepy)

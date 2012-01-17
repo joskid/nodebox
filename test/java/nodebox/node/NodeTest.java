@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertSame;
+import static junit.framework.Assert.assertNull;
 
 public class NodeTest {
 
@@ -43,6 +45,67 @@ public class NodeTest {
                 .connect("float1", "float", "int1", "int");
     }
 
+    @Test
+    public void testInputs() {
+        Port pX = Port.floatPort("x", 0);
+        Port pY = Port.floatPort("y", 0);
+        Node rectNode1 = Node.ROOT
+                .withName("rect1")
+                .withInputAdded(pX);
+        assertNull(Node.ROOT.getInput("x"));
+        assertSame(pX, rectNode1.getInput("x"));
+        Node rectNode2 = rectNode1
+                .withName("rect2")
+                .withInputAdded(pY);
+        assertSame(pX, rectNode2.getInput("x"));
+        assertSame(pY, rectNode2.getInput("y"));
+        assertNull(rectNode1.getInput("y"));
+        assertNodeInputsSizeEquals(0, Node.ROOT);
+        assertNodeInputsSizeEquals(1, rectNode1);
+        assertNodeInputsSizeEquals(2, rectNode2);
+        Node rectNode3 = rectNode2
+                .withName("rect3")
+                .withInputRemoved("x");
+        assertNodeInputsSizeEquals(2, rectNode2);
+        assertNodeInputsSizeEquals(1, rectNode3);
+        assertNull(rectNode3.getInput("x"));
+        assertSame(pY, rectNode3.getInput("y"));
+    }
+
+    @Test
+    public void testOutputs() {
+        Port pX = Port.floatPort("x", 0);
+        Port pY = Port.floatPort("y", 0);
+        Node rectNode1 = Node.ROOT
+                .withName("rect1")
+                .withOutputAdded(pX);
+        assertNull(Node.ROOT.getOutput("x"));
+        assertSame(pX, rectNode1.getOutput("x"));
+        Node rectNode2 = rectNode1
+                .withName("rect2")
+                .withOutputAdded(pY);
+        assertSame(pX, rectNode2.getOutput("x"));
+        assertSame(pY, rectNode2.getOutput("y"));
+        assertNull(rectNode1.getOutput("y"));
+        assertNodeOutputsSizeEquals(0, Node.ROOT);
+        assertNodeOutputsSizeEquals(1, rectNode1);
+        assertNodeOutputsSizeEquals(2, rectNode2);
+        Node rectNode3 = rectNode2
+                .withName("rect3")
+                .withOutputRemoved("x");
+        assertNodeOutputsSizeEquals(2, rectNode2);
+        assertNodeOutputsSizeEquals(1, rectNode3);
+        assertNull(rectNode3.getOutput("x"));
+        assertSame(pY, rectNode3.getOutput("y"));
+    }
+    
+    private void assertNodeInputsSizeEquals(int expected, Node node) {
+        assertEquals(expected, node.getInputs().size());
+    }
+
+    private void assertNodeOutputsSizeEquals(int expected, Node node) {
+        assertEquals(expected, node.getOutputs().size());
+    }
 
     public List<String> portNames(Node n) {
         List<String> portNames = new LinkedList<String>();

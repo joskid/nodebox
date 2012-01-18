@@ -35,6 +35,7 @@ public final class LastResortVisualizer implements Visualizer {
     }
 
     public void draw(Graphics2D g, List objects) {
+        if (objects == null) return;
         g.setColor(Theme.TEXT_NORMAL_COLOR);
         g.setFont(Theme.EDITOR_FONT);
         AffineTransform t = g.getTransform();

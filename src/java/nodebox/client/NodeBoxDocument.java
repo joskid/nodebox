@@ -92,6 +92,14 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withListPolicy(ListPolicy.LIST_AWARE)
                 .withInputAdded(Port.stringPort("s", "100 200 300"))
                 .withOutputAdded(Port.floatPort("numbers", 0));
+        Node range1 = Node.ROOT.withName("range1")
+                .withPosition(new nodebox.graphics.Point(20, 200))
+                .withFunction("math/range")
+                .withListPolicy(ListPolicy.LIST_AWARE)
+                .withInputAdded(Port.floatPort("start", 0))
+                .withInputAdded(Port.floatPort("end", 10))
+                .withInputAdded(Port.floatPort("step", 1))
+                .withOutputAdded(Port.floatPort("numbers", 0));
         Node makePoint1 = Node.ROOT.withName("makePoint1")
                 .withPosition(new nodebox.graphics.Point(120, 120))
                 .withFunction("corevector/makePoint")
@@ -138,6 +146,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.floatPort("height", 500))
                 .withChildAdded(value1)
                 .withChildAdded(value2)
+                .withChildAdded(range1)
                 .withChildAdded(add)
                 .withChildAdded(makePoint1)
                 .withChildAdded(makePoint2)

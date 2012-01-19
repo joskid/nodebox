@@ -6,9 +6,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
-import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.*;
 
 public class NodeTest {
 
@@ -21,6 +19,19 @@ public class NodeTest {
     @Test(expected = IllegalArgumentException.class)
     public void testRelativePath() {
         Node.path("", Node.ROOT.withName("child"));
+    }
+
+    @Test
+    public void testPrototype() {
+        Node alpha = Node.ROOT.withName("alpha");
+        assertSame("Using withXXX on the root sets the root automatically on the prototype.",
+                alpha.getPrototype(), Node.ROOT);
+        Node beta = alpha.withName("beta");
+        assertSame("Using withXXX methods doesn't automatically change the prototype.",
+                beta.getPrototype(), Node.ROOT);
+        Node gamma = alpha.extend().withName("gamma");
+        assertSame("Use extend() to change the prototype.",
+                gamma.getPrototype(), alpha);
     }
 
     @Test
@@ -98,7 +109,7 @@ public class NodeTest {
         assertNull(rectNode3.getOutput("x"));
         assertSame(pY, rectNode3.getOutput("y"));
     }
-    
+
     private void assertNodeInputsSizeEquals(int expected, Node node) {
         assertEquals(expected, node.getInputs().size());
     }

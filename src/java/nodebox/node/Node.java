@@ -2,30 +2,16 @@ package nodebox.node;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import nodebox.graphics.Point;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.*;
 
 public final class Node {
 
     public static final Node ROOT = new Node();
-    public static final String KEY_NAME = "name";
-    public static final String KEY_DESCRIPTION = "description";
-    public static final String KEY_IMAGE = "image";
-    public static final String KEY_FUNCTION = "function";
-    public static final String KEY_LIST_POLICY = "listPolicy";
-    public static final String KEY_POSITION = "position";
-    public static final String KEY_INPUTS = "inputs";
-    public static final String KEY_OUTPUTS = "outputs";
-    public static final String KEY_CHILDREN = "children";
-    public static final String KEY_RENDERED_CHILD_NAME = "renderedChildName";
-    public static final String KEY_CONNECTIONS = "connections";
 
     public static String path(String parentPath, Node node) {
         checkNotNull(node);
@@ -46,7 +32,17 @@ public final class Node {
     private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_POLICY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
-    private final PrototypeMap properties;
+    private final String name;
+    private final String description;
+    private final String image;
+    private final String function;
+    private final ListPolicy listPolicy;
+    private final Point position;
+    private final ImmutableList<Port> inputs;
+    private final ImmutableList<Port> outputs;
+    private final ImmutableList<Node> children;
+    private final String renderedChildName;
+    private final ImmutableList<Connection> connections;
 
     //// Constructors ////
 
@@ -56,34 +52,43 @@ public final class Node {
     private Node() {
         checkState(ROOT == null, "You cannot create more than one root node.");
         prototype = null;
-        HashMap<String, Object> m = new HashMap<String, Object>();
-        m.put(KEY_NAME, "root");
-        m.put(KEY_DESCRIPTION, "");
-        m.put(KEY_IMAGE, "");
-        m.put(KEY_FUNCTION, "core/zero");
-        m.put(KEY_LIST_POLICY, ListPolicy.LONGEST_LIST);
-        m.put(KEY_POSITION, Point.ZERO);
-        m.put(KEY_INPUTS, ImmutableList.<Port>of());
-        m.put(KEY_OUTPUTS, ImmutableList.<Port>of());
-        m.put(KEY_CHILDREN, ImmutableMap.<String, Node>of());
-        m.put(KEY_RENDERED_CHILD_NAME, "");
-        m.put(KEY_CONNECTIONS, ImmutableList.<Connection>of());
-        this.properties = new PrototypeMap(null, m);
+        name = "root";
+        description = "";
+        image = "";
+        function = "core/zero";
+        listPolicy = ListPolicy.LONGEST_LIST;
+        position = Point.ZERO;
+        inputs = ImmutableList.of();
+        outputs = ImmutableList.of();
+        children = ImmutableList.of();
+        renderedChildName = "";
+        connections = ImmutableList.of();
     }
 
-    /**
-     * Constructor for a Node.
-     * <p/>
-     * This is private because it takes a map containing possibly mutable property values.
-     * Use Node.ROOT.withXXX() to create a new Node.
-     *
-     * @param prototype  The new Node's prototype. This cannot be null.
-     * @param properties The list of new properties.
-     */
-    private Node(Node prototype, ImmutableMap<String, Object> properties) {
-        checkNotNull(prototype, "The prototype cannot be null. Use Node.ROOT.withXXX()");
+    private void checkAllNotNull(Object... args) {
+        for (Object o : args) {
+            checkNotNull(o);
+        }
+    }
+
+    private Node(Node prototype, String name, String description, String image, String function, ListPolicy listPolicy,
+                 Point position, ImmutableList<Port> inputs, ImmutableList<Port> outputs, ImmutableList<Node> children,
+                 String renderedChildName, ImmutableList<Connection> connections) {
+        checkAllNotNull(prototype, name, description, image, function, listPolicy,
+                position, inputs, outputs, children,
+                renderedChildName, connections);
         this.prototype = prototype;
-        this.properties = new PrototypeMap(prototype.properties, properties);
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.function = function;
+        this.listPolicy = listPolicy;
+        this.position = position;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.children = children;
+        this.renderedChildName = renderedChildName;
+        this.connections = connections;
     }
 
     //// Getters ////
@@ -93,64 +98,63 @@ public final class Node {
     }
 
     public String getName() {
-        return (String) getProperty(KEY_NAME);
+        return name;
     }
 
     public String getDescription() {
-        return (String) getProperty(KEY_DESCRIPTION);
+        return description;
     }
 
     public String getImage() {
-        return (String) getProperty(KEY_IMAGE);
+        return image;
     }
 
     public String getFunction() {
-        return (String) getProperty(KEY_FUNCTION);
+        return function;
     }
 
     public ListPolicy getListPolicy() {
-        return (ListPolicy) getProperty(KEY_LIST_POLICY);
+        return listPolicy;
     }
 
     public boolean isListAware() {
-        return getListPolicy().isListAware();
+        return listPolicy.isListAware();
     }
 
     public Point getPosition() {
-        return (Point) getProperty(KEY_POSITION);
+        return position;
     }
 
     public Collection<Node> getChildren() {
-        return getChildMap().values();
+        return children;
     }
 
     public Node getChild(String name) {
         checkNotNull(name, "Name cannot be null.");
-        return getChildMap().get(name);
+        for (Node child : getChildren()) {
+            if (child.getName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
     }
 
     public boolean hasChild(String name) {
         checkNotNull(name, "Name cannot be null.");
-        return getChildMap().containsKey(name);
+        return getChild(name) != null;
     }
 
     public boolean hasChild(Node node) {
         checkNotNull(node, "Node cannot be null.");
-        return getChildMap().containsValue(node);
+        return children.contains(node);
     }
 
     public boolean isEmpty() {
-        return getChildMap().isEmpty();
+        return children.isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
-    private ImmutableMap<String, Node> getChildMap() {
-        return (ImmutableMap<String, Node>) getProperty(KEY_CHILDREN);
-    }
-
-    @SuppressWarnings("unchecked")
     public List<Port> getInputs() {
-        return (List<Port>) getProperty(KEY_INPUTS);
+        return inputs;
     }
 
     public Port getInput(String name) {
@@ -177,9 +181,8 @@ public final class Node {
         return getInput(name) != null;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Port> getOutputs() {
-        return (List<Port>) getProperty(KEY_OUTPUTS);
+        return outputs;
     }
 
     public Port getOutput(String name) {
@@ -213,7 +216,7 @@ public final class Node {
      * @return the name of the rendered child or null.
      */
     public String getRenderedChildName() {
-        return (String) getProperty(KEY_RENDERED_CHILD_NAME);
+        return renderedChildName;
     }
 
     /**
@@ -223,18 +226,13 @@ public final class Node {
      */
     public Node getRenderedChild() {
         if (getRenderedChildName().isEmpty()) return null;
-        Node renderedChild = getChildMap().get(getRenderedChildName());
-        checkNotNull(renderedChild, "The child with name %s cannot be found. This is a bug in NodeBox.");
+        Node renderedChild = getChild(getRenderedChildName());
+        checkNotNull(renderedChild, "The child with name %s cannot be found. This is a bug in NodeBox.", getRenderedChildName());
         return renderedChild;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Connection> getConnections() {
-        return (List<Connection>) getProperty(KEY_CONNECTIONS);
-    }
-
-    private Object getProperty(String key) {
-        return properties.getProperty(key);
+        return connections;
     }
 
     //// Mutation functions ////
@@ -396,7 +394,7 @@ public final class Node {
      */
     public Node withInputValue(String portName, Object value) {
         Port p = getInput(portName);
-        checkArgument(p != null, "Input port %s does not exist on node %s.", portName, this);
+        checkNotNull(p, "Input port %s does not exist on node %s.", portName, this);
         p = p.withValue(value);
         return withInputChanged(portName, p);
     }
@@ -473,9 +471,9 @@ public final class Node {
     public Node withChildAdded(Node node) {
         checkNotNull(node, "Node cannot be null.");
         checkArgument(!hasChild(node.getName()), "A node named %s is already a child of node %s.", node.getName(), this);
-        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
-        b.putAll(getChildMap());
-        b.put(node.getName(), node);
+        ImmutableList.Builder<Node> b = ImmutableList.builder();
+        b.addAll(getChildren());
+        b.add(node);
         return newNodeWithAttribute(Attribute.CHILDREN, b.build());
     }
 
@@ -490,10 +488,10 @@ public final class Node {
     public Node withChildRemoved(String childName) {
         Node childToRemove = getChild(childName);
         checkArgument(childToRemove != null, "Node %s is not a child of node %s.", childName, this);
-        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
-        for (Node child : getChildMap().values()) {
+        ImmutableList.Builder<Node> b = ImmutableList.builder();
+        for (Node child : getChildren()) {
             if (child != childToRemove)
-                b.put(child.getName(), child);
+                b.add(child);
         }
         return newNodeWithAttribute(Attribute.CHILDREN, b.build());
     }
@@ -512,12 +510,12 @@ public final class Node {
         checkNotNull(newChild);
         checkArgument(newChild.getName().equals(childName), "New child %s does not have the same name as old child %s.", newChild, childName);
         checkArgument(childToReplace != null, "Node %s is not a child of node %s.", childName, this);
-        ImmutableMap.Builder<String, Node> b = ImmutableMap.builder();
-        for (Node child : getChildMap().values()) {
+        ImmutableList.Builder<Node> b = ImmutableList.builder();
+        for (Node child : getChildren()) {
             if (child != childToReplace) {
-                b.put(child.getName(), child);
+                b.add(child);
             } else {
-                b.put(childName, newChild);
+                b.add(newChild);
             }
         }
         return newNodeWithAttribute(Attribute.CHILDREN, b.build());
@@ -540,7 +538,20 @@ public final class Node {
         return newNodeWithAttribute(Attribute.RENDERED_CHILD_NAME, name);
     }
 
-    // TODO Add a variant that takes in Node objects.
+    /**
+     * Create a new node with the given child set as rendered.
+     * <p/>
+     * The rendered node should exist as a child on this node.
+     * If you don't want a child node to be rendered, set it to null.
+     * <p/>
+     * If you call this on ROOT, extend() is called implicitly.
+     *
+     * @param renderedChild The new rendered child or null if you don't want anything rendered.
+     * @return A new Node.
+     */
+    public Node withRenderedChild(Node renderedChild) {
+        return withRenderedChildName(renderedChild == null ? "" : renderedChild.getName());
+    }
 
     /**
      * Create a new node that connects the given child nodes.
@@ -586,94 +597,79 @@ public final class Node {
     /**
      * Change an attribute on the node and return a new copy.
      * The prototype remains the same.
+     * <p/>
+     * We use this more complex function instead of having every withXXX method call the constructor, because
+     * it allows us a to be more flexible when changing Node attributes.
      *
      * @param attribute The Node's attribute.
      * @param value     The value for the attribute. The type needs to match the internal type.
      * @return A copy of this node with the attribute changed.
      */
+    @SuppressWarnings("unchecked")
     private Node newNodeWithAttribute(Attribute attribute, Object value) {
+        Node prototype = this.prototype;
+        String name = this.name;
+        String description = this.description;
+        String image = this.image;
+        String function = this.function;
+        ListPolicy listPolicy = this.listPolicy;
+        Point position = this.position;
+        ImmutableList<Port> inputs = this.inputs;
+        ImmutableList<Port> outputs = this.outputs;
+        ImmutableList<Node> children = this.children;
+        String renderedChildName = this.renderedChildName;
+        ImmutableList<Connection> connections = this.connections;
+
         switch (attribute) {
             case PROTOTYPE:
-                checkArgument(value instanceof Node, "Setting the prototype requires a Node, not %s.", value);
-                return new Node((Node) value, properties.getProperties());
+                prototype = (Node) value;
+                break;
             case NAME:
-                checkArgument(value instanceof String, "Changing the name requires a String, not %s.", value);
-                return newNode(KEY_NAME, value);
+                name = (String) value;
+                break;
             case DESCRIPTION:
-                checkArgument(value instanceof String, "Changing the description requires a String, not %s.", value);
-                return newNode(KEY_DESCRIPTION, value);
+                description = (String) value;
+                break;
             case IMAGE:
-                checkArgument(value instanceof String, "Changing the image requires a String, not %s.", value);
-                return newNode(KEY_IMAGE, value);
+                image = (String) value;
+                break;
             case FUNCTION:
-                checkArgument(value instanceof String, "Changing the function name requires a String, not %s.", value);
-                return newNode(KEY_FUNCTION, value);
+                function = (String) value;
+                break;
             case LIST_POLICY:
-                checkArgument(value instanceof ListPolicy, "Changing the list policy requires a ListPolicy, not %s.", value);
-                return newNode(KEY_LIST_POLICY, value);
+                listPolicy = (ListPolicy) value;
+                break;
             case POSITION:
-                checkArgument(value instanceof Point, "Changing the position requires a Point, not %s.", value);
-                return newNode(KEY_POSITION, value);
+                position = (Point) value;
+                break;
             case INPUTS:
-                checkArgument(value instanceof ImmutableList, "Changing the inputs requires an ImmutableList, not %s.", value);
-                return newNode(KEY_INPUTS, value);
+                inputs = (ImmutableList<Port>) value;
+                break;
             case OUTPUTS:
-                checkArgument(value instanceof ImmutableList, "Changing the outputs requires an ImmutableList, not %s.", value);
-                return newNode(KEY_OUTPUTS, value);
+                outputs = (ImmutableList<Port>) value;
+                break;
             case CHILDREN:
-                checkArgument(value instanceof ImmutableMap, "Changing the children requires an ImmutableMap, not %s.", value);
-                return newNode(KEY_CHILDREN, value);
+                children = (ImmutableList<Node>) value;
+                break;
             case RENDERED_CHILD_NAME:
-                checkArgument(value instanceof String, "Changing the rendered child name requires a String, not %s.", value);
-                return newNode(KEY_RENDERED_CHILD_NAME, value);
+                renderedChildName = (String) value;
+                break;
             case CONNECTIONS:
-                checkArgument(value instanceof ImmutableList, "Changing the connections requires an ImmutableList, not %s.", value);
-                return newNode(KEY_CONNECTIONS, value);
+                connections = (ImmutableList<Connection>) value;
+                break;
             default:
                 throw new AssertionError("Unknown attribute " + attribute);
         }
-    }
-
-    /**
-     * Create a new node with the given key and value.
-     * <p/>
-     * This method doesn't change the prototype! If you want to extend from another node, use extend().
-     * The only exception is if the prototype is null, then it is set to ROOT.
-     *
-     * @param key   The key to set.
-     * @param value The value to set.
-     * @return A new Node.
-     */
-    private Node newNode(String key, Object value) {
-        // There can only be one ROOT. If creating a new node from the ROOT, the prototype automatically becomes ROOT.
-        // Otherwise, the prototype is kept unchanged.
-        Node prototype = getPrototype() != null ? getPrototype() : ROOT;
-        // This a verbose way of "adding" a property to a PrototypeMap, then constructing a new Node.
-        PrototypeMap m = properties.withProperty(key, value);
-        return new Node(prototype, m.getProperties());
-    }
-
-    /**
-     * Build a map out of a sequence of nodes keyed by their names.
-     * <p/>
-     * The function checks if all node names in the sequence are unique.
-     *
-     * @param nodes An Iterable of nodes.
-     * @return a map of nodes. Each name is guaranteed to be unique.
-     */
-    private static ImmutableMap<String, Node> buildNodeMap(Iterable<Node> nodes) {
-        checkNotNull(nodes, "Given nodes cannot be null.");
-        Map<String, Node> transientNodeMap = new HashMap<String, Node>();
-        for (Node node : nodes) {
-            checkState(!transientNodeMap.containsKey(node.getName()),
-                    "In the given list of nodes, %s is not unique.", node.getName());
-            transientNodeMap.put(node.getName(), node);
-        }
-        return ImmutableMap.copyOf(transientNodeMap);
+        // If we're "changing" an attribute on ROOT, make the ROOT the prototype.
+        if (prototype == null)
+            prototype = ROOT;
+        return new Node(prototype, name, description, image, function, listPolicy, position,
+                inputs, outputs, children, renderedChildName, connections);
     }
 
     @Override
     public String toString() {
         return String.format("<Node %s:%s>", getName(), getFunction());
     }
+
 }

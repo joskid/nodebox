@@ -9,6 +9,9 @@ import java.util.List;
 import static junit.framework.Assert.*;
 
 public class NodeTest {
+    
+    static final private String DIRECTION_IN = "in";
+    static final private String DIRECTION_OUT = "out";
 
     @Test
     public void testPath() {
@@ -55,67 +58,67 @@ public class NodeTest {
                 .withChildAdded(intNode)
                 .connect("float1", "float", "int1", "int");
     }
-
+    
     @Test
-    public void testInputs() {
+    public void testPorts() {
+        testPorts(DIRECTION_IN);
+        testPorts(DIRECTION_OUT);
+    }
+
+    public void testPorts(String direction) {
         Port pX = Port.floatPort("x", 0);
         Port pY = Port.floatPort("y", 0);
-        Node rectNode1 = Node.ROOT
-                .withName("rect1")
-                .withInputAdded(pX);
-        assertNull(Node.ROOT.getInput("x"));
-        assertSame(pX, rectNode1.getInput("x"));
-        Node rectNode2 = rectNode1
-                .withName("rect2")
-                .withInputAdded(pY);
-        assertSame(pX, rectNode2.getInput("x"));
-        assertSame(pY, rectNode2.getInput("y"));
-        assertNull(rectNode1.getInput("y"));
-        assertNodeInputsSizeEquals(0, Node.ROOT);
-        assertNodeInputsSizeEquals(1, rectNode1);
-        assertNodeInputsSizeEquals(2, rectNode2);
-        Node rectNode3 = rectNode2
-                .withName("rect3")
-                .withInputRemoved("x");
-        assertNodeInputsSizeEquals(2, rectNode2);
-        assertNodeInputsSizeEquals(1, rectNode3);
-        assertNull(rectNode3.getInput("x"));
-        assertSame(pY, rectNode3.getInput("y"));
+        Node rectNode1 = newNodeWithPortAdded(Node.ROOT.withName("rect1"), pX, direction);
+        assertNull(getNodePort(Node.ROOT, "x", direction));
+        assertSame(pX, getNodePort(rectNode1, "x", direction));
+        Node rectNode2 = newNodeWithPortAdded(rectNode1.withName("rect2"), pY, direction);
+        assertSame(pX, getNodePort(rectNode2, "x", direction));
+        assertSame(pY, getNodePort(rectNode2, "y", direction));
+        assertNull(getNodePort(rectNode1, "y", direction));
+        assertNodePortsSizeEquals(0, Node.ROOT, direction);
+        assertNodePortsSizeEquals(1, rectNode1, direction);
+        assertNodePortsSizeEquals(2, rectNode2, direction);
+        Node rectNode3 = newNodeWithPortRemoved(rectNode2.withName("rect3"), "x", direction);
+        assertNodePortsSizeEquals(2, rectNode2, direction);
+        assertNodePortsSizeEquals(1, rectNode3, direction);
+        assertNull(getNodePort(rectNode3, "x", direction));
+        assertSame(pY, getNodePort(rectNode3, "y", direction));
     }
 
-    @Test
-    public void testOutputs() {
-        Port pX = Port.floatPort("x", 0);
-        Port pY = Port.floatPort("y", 0);
-        Node rectNode1 = Node.ROOT
-                .withName("rect1")
-                .withOutputAdded(pX);
-        assertNull(Node.ROOT.getOutput("x"));
-        assertSame(pX, rectNode1.getOutput("x"));
-        Node rectNode2 = rectNode1
-                .withName("rect2")
-                .withOutputAdded(pY);
-        assertSame(pX, rectNode2.getOutput("x"));
-        assertSame(pY, rectNode2.getOutput("y"));
-        assertNull(rectNode1.getOutput("y"));
-        assertNodeOutputsSizeEquals(0, Node.ROOT);
-        assertNodeOutputsSizeEquals(1, rectNode1);
-        assertNodeOutputsSizeEquals(2, rectNode2);
-        Node rectNode3 = rectNode2
-                .withName("rect3")
-                .withOutputRemoved("x");
-        assertNodeOutputsSizeEquals(2, rectNode2);
-        assertNodeOutputsSizeEquals(1, rectNode3);
-        assertNull(rectNode3.getOutput("x"));
-        assertSame(pY, rectNode3.getOutput("y"));
+    private Node newNodeWithPortAdded(Node node, Port port, String direction) {
+        if (direction.equals(DIRECTION_IN))
+            return node.withInputAdded(port);
+        else if (direction.equals(DIRECTION_OUT))
+            return node.withOutputAdded(port);
+        else
+            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
-    private void assertNodeInputsSizeEquals(int expected, Node node) {
-        assertEquals(expected, node.getInputs().size());
+    private Node newNodeWithPortRemoved(Node node, String portName, String direction) {
+        if (direction.equals(DIRECTION_IN))
+            return node.withInputRemoved(portName);
+        else if (direction.equals(DIRECTION_OUT))
+            return node.withOutputRemoved(portName);
+        else
+            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
-    private void assertNodeOutputsSizeEquals(int expected, Node node) {
-        assertEquals(expected, node.getOutputs().size());
+    private Port getNodePort(Node node, String portName, String direction) {
+        if (direction.equals(DIRECTION_IN))
+            return node.getInput(portName);
+        else if (direction.equals(DIRECTION_OUT))
+            return node.getOutput(portName);
+        else
+            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
+    }
+
+    private void assertNodePortsSizeEquals(int expected, Node node, String direction) {
+        if (direction.equals(DIRECTION_IN))
+            assertEquals(expected, node.getInputs().size());
+        else if (direction.equals(DIRECTION_OUT))
+            assertEquals(expected, node.getOutputs().size());
+        else
+            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
     public List<String> portNames(Node n) {

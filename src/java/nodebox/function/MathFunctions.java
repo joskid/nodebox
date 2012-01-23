@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Basic math function library.
  */
@@ -25,6 +27,15 @@ public class MathFunctions {
 
     public static double subtract(double a, double b) {
         return a - b;
+    }
+    
+    public static double multiply(double a, double b) {
+        return a * b;
+    }
+    
+    public static double divide(double a, double b) {
+        checkArgument(b != 0, "Divider cannot be zero.");
+        return a / b;
     }
 
     public static double invert(double v) {

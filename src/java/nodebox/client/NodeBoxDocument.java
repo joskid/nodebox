@@ -172,6 +172,16 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.colorPort("stroke", nodebox.graphics.Color.BLACK))
                 .withInputAdded(Port.floatPort("strokeWidth", 0))
                 .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+        
+        Node makeColor = Node.ROOT.withName("makeColor")
+                .withPosition(new nodebox.graphics.Point(420, 320))
+                .withFunction("corevector/makeColor")
+                .withInputAdded(Port.floatPort("red", 0))
+                .withInputAdded(Port.floatPort("green", 0))
+                .withInputAdded(Port.floatPort("blue", 0))
+                .withInputAdded(Port.floatPort("alpha", 255))
+                .withInputAdded(Port.floatPort("range", 255))
+                .withOutputAdded(Port.colorPort("color", nodebox.graphics.Color.BLACK));
 
         demoRoot = Node.ROOT
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
@@ -189,6 +199,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(grid1)
                 .withChildAdded(rect2)
                 .withChildAdded(color2)
+                .withChildAdded(makeColor)
                 .connect("toNumbers1", "numbers", "add", "v1")
                 .connect("toNumbers2", "numbers", "add", "v2")
                 .connect("toNumbers1", "numbers", "makePoint1", "x")

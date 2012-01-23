@@ -149,6 +149,9 @@ def copy(shape, copies, order, translation, rotation, scale):
 def makePoint(x, y):
     return Point(x, y)
 
+def makeColor(r, g, b, a, range):
+    return Color(r / range, g / range, b / range, a / range)
+
 def grid(*args):
     try:
         width, height, rows, columns, position = [arg[0] for arg in args]

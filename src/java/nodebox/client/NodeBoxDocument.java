@@ -160,8 +160,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withPosition(new nodebox.graphics.Point(320, 220))
                 .withFunction("corevector/rect")
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
-                .withInputAdded(Port.floatPort("width", 5))
-                .withInputAdded(Port.floatPort("height", 5))
+                .withInputAdded(Port.floatPort("width", 35))
+                .withInputAdded(Port.floatPort("height", 15))
                 .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO))
                 .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
         Node color2 = Node.ROOT.withName("color2")
@@ -174,7 +174,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
         
         Node makeColor = Node.ROOT.withName("makeColor")
-                .withPosition(new nodebox.graphics.Point(420, 320))
+                .withPosition(new nodebox.graphics.Point(220, 120))
                 .withFunction("corevector/makeColor")
                 .withInputAdded(Port.floatPort("red", 0))
                 .withInputAdded(Port.floatPort("green", 0))
@@ -204,10 +204,14 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .connect("toNumbers2", "numbers", "add", "v2")
                 .connect("toNumbers1", "numbers", "makePoint1", "x")
                 .connect("toNumbers2", "numbers", "makePoint1", "y")
+                .connect("toNumbers2", "numbers", "makeColor", "red")
+                .connect("range1", "numbers", "makeColor", "green")
+                .connect("toNumbers2", "numbers", "makeColor", "blue")
                 .connect("rect1", "geometry", "color1", "geometry")
                 .connect("grid1", "points", "rect2", "position")
                 .connect("rect2", "geometry", "color2", "geometry")
-                .withRenderedChildName("rect2");
+                .connect("makeColor", "color", "color2", "fill")
+                .withRenderedChildName("color2");
 }
 
     public NodeBoxDocument() {

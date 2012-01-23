@@ -30,7 +30,7 @@ public final class Node {
         }
     }
 
-    private enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_POLICY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_POLICY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final String name;
@@ -235,6 +235,36 @@ public final class Node {
 
     public List<Connection> getConnections() {
         return connections;
+    }
+
+    public Object getAttributeValue(Attribute attribute) {
+        if (attribute == Attribute.PROTOTYPE) {
+            return getPrototype();
+        } else if (attribute == Attribute.NAME) {
+            return getName();
+        } else if (attribute == Attribute.DESCRIPTION) {
+            return getDescription();
+        } else if (attribute == Attribute.IMAGE) {
+            return getImage();
+        } else if (attribute == Attribute.FUNCTION) {
+            return getFunction();
+        } else if (attribute == Attribute.LIST_POLICY) {
+            return getListPolicy();
+        } else if (attribute == Attribute.POSITION) {
+            return getPosition();
+        } else if (attribute == Attribute.INPUTS) {
+            return getInputs();
+        } else if (attribute == Attribute.OUTPUTS) {
+            return getOutputs();
+        } else if (attribute == Attribute.CHILDREN) {
+            return getChildren();
+        } else if (attribute == Attribute.RENDERED_CHILD_NAME) {
+            return getRenderedChildName();
+        } else if (attribute == Attribute.CONNECTIONS) {
+            return getConnections();
+        } else {
+            throw new AssertionError("Unknown node attribute " + attribute);
+        }
     }
 
     //// Mutation functions ////
@@ -586,6 +616,10 @@ public final class Node {
         }
         b.add(newConnection);
         return newNodeWithAttribute(Attribute.CONNECTIONS, b.build());
+    }
+
+    public Node withConnectionAdded(Connection connection) {
+        return connect(connection.getOutputNode(), connection.getOutputPort(), connection.getInputNode(), connection.getInputPort());
     }
 
     public boolean isConnected(String node) {

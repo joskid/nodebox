@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import nodebox.function.FunctionLibrary;
 import nodebox.function.FunctionRepository;
+import nodebox.graphics.Point;
 import nodebox.util.FileUtils;
 import nodebox.util.LoadException;
 
@@ -12,12 +13,15 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.*;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
 
 public class NodeLibrary {
+
+    public static final Splitter PORT_NAME_SPLITTER = Splitter.on(".");
 
     public static NodeLibrary create(String libraryName, Node root, FunctionRepository functionRepository) {
         return new NodeLibrary(libraryName, root, functionRepository);
@@ -115,9 +119,7 @@ public class NodeLibrary {
                     FunctionLibrary functionLibrary = parseLink(reader);
                     functionLibraries.add(functionLibrary);
                 } else if (tagName.equals("node")) {
-                    rootNode = parseNode(reader, rootNode, nodeRepository);
-                } else if (tagName.equals("conn")) {
-
+                    rootNode = parseNode(reader, nodeRepository);
                 } else {
                     throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
                 }
@@ -143,39 +145,39 @@ public class NodeLibrary {
      * Parse the <node> tag.
      *
      * @param reader         The XML stream.
-     * @param parent         The parent node to which to attach this node.
      * @param nodeRepository The node library dependencies.
-     * @return The new parent node.
+     * @return The new node.
      * @throws XMLStreamException if a parse error occurs.
      */
-    private static Node parseNode(XMLStreamReader reader, Node parent, NodeRepository nodeRepository) throws XMLStreamException {
+    private static Node parseNode(XMLStreamReader reader, NodeRepository nodeRepository) throws XMLStreamException {
         String prototypeId = reader.getAttributeValue(null, "prototype");
         String name = reader.getAttributeValue(null, "name");
         String function = reader.getAttributeValue(null, "function");
+        String position = reader.getAttributeValue(null, "position");
+        String renderedChildName = reader.getAttributeValue(null, "renderedChild");
 
-        Node prototype = nodeRepository.getNode(prototypeId);
-        prototype = prototype != null ? prototype : Node.ROOT;
+        Node prototype = prototypeId == null ? Node.ROOT : nodeRepository.getNode(prototypeId);
         Node node = prototype.extend();
 
         if (name != null)
             node = node.withName(name);
         if (function != null)
             node = node.withFunction(function);
+        if (position != null)
+            node = node.withPosition(Point.valueOf(position));
 
         while (true) {
             int eventType = reader.next();
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 String tagName = reader.getLocalName();
-                if (tagName.equals("port")) {
-                    Port p = parsePort(reader);
-                    String direction = reader.getAttributeValue(null, "direction");
-                    if (direction != null && direction.equals("input")) {
-                        node = node.withInputAdded(p);
-                    } else {
-                        node = node.withOutputAdded(p);
-                    }
+                if (tagName.equals("input")) {
+                    node = node.withInputAdded(parsePort(reader));
+                } else if (tagName.equals("output")) {
+                    node = node.withOutputAdded(parsePort(reader));
                 } else if (tagName.equals("node")) {
-                    node = parseNode(reader, node, nodeRepository);
+                    node = node.withChildAdded(parseNode(reader, nodeRepository));
+                } else if (tagName.equals("conn")) {
+                    node = node.withConnectionAdded(parseConnection(reader));
                 } else {
                     throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
                 }
@@ -185,53 +187,31 @@ public class NodeLibrary {
                     break;
             }
         }
-        parent = parent.withChildAdded(node);
-        return parent;
+
+        // This has to come at the end, since the child first needs to exist.
+        if (renderedChildName != null)
+            node = node.withRenderedChildName(renderedChildName);
+
+        return node;
     }
 
     private static Port parsePort(XMLStreamReader reader) throws XMLStreamException {
         String name = reader.getAttributeValue(null, "name");
         String type = reader.getAttributeValue(null, "type");
-        Port port = Port.portForType(name, type);
-        while (true) {
-            int eventType = reader.next();
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                String tagName = reader.getLocalName();
-                if (tagName.equals("value")) {
-                    String valueAsString = parsePortValue(reader);
-                    port = Port.parsedPort(name, type, valueAsString);
-                } else {
-                    throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
-                }
-
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                String tagName = reader.getLocalName();
-                if (tagName.equals("port"))
-                    break;
-            }
-        }
-        checkNotNull(port);
-        return port;
+        String value = reader.getAttributeValue(null, "value");
+        return Port.parsedPort(name, type, value);
     }
-
-    private static String parsePortValue(XMLStreamReader reader) throws XMLStreamException {
-        String text = null;
-        while (true) {
-            int eventType = reader.next();
-            if (eventType == XMLStreamConstants.CHARACTERS) {
-                text = reader.getText();
-            }
-            if (eventType == XMLStreamConstants.START_ELEMENT) {
-                String tagName = reader.getLocalName();
-                throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
-            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
-                String tagName = reader.getLocalName();
-                if (tagName.equals("value"))
-                    break;
-            }
-        }
-        checkNotNull(text);
-        return text;
+    
+    private static Connection parseConnection(XMLStreamReader reader) throws XMLStreamException {
+        String output = reader.getAttributeValue(null, "output");
+        String input = reader.getAttributeValue(null, "input");
+        Iterator<String> outputIterator = PORT_NAME_SPLITTER.split(output).iterator();
+        Iterator<String> inputIterator = PORT_NAME_SPLITTER.split(input).iterator();
+        String outputNode =  outputIterator.next();
+        String outputPort = outputIterator.next();
+        String inputNode = inputIterator.next();
+        String inputPort = inputIterator.next();
+        return new Connection(outputNode, outputPort, inputNode, inputPort);
     }
 
     //// Saving ////
@@ -244,9 +224,10 @@ public class NodeLibrary {
      * Write the NodeLibrary to a file.
      *
      * @param file The file to save.
+     * @throws java.io.IOException When file saving fails.
      */
     public void store(File file) throws IOException {
-        throw new UnsupportedOperationException("Not implemented");
+        NDBXWriter.write(this, file);
     }
 
     //// Object overrides ////

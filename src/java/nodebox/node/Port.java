@@ -23,6 +23,10 @@ public final class Port {
         ANGLE, COLOR, FILE, FLOAT, FONT, GRADIENT, IMAGE, INT, MENU, SEED, STRING, TEXT, TOGGLE, POINT
     }
 
+    public enum Direction {
+        INPUT, OUTPUT
+    }
+
     public static final ImmutableMap<String, Object> DEFAULT_VALUES;
     public static final ImmutableSet<String> STANDARD_TYPES;
 
@@ -102,21 +106,30 @@ public final class Port {
     public static Port parsedPort(String name, String type, String stringValue) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
-        checkNotNull(stringValue, "String value cannot be null.");
-        checkArgument(STANDARD_TYPES.contains(type), "Given type %s is not a standard type.");
-        Object value;
-        if (type.equals("int")) {
-            value = Long.valueOf(stringValue);
-        } else if (type.equals("float")) {
-            value = Double.valueOf(stringValue);
-        } else if (type.equals("point")) {
-            value = Point.valueOf(stringValue);
-        } else if (type.equals("color")) {
-            value = Color.valueOf(stringValue);
+        if (STANDARD_TYPES.contains(type)) {
+            Object value;
+            if (stringValue == null) {
+                value = DEFAULT_VALUES.get(type);
+                checkNotNull(value);
+            } else {
+                if (type.equals("int")) {
+                    value = Long.valueOf(stringValue);
+                } else if (type.equals("float")) {
+                    value = Double.valueOf(stringValue);
+                } else if (type.equals("string")) {
+                    value = stringValue;
+                } else if (type.equals("point")) {
+                    value = Point.valueOf(stringValue);
+                } else if (type.equals("color")) {
+                    value = Color.valueOf(stringValue);
+                } else {
+                    throw new AssertionError("Unknown type " + type);
+                }
+            }
+            return new Port(name, type, value);
         } else {
-            throw new AssertionError("Unknown type " + type);
+            return Port.customPort(name, type);
         }
-        return new Port(name, type, value);
     }
 
     private Port(String name, String type, Object value) {
@@ -142,7 +155,7 @@ public final class Port {
      *
      * @return true if this is a standard type.
      */
-    private boolean isStandardType() {
+    public boolean isStandardType() {
         return STANDARD_TYPES.contains(type);
     }
 
@@ -152,7 +165,7 @@ public final class Port {
      * @return true if this is a custom type.
      */
     public boolean isCustomType() {
-        return ! isStandardType();
+        return !isStandardType();
     }
 
     /**

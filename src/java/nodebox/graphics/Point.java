@@ -95,7 +95,7 @@ public final class Point implements Iterable<Double> {
 
     @Override
     public String toString() {
-        return String.format("Point(%s, %s)", x, y);
+        return String.format("%.2f,%.2f", x, y);
     }
 
     public Point2D toPoint2D() {

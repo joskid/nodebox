@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableMap;
 import nodebox.node.Node;
 import nodebox.node.Port;
 
+import java.util.Collection;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -53,6 +55,14 @@ public class FunctionRepository {
             n = n.withInputAdded(Port.portForType(arg.getName(), arg.getType()));
         }
         return n;
+    }
+    
+    public Collection<FunctionLibrary> getLibraries() {
+        return libraryMap.values();
+    }
+
+    public boolean hasLibrary(String namespace) {
+        return libraryMap.containsKey(namespace);
     }
 
     public FunctionLibrary getLibrary(String namespace) {

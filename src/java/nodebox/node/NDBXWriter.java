@@ -1,9 +1,10 @@
 package nodebox.node;
 
+import nodebox.function.FunctionLibrary;
+import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Text;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,7 +18,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Writes the ndbx file format.
@@ -42,9 +49,9 @@ public class NDBXWriter {
 
             // Build the header.
             Element rootElement = doc.createElement("ndbx");
-            doc.appendChild(rootElement);
             rootElement.setAttribute("type", "file");
             rootElement.setAttribute("formatVersion", "1.0");
+            doc.appendChild(rootElement);
 
             // Write out all the variables.
 //            for (String variableName : library.getVariableNames()) {
@@ -54,25 +61,9 @@ public class NDBXWriter {
 //                varElement.setAttribute("name", variableName);
 //                varElement.setAttribute("value", variableValue);
 //            }
-
-            // Write out all the nodes (skip the root)
-            ArrayList<Node> children = new ArrayList<Node>();
-            children.addAll(library.getRoot().getChildren());
-            // Sort the children by name.
-            Collections.sort(children, new NodeNameComparator());
-            // The order in which the nodes are written is important!
-            // Since a library can potentially store an instance and its prototype, make sure that the prototype gets
-            // stored sequentially before its instance.
-            // The reader expects prototypes to be defined before their instances.
-            while (!children.isEmpty()) {
-                Node child = children.iterator().next();
-                writeOrderedChild(library, doc, rootElement, children, child);
-            }
-
-            // Write out all the child connections.
-            for (Connection conn : library.getRoot().getConnections()) {
-                writeConnection(doc, rootElement, conn);
-            }
+            
+            // Write the root node.
+            writeNode(doc, rootElement, library.getRoot());
 
             // Convert the document to XML.
             DOMSource domSource = new DOMSource(doc);
@@ -95,65 +86,128 @@ public class NDBXWriter {
     }
 
     /**
+     * Write out the node.
+     *
+     * @param doc    the XML document
+     * @param parent the parent element
+     * @param node   the node to write
+     */
+    private static void writeNode(Document doc, Element parent, Node node) {
+        Element el = doc.createElement("node");
+        parent.appendChild(el);
+
+        // Write prototype
+        if (shouldWriteAttribute(node, Node.Attribute.PROTOTYPE) && node.getPrototype() != Node.ROOT)
+            el.setAttribute("prototype", node.getPrototype().getName());
+
+        // Write name
+        if (shouldWriteAttribute(node, Node.Attribute.NAME))
+            el.setAttribute("name", node.getName());
+
+        // Write description
+        if (shouldWriteAttribute(node, Node.Attribute.DESCRIPTION))
+            el.setAttribute("description", node.getDescription());
+
+        // Write image
+        if (shouldWriteAttribute(node, Node.Attribute.IMAGE))
+            el.setAttribute("image", node.getImage());
+
+        // Write function
+        if (shouldWriteAttribute(node, Node.Attribute.FUNCTION))
+            el.setAttribute("function", node.getFunction());
+
+        // Write list policy
+        if (shouldWriteAttribute(node, Node.Attribute.LIST_POLICY))
+            el.setAttribute("listPolicy", node.getListPolicy().toString());
+
+        // Write position
+        if (shouldWriteAttribute(node, Node.Attribute.POSITION)) {
+            Point position = node.getPosition();
+            el.setAttribute("position", String.format("%.0f,%.0f", position.x, position.y));
+        }
+
+        // Write rendered child
+        if (shouldWriteAttribute(node, Node.Attribute.RENDERED_CHILD_NAME))
+            el.setAttribute("renderedChild", node.getRenderedChildName());
+
+        // Add the input ports
+        if (shouldWriteAttribute(node, Node.Attribute.INPUTS)) {
+            for (Port port : node.getInputs()) {
+                writePort(doc, el, node, port, Port.Direction.INPUT);
+            }
+        }
+
+        // Add the output ports
+        if (shouldWriteAttribute(node, Node.Attribute.OUTPUTS)) {
+            for (Port port : node.getOutputs()) {
+                writePort(doc, el, node, port, Port.Direction.OUTPUT);
+            }
+        }
+
+        // Add the children
+        if (shouldWriteAttribute(node, Node.Attribute.CHILDREN)) {
+            // Sort the children.
+            ArrayList<Node> children = new ArrayList<Node>();
+            children.addAll(node.getChildren());
+            Collections.sort(children, new NodeNameComparator());
+            // The order in which the nodes are written is important!
+            // Since a library can potentially store an instance and its prototype, make sure that the prototype gets
+            // stored sequentially before its instance.
+            // The reader expects prototypes to be defined before their instances.
+            while (!children.isEmpty()) {
+                Node child = children.get(0);
+                writeOrderedChild(doc, el, children, child);
+            }
+        }
+
+        // Add all child connections
+        if (shouldWriteAttribute(node, Node.Attribute.CONNECTIONS)) {
+            for (Connection conn : node.getConnections()) {
+                writeConnection(doc, el, conn);
+            }
+        }
+    }
+
+    /**
+     * Check if the given attribute should be written.
+     * <p/>
+     * The attribute should be written if  it's value is different from the prototype value.
+     *
+     * @param node      The node.
+     * @param attribute The name of the attribute.
+     * @return true if the attribute should be written.
+     */
+    private static boolean shouldWriteAttribute(Node node, Node.Attribute attribute) {
+        checkArgument(node != Node.ROOT, "You cannot write out the _root node.");
+        Object prototypeValue = node.getPrototype().getAttributeValue(attribute);
+        Object nodeValue = node.getAttributeValue(attribute);
+        if (attribute != Node.Attribute.PROTOTYPE) {
+            checkNotNull(prototypeValue, "Attribute %s of node %s is empty.", attribute, node.getPrototype());
+            checkNotNull(nodeValue, "Attribute %s of node %s is empty.", attribute, node);
+            return !prototypeValue.equals(nodeValue);
+        } else {
+            return prototypeValue != nodeValue;
+        }
+    }
+
+    /**
      * Write out the child. If the prototype of the child is also in this library, write that out first, recursively.
      *
-     * @param library  the node library
      * @param doc      the XML document
      * @param parent   the parent element
      * @param children a list of children that were written already.
      *                 When a child is written, we remove it from the list.
      * @param child    the child to write
      */
-    private static void writeOrderedChild(NodeLibrary library, Document doc, Element parent, List<Node> children, Node child) {
+    private static void writeOrderedChild(Document doc, Element parent, List<Node> children, Node child) {
         Node prototype = child.getPrototype();
-        if (children.contains(prototype)) // TODO doesn't do a deep check.
-            writeOrderedChild(library, doc, parent, children, prototype);
+        if (children.contains(prototype))
+            writeOrderedChild(doc, parent, children, prototype);
         writeNode(doc, parent, child);
         children.remove(child);
     }
 
-    private static void writeNode(Document doc, Element parent, Node node) {
-        Point position = node.getPosition();
-        String xPosition = String.format(Locale.US, "%.0f", position.x);
-        String yPosition = String.format(Locale.US, "%.0f", position.y);
-        Element el = doc.createElement("node");
-        parent.appendChild(el);
-        el.setAttribute("name", node.getName());
-        // TODO How do we find the full name of a prototype?
-        el.setAttribute("prototype", node.getPrototype().getName());
-        el.setAttribute("x", xPosition);
-        el.setAttribute("y", yPosition);
-        // Before we wrote this on the child. Now we write it on the parent, if appropriate.
-        if (!node.getRenderedChildName().isEmpty()) {
-            el.setAttribute("renderedChild", node.getRenderedChildName());
-        }
-
-        // Add the description
-        if (!node.getDescription().isEmpty()) {
-            Element desc = doc.createElement("description");
-            el.appendChild(desc);
-            Text descText = doc.createTextNode(node.getDescription());
-            desc.appendChild(descText);
-        }
-
-        // Add the ports
-        for (Port port : node.getInputs()) {
-            writePort(doc, el, node, port);
-        }
-
-        // Add all child nodes
-        for (Node child : node.getChildren()) {
-            writeNode(doc, el, child);
-        }
-
-
-        // Add all child connections
-        for (Connection conn : node.getConnections()) {
-            writeConnection(doc, el, conn);
-        }
-    }
-
-    private static void writePort(Document doc, Element parent, Node node, Port port) {
+    private static void writePort(Document doc, Element parent, Node node, Port port, Port.Direction direction) {
         // We only write out the ports that have changed with regards to the prototype.
         Node protoNode = node.getPrototype();
         Port protoPort = null;
@@ -161,18 +215,19 @@ public class NDBXWriter {
             protoPort = protoNode.getInput(port.getName());
         // If the port and its prototype are equal, don't write anything.
         if (port.equals(protoPort)) return;
-        Element el = doc.createElement("port");
+        String tagName = direction == Port.Direction.INPUT ? "input" : "output";
+        Element el = doc.createElement(tagName);
         el.setAttribute("name", port.getName());
         el.setAttribute("type", port.getType());
-        el.setAttribute("value", port.stringValue());
+        if (port.isStandardType()) // TODO && direction == Port.Direction.INPUT
+            el.setAttribute("value", port.stringValue());
         parent.appendChild(el);
     }
 
     private static void writeConnection(Document doc, Element parent, Connection conn) {
         Element connElement = doc.createElement("conn");
-        connElement.setAttribute("output", conn.getOutputNode());
-        connElement.setAttribute("input", conn.getInputNode());
-        connElement.setAttribute("port", conn.getInputPort());
+        connElement.setAttribute("output", String.format("%s.%s", conn.getOutputNode(), conn.getOutputPort()));
+        connElement.setAttribute("input", String.format("%s.%s", conn.getInputNode(), conn.getInputPort()));
         parent.appendChild(connElement);
     }
 

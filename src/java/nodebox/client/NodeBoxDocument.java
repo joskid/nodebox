@@ -1,7 +1,9 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
-import nodebox.function.*;
+import nodebox.function.FunctionRepository;
+import nodebox.function.MathFunctions;
+import nodebox.function.PythonLibrary;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -78,6 +80,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     private static final Node demoRoot;
+
+    private static final FunctionRepository THE_FUNCTION_REPOSITORY = FunctionRepository.of(
+            MathFunctions.LIBRARY,
+            PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
 
     static {
         Node value1 = Node.ROOT.withName("toNumbers1")
@@ -194,10 +200,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 }
 
     public NodeBoxDocument() {
-        this(NodeLibrary.create("untitled", demoRoot,
-                FunctionRepository.of(
-                        MathFunctions.LIBRARY,
-                        PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"))));
+        this(NodeLibrary.create("untitled", demoRoot, THE_FUNCTION_REPOSITORY));
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {

@@ -90,11 +90,15 @@ public class NodeContext {
      */
     public void renderNetwork(Node network) throws NodeRenderException {
         checkNotNull(network);
-        renderChild(network, network.getRenderedChild());
+        if (network.getRenderedChild() == null) {
+            throw new NodeRenderException(network, "No child node to render.");
+        } else {
+            renderChild(network, network.getRenderedChild());
+        }
     }
 
     /**
-     * Render the child by rendering its rendered child.
+     * Render the child in the network.
      *
      * @param network The network to render.
      * @param child   The child node to render.

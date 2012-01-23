@@ -148,3 +148,30 @@ def copy(shape, copies, order, translation, rotation, scale):
 
 def makePoint(x, y):
     return Point(x, y)
+
+def grid(*args):
+    try:
+        width, height, rows, columns, position = [arg[0] for arg in args]
+    except IndexError:
+        return []
+    except ValueError:
+        return []
+        
+    if columns > 1:
+        column_size = width / (columns - 1)
+        left = position.x - width / 2
+    else:
+        column_size = left = 0
+    if rows > 1:
+        row_size = height / (rows - 1)
+        top = position.y - height / 2
+    else:
+        row_size = top = 0
+        
+    points = []
+    for ri in xrange(rows):
+        for ci in xrange(columns):
+            x = left + ci * column_size
+            y = top + ri * row_size
+            points.append(Point(x, y))
+    return points

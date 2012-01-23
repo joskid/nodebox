@@ -18,6 +18,8 @@
  */
 package nodebox.node;
 
+import com.google.common.base.Objects;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -74,6 +76,23 @@ public class Connection {
      */
     public String getInputPort() {
         return inputPort;
+    }
+
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(outputNode, outputPort, inputNode, inputPort);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Connection)) return false;
+        final Connection other = (Connection) o;
+        return Objects.equal(outputNode, other.outputNode)
+                && Objects.equal(outputPort, other.outputPort)
+                && Objects.equal(inputNode, other.inputNode)
+                && Objects.equal(inputPort, other.inputPort);
     }
 
     @Override

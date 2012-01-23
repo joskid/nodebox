@@ -40,4 +40,26 @@ public class NodeLibraryTest {
         library.getNodeForPath("parent");
     }
 
+    @Test
+    public void testSimpleReadWrite() {
+        NodeLibrary simple = NodeLibrary.create("test", Node.ROOT, FunctionRepository.of());
+        assertReadWriteEquals(simple, NodeRepository.of());
+    }
+
+    @Test
+    public void testNestedReadWrite() {
+        assertReadWriteEquals(library, NodeRepository.of());
+    }
+
+    /**
+     * Assert that a NodeLibrary equals itself after reading and writing.
+     * @param library The NodeLibrary.
+     * @param nodeRepository The repository of NodeLibraries.
+     */
+    private void assertReadWriteEquals(NodeLibrary library, NodeRepository nodeRepository) {
+        String xml  = library.toXml();
+        System.out.println("xml = " + xml);
+        assertEquals(library, NodeLibrary.load(library.getName(), xml, nodeRepository));
+    }
+
 }

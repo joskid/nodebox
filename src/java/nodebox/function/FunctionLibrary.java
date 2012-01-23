@@ -1,5 +1,6 @@
 package nodebox.function;
 
+import com.google.common.base.Objects;
 import nodebox.util.LoadException;
 
 /**
@@ -24,5 +25,24 @@ public abstract class FunctionLibrary {
     public abstract Function getFunction(String name);
 
     public abstract boolean hasFunction(String name);
+
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getNamespace());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof FunctionLibrary)) return false;
+        final FunctionLibrary other = (FunctionLibrary) o;
+        return Objects.equal(getNamespace(), other.getNamespace());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("<FunctionLibrary %s>", getNamespace());
+    }
 
 }

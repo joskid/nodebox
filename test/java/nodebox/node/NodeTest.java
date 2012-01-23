@@ -23,6 +23,21 @@ public class NodeTest {
     public void testRelativePath() {
         Node.path("", Node.ROOT.withName("child"));
     }
+    
+    @Test
+    public void testRootName() {
+        assertEquals("_root", Node.ROOT.getName());
+        // The moment we extend from root, the name changes.
+        assertEquals("node", Node.ROOT.withFunction("test").getName());
+        // Trying to change the name back to _root fails.
+        assertEquals("node", Node.ROOT.withName("_root").getName());
+    }
+    
+    @Test
+    public void testChangeFunction(){
+        Node test = Node.ROOT.extend().withFunction("test/test");
+        assertEquals("test/test", test.getFunction());
+    }
 
     @Test
     public void testPrototype() {

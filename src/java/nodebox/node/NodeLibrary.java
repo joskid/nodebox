@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import nodebox.function.FunctionLibrary;
 import nodebox.function.FunctionRepository;
@@ -154,13 +155,27 @@ public class NodeLibrary {
 
         Node prototype = nodeRepository.getNode(prototypeId);
         prototype = prototype != null ? prototype : Node.ROOT;
-        Node node = prototype.extend().withName(name).withFunction(function);
+        Node node = prototype.extend();
+
+        if (name != null)
+            node = node.withName(name);
+        if (function != null)
+            node = node.withFunction(function);
+
         while (true) {
             int eventType = reader.next();
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 String tagName = reader.getLocalName();
                 if (tagName.equals("port")) {
-                    parsePort(reader);
+                    Port p = parsePort(reader);
+                    String direction = reader.getAttributeValue(null, "direction");
+                    if (direction != null && direction.equals("input")) {
+                        node = node.withInputAdded(p);
+                    } else {
+                        node = node.withOutputAdded(p);
+                    }
+                } else if (tagName.equals("node")) {
+                    node = parseNode(reader, node, nodeRepository);
                 } else {
                     throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
                 }
@@ -221,6 +236,10 @@ public class NodeLibrary {
 
     //// Saving ////
 
+    public String toXml() {
+        return NDBXWriter.asString(this);
+    }
+
     /**
      * Write the NodeLibrary to a file.
      *
@@ -228,6 +247,27 @@ public class NodeLibrary {
      */
     public void store(File file) throws IOException {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name, root, functionRepository);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof NodeLibrary)) return false;
+        final NodeLibrary other = (NodeLibrary) o;
+        return Objects.equal(name, other.name)
+                && Objects.equal(root, other.root)
+                && Objects.equal(functionRepository, other.functionRepository);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("<NodeLibrary %s>", name);
     }
 
 }

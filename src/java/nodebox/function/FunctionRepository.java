@@ -1,5 +1,7 @@
 package nodebox.function;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import nodebox.node.Node;
 import nodebox.node.Port;
@@ -57,6 +59,24 @@ public class FunctionRepository {
         checkNotNull(namespace);
         checkArgument(libraryMap.containsKey(namespace), "Could not find library %s: unknown namespace.", namespace);
         return libraryMap.get(namespace);
+    }
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(libraryMap);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof FunctionRepository)) return false;
+        final FunctionRepository other = (FunctionRepository) o;
+        return Objects.equal(libraryMap, other.libraryMap);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("<FunctionRepository %s>", Joiner.on(", ").join(libraryMap.values()));
     }
 
 }

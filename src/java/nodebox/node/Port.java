@@ -313,6 +313,13 @@ public final class Port {
         }
     }
 
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name, type, value);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Port)) return false;
@@ -323,7 +330,8 @@ public final class Port {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(name, type, value);
+    public String toString() {
+        return String.format("<Port %s (%s): %s>", name, type, value);
     }
+
 }

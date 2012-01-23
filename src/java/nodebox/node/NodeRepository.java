@@ -42,6 +42,8 @@ public class NodeRepository {
      * @return a Node or null if a node could not be found.
      */
     public Node getNode(String identifier) {
+        checkNotNull(identifier);
+        if (identifier.equals("_root")) return Node.ROOT;
         String[] names = identifier.split(".");
         checkArgument(names.length == 2);
         String libraryName = names[0];

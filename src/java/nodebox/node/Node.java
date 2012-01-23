@@ -1,6 +1,7 @@
 package nodebox.node;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import nodebox.graphics.Point;
 
@@ -52,7 +53,7 @@ public final class Node {
     private Node() {
         checkState(ROOT == null, "You cannot create more than one root node.");
         prototype = null;
-        name = "root";
+        name = "_root";
         description = "";
         image = "";
         function = "core/zero";
@@ -77,6 +78,7 @@ public final class Node {
         checkAllNotNull(prototype, name, description, image, function, listPolicy,
                 position, inputs, outputs, children,
                 renderedChildName, connections);
+        checkArgument(!name.equals("_root"), "The name _root is a reserved internal name.");
         this.prototype = prototype;
         this.name = name;
         this.description = description;
@@ -661,10 +663,44 @@ public final class Node {
                 throw new AssertionError("Unknown attribute " + attribute);
         }
         // If we're "changing" an attribute on ROOT, make the ROOT the prototype.
-        if (prototype == null)
+        if (prototype == null) {
             prototype = ROOT;
+
+        }
+
+        // The name of a node can never be "_root".
+        if (name.equals("_root")) {
+            name = "node";
+        }
+
         return new Node(prototype, name, description, image, function, listPolicy, position,
                 inputs, outputs, children, renderedChildName, connections);
+    }
+
+    //// Object overrides ////
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(prototype, name, description, image, function, listPolicy, position,
+                inputs, outputs, children, renderedChildName, connections);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Node)) return false;
+        final Node other = (Node) o;
+        return Objects.equal(prototype, other.prototype)
+                && Objects.equal(name, other.name)
+                && Objects.equal(description, other.description)
+                && Objects.equal(image, other.image)
+                && Objects.equal(function, other.function)
+                && Objects.equal(listPolicy, other.listPolicy)
+                && Objects.equal(position, other.position)
+                && Objects.equal(inputs, other.inputs)
+                && Objects.equal(outputs, other.outputs)
+                && Objects.equal(children, other.children)
+                && Objects.equal(renderedChildName, other.renderedChildName)
+                && Objects.equal(connections, other.connections);
     }
 
     @Override

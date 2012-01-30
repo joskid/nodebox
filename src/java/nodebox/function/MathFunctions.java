@@ -28,11 +28,11 @@ public class MathFunctions {
     public static double subtract(double a, double b) {
         return a - b;
     }
-    
+
     public static double multiply(double a, double b) {
         return a * b;
     }
-    
+
     public static double divide(double a, double b) {
         checkArgument(b != 0, "Divider cannot be zero.");
         return a / b;
@@ -51,23 +51,14 @@ public class MathFunctions {
         return v;
     }
 
-    public static Iterable<Double> toNumbers(Iterable<String> strings) {
+    public static Iterable<Double> toNumbers(String s) {
         ArrayList<Double> numbers = new ArrayList<Double>();
-        for (String s : strings) {
-            if (!s.isEmpty()) {
-                for (String part : s.split(" ")) {
-                    numbers.add(Double.parseDouble(part));
-                }
+        if (!s.isEmpty()) {
+            for (String part : s.split(" ")) {
+                numbers.add(Double.parseDouble(part));
             }
         }
         return numbers;
-    }
-
-    public static Iterable<Double> range(Iterable<Double> start, Iterable<Double> end, Iterable<Double> step) {
-        double startValue = start.iterator().next();
-        double endValue = end.iterator().next();
-        double stepValue = step.iterator().next();
-        return range(startValue, endValue, stepValue);
     }
 
     public static Iterable<Double> range(final double start, final double end, final double step) {

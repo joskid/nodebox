@@ -149,12 +149,13 @@ public class NodeContext {
         Function function = repository.getFunction(functionName);
 
         // Get the input values.
-        ArrayList<List<Object>> inputValues = new ArrayList<List<Object>>();
+        ArrayList<ValueOrList> inputValues = new ArrayList<ValueOrList>();
         for (Port p : node.getInputs()) {
             if (inputValuesMap.containsKey(NodePort.of(node, p))) {
-                inputValues.add(inputValuesMap.get(NodePort.of(node, p)));
+                inputValues.add(ValueOrList.ofList(inputValuesMap.get(NodePort.of(node, p))));
             } else {
-                inputValues.add(ImmutableList.of(p.getValue()));
+                // Because other values return the shortest list, this doesn't work.
+                inputValues.add(ValueOrList.ofValue(p.getValue()));
             }
         }
 
@@ -179,8 +180,9 @@ public class NodeContext {
      * @param function    The node's function implementation.
      * @param inputValues A list of all values for the input ports.
      */
-    private void renderListAwareNode(Node node, Function function, List<List<Object>> inputValues) {
-        Object returnValues = invokeFunction(node, function, inputValues);
+    private void renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
+        List arguments = inputValuesToArguments(inputValues);
+        Object returnValues = invokeFunction(node, function, arguments);
         checkState(returnValues instanceof Iterable, "Return value of list-aware function needs to be a List.");
 
         List<Port> outputs = node.getOutputs();
@@ -190,6 +192,14 @@ public class NodeContext {
         NodePort np = NodePort.of(node, thePort);
         checkState(!outputValuesMap.containsKey(np), "This value should not have been set yet.");
         outputValuesMap.put(np, ImmutableList.copyOf((Iterable<? extends Object>) returnValues));
+    }
+
+    private List inputValuesToArguments(List<ValueOrList> inputValues) {
+        List arguments = new ArrayList(inputValues.size());
+        for (ValueOrList v : inputValues) {
+            arguments.add(v.value);
+        }
+        return arguments;
     }
 
     /**
@@ -203,8 +213,8 @@ public class NodeContext {
      * @param function    The node's function implementation.
      * @param inputValues A list of all values for the input ports.
      */
-    private void renderListUnawareNode(Node node, Function function, List<List<Object>> inputValues) {
-        checkState(node.getListPolicy() != ListPolicy.LIST_AWARE);
+    private void renderListUnawareNode(Node node, Function function, List<ValueOrList> inputValues) {
+        checkState(!node.isListAware());
 
         List<Port> outputs = node.getOutputs();
         for (Port output : outputs) {
@@ -218,19 +228,7 @@ public class NodeContext {
                 outputValuesMap.put(NodePort.of(node, returnValue.getKey()), ImmutableList.of(returnValue.getValue()));
             }
         } else {
-            // There are input ports. Use the list policy to determine what to do with them.
-            final int minimumSize = minimumSize(inputValues);
-            ListOfListsIterator inputsIterator;
-            if (node.getListPolicy() == ListPolicy.SHORTEST_LIST) {
-                inputsIterator = new ShortestListIterator(inputValues);
-            } else if (node.getListPolicy() == ListPolicy.LONGEST_LIST) {
-                inputsIterator = new LongestListIterator(inputValues);
-            } else if (node.getListPolicy() == ListPolicy.CROSS_REFERENCE) {
-                inputsIterator = new CrossReferenceListIterator(inputValues);
-            } else {
-                throw new AssertionError("Invalid list policy " + node.getListPolicy());
-            }
-            checkState(inputsIterator.size() >= 0);
+            int minimumSize = minimumSize(inputValues);
             if (minimumSize == 0) {
                 // If the minimum list size is zero a list of zero elements was passed in to one of the inputs.
                 // This means the function doesn't get called, and returns an empty list.
@@ -239,38 +237,43 @@ public class NodeContext {
                 }
             } else {
                 Multimap<Port, Object> resultsMultimap = LinkedListMultimap.create();
-                while (inputsIterator.hasNext()) {
-                    List<? extends Object> arguments = inputsIterator.next();
+                int listIndex = 0;
+                boolean hasListArgument = false;
+                processInputValues:
+                while (true) {
+                    // Collect arguments by going through the input values.
+                    List arguments = new ArrayList();
+                    for (ValueOrList v : inputValues) {
+                        if (v.isList()) {
+                            // End when the first list is exhausted.
+                            if (listIndex >= v.getList().size()) break processInputValues;
+                            arguments.add(v.getList().get(listIndex));
+                            hasListArgument = true;
+                        } else {
+                            arguments.add(v.getValue());
+                        }
+                    }
+                    // Invoke the function.
                     Map<Port, Object> returnValues = invokeListUnawareFunction(node, function, arguments);
+                    // Collect the return values.
                     for (Map.Entry<Port, Object> returnValue : returnValues.entrySet()) {
                         resultsMultimap.put(returnValue.getKey(), returnValue.getValue());
                     }
+                    // If none of the arguments are lists, we're done.
+                    if (!hasListArgument) break;
+                    // Otherwise increment the list index.
+                    listIndex++;
                 }
                 for (Port port : resultsMultimap.keySet()) {
                     NodePort np = NodePort.of(node, port);
-                    checkState(!outputValuesMap.containsKey(np), "This value should not have been set yet.");
+                    checkState(!outputValuesMap.containsKey(np), "Value on %s.%s should not have been set yet.", node, port);
                     outputValuesMap.put(NodePort.of(node, port), ImmutableList.copyOf(resultsMultimap.get(port)));
                 }
             }
         }
     }
 
-    /**
-     * Get the value at the given index. If the index is larger than the list, wrap around.
-     * The list cannot be null. If the list is empty, null is returned.
-     *
-     * @param values The input values.
-     * @param index  The index number. Negative indices are not supported.
-     * @return The value at the index.
-     */
-    public static Object getValueAtIndexWrapped(List<? extends Object> values, int index) {
-        checkNotNull(values, "Values cannot be null.");
-        checkArgument(index >= 0, "Index needs to be greater than or equal to zero.");
-        if (values.isEmpty()) return null;
-        return values.get(index % values.size());
-    }
-
-    private Map<Port, Object> invokeListUnawareFunction(Node node, Function function, List<? extends Object> arguments) throws NodeRenderException {
+    private Map<Port, Object> invokeListUnawareFunction(Node node, Function function, List arguments) throws NodeRenderException {
         Object returnValue = invokeFunction(node, function, arguments);
         List<Port> outputs = node.getOutputs();
         if (outputs.size() == 0) {
@@ -295,7 +298,7 @@ public class NodeContext {
         }
     }
 
-    private Object invokeFunction(Node node, Function function, List<? extends Object> arguments) throws NodeRenderException {
+    private Object invokeFunction(Node node, Function function, List arguments) throws NodeRenderException {
         try {
             return function.invoke(arguments.toArray());
         } catch (Exception e) {
@@ -318,136 +321,52 @@ public class NodeContext {
      * @param ll The list of lists.
      * @return The minimum amount of elements.
      */
-    private static int minimumSize(List<List<Object>> ll) {
+    private static int minimumSize(List<ValueOrList> ll) {
         if (ll.size() == 0) return 0;
-        int minSpan = Integer.MAX_VALUE;
-        for (List values : ll) {
-            minSpan = Math.min(minSpan, values.size());
+        int minSize = Integer.MAX_VALUE;
+        for (ValueOrList v : ll) {
+            if (v.isList())
+                minSize = Math.min(minSize, v.getList().size());
         }
-        checkState(minSpan < Integer.MAX_VALUE);
-        return minSpan;
+        // HACK If all lists are infinite (meaning they return a size() of MAX_VALUE),
+        // they are all a size of one. Infinite lists are a hack themselves to make
+        // sure that non-connected ports do not produce short lists of one element.
+        return minSize < Integer.MAX_VALUE ? minSize : 1;
     }
 
-    /**
-     * Get the maximum amount of elements in the list of lists.
-     *
-     * @param ll The list of lists.
-     * @return The maximum amount of elements.
-     */
-    private static int maximumSize(List<List<Object>> ll) {
-        if (ll.size() == 0) return 0;
-        int maxSpan = 0;
-        for (List values : ll) {
-            maxSpan = Math.max(maxSpan, values.size());
-        }
-        return maxSpan;
-    }
+    private static final class ValueOrList {
+        private final boolean isList;
+        private final Object value;
 
-    /**
-     * Get the cross product of the amount of elements in the list of lists.
-     *
-     * @param ll The list of lists.
-     * @return The cross product amount of elements.
-     */
-    private static int crossReferencedSize(List<List<Object>> ll) {
-        if (ll.size() == 0) return 0;
-        int amount = 1;
-        // TODO Check for overflow?
-        for (List values : ll) {
-            amount *= values.size();
-        }
-        return amount;
-    }
-
-
-    public static abstract class ListOfListsIterator implements Iterator<List<? extends Object>> {
-
-        protected final List<List<Object>> listOfLists;
-        protected final int size;
-        protected int index = 0;
-
-        public ListOfListsIterator(List<List<Object>> listOfLists, int size) {
-            this.listOfLists = listOfLists;
-            this.size = size;
+        private static ValueOrList ofValue(Object value) {
+            return new ValueOrList(false, value);
         }
 
-        public boolean hasNext() {
-            return index < size;
+        private static ValueOrList ofList(List list) {
+            return new ValueOrList(true, list);
         }
 
-        public int size() {
-            return size;
+        private ValueOrList(boolean isList, Object value) {
+            checkArgument(!isList || value instanceof List);
+            this.isList = isList;
+            this.value = value;
         }
 
-        public void remove() {
+
+        private Object getValue() {
+            checkState(!isList);
+            return value;
+        }
+
+        private List getList() {
+            checkState(isList);
+            return (List) value;
+        }
+
+        private boolean isList() {
+            return isList;
         }
 
     }
-
-    public static final class ShortestListIterator extends ListOfListsIterator {
-
-        public ShortestListIterator(List<List<Object>> listOfLists) {
-            super(listOfLists, minimumSize(listOfLists));
-        }
-
-        public List<Object> next() {
-            ImmutableList.Builder<Object> builder = ImmutableList.builder();
-            for (List<Object> list : listOfLists) {
-                builder.add(list.get(index));
-            }
-            index++;
-            return builder.build();
-        }
-    }
-
-    public static final class LongestListIterator extends ListOfListsIterator {
-
-        public LongestListIterator(List<List<Object>> listOfLists) {
-            super(listOfLists, maximumSize(listOfLists));
-        }
-
-        public List<Object> next() {
-            ImmutableList.Builder<Object> builder = ImmutableList.builder();
-            for (List<Object> list : listOfLists) {
-                builder.add(getValueAtIndexWrapped(list, index));
-            }
-            index++;
-            return builder.build();
-        }
-    }
-
-    public static final class CrossReferenceListIterator extends ListOfListsIterator {
-
-        private int[] indices;
-        private int[] sizes;
-
-        public CrossReferenceListIterator(List<List<Object>> listOfLists) {
-            super(listOfLists, crossReferencedSize(listOfLists));
-            indices = new int[listOfLists.size()];
-            sizes = new int[listOfLists.size()];
-            for (int i = 0; i < listOfLists.size(); i++) {
-                sizes[i] = listOfLists.get(i).size();
-            }
-        }
-
-        public List<Object> next() {
-            ImmutableList.Builder<Object> builder = ImmutableList.builder();
-            for (int i = 0; i < indices.length; i++) {
-                List<Object> list = listOfLists.get(i);
-                builder.add(list.get(indices[i]));
-            }
-            for (int i = indices.length - 1; i >= 0; i--) {
-                if (indices[i] < sizes[i] - 1) {
-                    indices[i] += 1;
-                    break;
-                } else {
-                    indices[i] = 0;
-                }
-            }
-            index++;
-            return builder.build();
-        }
-    }
-
 
 }

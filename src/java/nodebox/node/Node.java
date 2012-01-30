@@ -30,14 +30,18 @@ public final class Node {
         }
     }
 
-    public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_POLICY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    public static String MAP_STRATEGY = "map";
+    public static String AS_IS_STRATEGY = "as-is";
+    public static String FLATTEN_STRATEGY = "flatten";
+
+    public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final String name;
     private final String description;
     private final String image;
     private final String function;
-    private final ListPolicy listPolicy;
+    private final String listStrategy;
     private final Point position;
     private final ImmutableList<Port> inputs;
     private final ImmutableList<Port> outputs;
@@ -57,7 +61,7 @@ public final class Node {
         description = "";
         image = "";
         function = "core/zero";
-        listPolicy = ListPolicy.LONGEST_LIST;
+        listStrategy = "map";
         position = Point.ZERO;
         inputs = ImmutableList.of();
         outputs = ImmutableList.of();
@@ -72,10 +76,10 @@ public final class Node {
         }
     }
 
-    private Node(Node prototype, String name, String description, String image, String function, ListPolicy listPolicy,
+    private Node(Node prototype, String name, String description, String image, String function, String listStrategy,
                  Point position, ImmutableList<Port> inputs, ImmutableList<Port> outputs, ImmutableList<Node> children,
                  String renderedChildName, ImmutableList<Connection> connections) {
-        checkAllNotNull(prototype, name, description, image, function, listPolicy,
+        checkAllNotNull(prototype, name, description, image, function, listStrategy,
                 position, inputs, outputs, children,
                 renderedChildName, connections);
         checkArgument(!name.equals("_root"), "The name _root is a reserved internal name.");
@@ -84,7 +88,7 @@ public final class Node {
         this.description = description;
         this.image = image;
         this.function = function;
-        this.listPolicy = listPolicy;
+        this.listStrategy = listStrategy;
         this.position = position;
         this.inputs = inputs;
         this.outputs = outputs;
@@ -115,12 +119,15 @@ public final class Node {
         return function;
     }
 
-    public ListPolicy getListPolicy() {
-        return listPolicy;
+    public String getListStrategy() {
+        return listStrategy;
     }
 
     public boolean isListAware() {
-        return listPolicy.isListAware();
+        // HACK this is a quick way to port old code into the list strategy pattern.
+        // The "as-is" strategy, where lists are passed as-is, could be called "list-aware", so
+        // we check for that.
+        return listStrategy.equals(AS_IS_STRATEGY);
     }
 
     public Point getPosition() {
@@ -248,8 +255,8 @@ public final class Node {
             return getImage();
         } else if (attribute == Attribute.FUNCTION) {
             return getFunction();
-        } else if (attribute == Attribute.LIST_POLICY) {
-            return getListPolicy();
+        } else if (attribute == Attribute.LIST_STRATEGY) {
+            return getListStrategy();
         } else if (attribute == Attribute.POSITION) {
             return getPosition();
         } else if (attribute == Attribute.INPUTS) {
@@ -327,18 +334,25 @@ public final class Node {
     }
 
     /**
-     * Create a new node with the given list policy.
-     * The list policy defines how the node context operates on the input and output lists.
-     * Nodes that are not list-aware operate on one value, and NodeBox takes care of feeding the input of a list to
-     * the function and re-assembling the outputs into a new list.
+     * Create a new node with the given list strategy.
+     * <p/>
+     * The list strategy is a higher-oder mapping function that defines how sequences are passed in the node function.
+     * Possible values are:
+     * <ul>
+     * <li><strong>none</strong>: pass the sequence as-is.</li>
+     * <li><strong>map</strong>: apply the function over each of the elements until any of the input sequences are
+     * exhausted and return a new sequence.</li>
+     * <li><strong>filter</strong>: apply the function as a predicate and return a new sequence with the elements that
+     * pass the predicate.</li>
+     * </ul>
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
-     * @param listPolicy The new list policy.
+     * @param listStrategy The higher-order mapping function.
      * @return A new Node.
      */
-    public Node withListPolicy(ListPolicy listPolicy) {
-        return newNodeWithAttribute(Attribute.LIST_POLICY, listPolicy);
+    public Node withListStrategy(String listStrategy) {
+        return newNodeWithAttribute(Attribute.LIST_STRATEGY, listStrategy);
     }
 
     /**
@@ -648,7 +662,7 @@ public final class Node {
         String description = this.description;
         String image = this.image;
         String function = this.function;
-        ListPolicy listPolicy = this.listPolicy;
+        String listStrategy = this.listStrategy;
         Point position = this.position;
         ImmutableList<Port> inputs = this.inputs;
         ImmutableList<Port> outputs = this.outputs;
@@ -672,8 +686,8 @@ public final class Node {
             case FUNCTION:
                 function = (String) value;
                 break;
-            case LIST_POLICY:
-                listPolicy = (ListPolicy) value;
+            case LIST_STRATEGY:
+                listStrategy = (String) value;
                 break;
             case POSITION:
                 position = (Point) value;
@@ -707,7 +721,7 @@ public final class Node {
             name = "node";
         }
 
-        return new Node(prototype, name, description, image, function, listPolicy, position,
+        return new Node(prototype, name, description, image, function, listStrategy, position,
                 inputs, outputs, children, renderedChildName, connections);
     }
 
@@ -715,7 +729,7 @@ public final class Node {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(prototype, name, description, image, function, listPolicy, position,
+        return Objects.hashCode(prototype, name, description, image, function, listStrategy, position,
                 inputs, outputs, children, renderedChildName, connections);
     }
 
@@ -728,7 +742,7 @@ public final class Node {
                 && Objects.equal(description, other.description)
                 && Objects.equal(image, other.image)
                 && Objects.equal(function, other.function)
-                && Objects.equal(listPolicy, other.listPolicy)
+                && Objects.equal(listStrategy, other.listStrategy)
                 && Objects.equal(position, other.position)
                 && Objects.equal(inputs, other.inputs)
                 && Objects.equal(outputs, other.outputs)

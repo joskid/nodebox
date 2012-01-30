@@ -139,8 +139,8 @@ public class NDBXWriter {
             el.setAttribute("function", node.getFunction());
 
         // Write list policy
-        if (shouldWriteAttribute(node, Node.Attribute.LIST_POLICY))
-            el.setAttribute("listPolicy", node.getListPolicy().toString());
+        if (shouldWriteAttribute(node, Node.Attribute.LIST_STRATEGY))
+            el.setAttribute("strategy", node.getListStrategy());
 
         // Write position
         if (shouldWriteAttribute(node, Node.Attribute.POSITION)) {

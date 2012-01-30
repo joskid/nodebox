@@ -49,7 +49,7 @@ public class NodeContextTest {
     public static final Node toNumbersNode = Node.ROOT
             .withName("toNumbers")
             .withFunction("math/toNumbers")
-            .withListPolicy(ListPolicy.LIST_AWARE)
+            .withListStrategy(Node.AS_IS_STRATEGY)
             .withInputAdded(Port.stringPort("string", ""))
             .withOutputAdded(Port.floatPort("numbers", 0.0));
 
@@ -234,48 +234,9 @@ public class NodeContextTest {
         List<Object> results = context.getResults(add1, "number");
         assertResultsEqual(results, 101.0, 102.0, 103.0);
     }
-    
+
     @Test
     public void testListPolicies() {
-        // With shortest list policy we stop when the shortest list runs out of values.
-        Node addShortest = addNode.extend().withName("addShortest").withListPolicy(ListPolicy.SHORTEST_LIST);
-        assertResultsEqual(renderAddNode(addShortest), 101.0, 202.0, 303.0);
-        // With longest list policy shorter lists wraps around.
-        Node addLongest = addNode.extend().withName("addLongest").withListPolicy(ListPolicy.LONGEST_LIST);
-        assertResultsEqual(renderAddNode(addLongest), 101.0, 202.0, 303.0, 401.0, 502.0);
-        // With cross-reference list policy we combine everything with everything.
-        Node addCrossReference = addNode.extend().withName("addLongest").withListPolicy(ListPolicy.CROSS_REFERENCE);
-        assertResultsEqual(renderAddNode(addCrossReference),
-                101.0, 201.0, 301.0, 401.0, 501.0,
-                102.0, 202.0, 302.0, 402.0, 502.0,
-                103.0, 203.0, 303.0, 403.0, 503.0);
-    }
-
-    @Test
-    public void testGetValueAtIndexWrapped() {
-        List<Integer> numbers = ImmutableList.of(1, 2, 3);
-        assertEquals(1, NodeContext.getValueAtIndexWrapped(numbers, 0));
-        assertEquals(2, NodeContext.getValueAtIndexWrapped(numbers, 1));
-        assertEquals(3, NodeContext.getValueAtIndexWrapped(numbers, 2));
-        assertEquals(1, NodeContext.getValueAtIndexWrapped(numbers, 3));
-        assertEquals(2, NodeContext.getValueAtIndexWrapped(numbers, 4));
-        List<Integer> emptyNumbers = ImmutableList.of();
-        assertEquals(null, NodeContext.getValueAtIndexWrapped(emptyNumbers, 4));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetValueAtIndexWrappedNull() {
-        NodeContext.getValueAtIndexWrapped(ImmutableList.of(), -1);
-    }
-
-
-    /**
-     * Construct a network with three numbers and five numbers and add them using the given add node.
-     *
-     * @param addNode The add node to connect.
-     * @return The results of the add node.
-     */
-    private List<Object> renderAddNode(Node addNode) {
         Node net = Node.ROOT
                 .withChildAdded(threeNumbers)
                 .withChildAdded(fiveNumbers)
@@ -283,39 +244,8 @@ public class NodeContextTest {
                 .connect("threeNumbers", "numbers", addNode.getName(), "v1")
                 .connect("fiveNumbers", "numbers", addNode.getName(), "v2");
         context.renderChild(net, addNode);
-        return context.getResults(addNode, "number");
+        assertResultsEqual(context.getResults(addNode, "number"), 101.0, 202.0,303.0);
     }
-
-    @Test
-    public void testListOfListsIterator() {
-        List<? extends Object> threeNumbers = ImmutableList.of(1, 2, 3);
-        List<? extends Object> fiveNumbers = ImmutableList.of(1, 2, 3, 4, 5);
-
-        assertEquals(ImmutableList.of(
-                ImmutableList.of(1, 1),
-                ImmutableList.of(2, 2),
-                ImmutableList.of(3, 3)),
-                realizeIterator(makeListOfListsIterator(NodeContext.ShortestListIterator.class, ImmutableList.of(threeNumbers, fiveNumbers))));
-
-    }
-
-    private NodeContext.ListOfListsIterator makeListOfListsIterator(Class<? extends NodeContext.ListOfListsIterator> c, List<List<? extends Object>> listOfLists) {
-        try {
-            return (NodeContext.ListOfListsIterator) c.getConstructors()[0].newInstance(listOfLists);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    private List<List<? extends Object>> realizeIterator(Iterator<List<? extends Object>> iterator) {
-        ImmutableList.Builder<List<? extends Object>> builder = ImmutableList.builder();
-        while (iterator.hasNext()) {
-            builder.add(iterator.next());
-        }
-        return builder.build();
-    }
-
 
     // TODO Check list-aware node with no inputs.
     // TODO Check list-aware node with no outputs.

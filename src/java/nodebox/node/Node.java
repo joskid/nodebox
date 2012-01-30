@@ -615,9 +615,6 @@ public final class Node {
         Node input = getChild(inputNode);
         checkArgument(output.hasOutput(outputPort), "Node %s does not have an output port %s.", outputNode, outputPort);
         checkArgument(input.hasInput(inputPort), "Node %s does not have an input port %s.", inputNode, inputPort);
-        String outputPortType = output.getOutput(outputPort).getType();
-        String inputPortType = input.getInput(inputPort).getType();
-        checkArgument(outputPortType.equals(inputPortType), "Output port %s.%s (%s) has a different type than input port %s.%s (%s).", outputNode, outputPort, outputPortType, inputNode, inputPort, inputPortType);
         Connection newConnection = new Connection(outputNode, outputPort, inputNode, inputPort);
         ImmutableList.Builder<Connection> b = ImmutableList.builder();
         for (Connection c : getConnections()) {

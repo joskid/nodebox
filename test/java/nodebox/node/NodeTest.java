@@ -9,7 +9,7 @@ import java.util.List;
 import static junit.framework.Assert.*;
 
 public class NodeTest {
-    
+
     static final private String DIRECTION_IN = "in";
     static final private String DIRECTION_OUT = "out";
 
@@ -23,7 +23,7 @@ public class NodeTest {
     public void testRelativePath() {
         Node.path("", Node.ROOT.withName("child"));
     }
-    
+
     @Test
     public void testRootName() {
         assertEquals("_root", Node.ROOT.getName());
@@ -32,9 +32,9 @@ public class NodeTest {
         // Trying to change the name back to _root fails.
         assertEquals("node", Node.ROOT.withName("_root").getName());
     }
-    
+
     @Test
-    public void testChangeFunction(){
+    public void testChangeFunction() {
         Node test = Node.ROOT.extend().withFunction("test/test");
         assertEquals("test/test", test.getFunction());
     }
@@ -64,16 +64,6 @@ public class NodeTest {
         assertEquals(orderedPortNames, portNames(alphaChanged));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testOnlyConnectSameType() {
-        Node floatNode = Node.ROOT.withName("float1").withOutputAdded(Port.floatPort("float", 0));
-        Node intNode = Node.ROOT.withName("int1").withInputAdded(Port.intPort("int", 0));
-        Node.ROOT
-                .withChildAdded(floatNode)
-                .withChildAdded(intNode)
-                .connect("float1", "float", "int1", "int");
-    }
-    
     @Test
     public void testPorts() {
         testPorts(DIRECTION_IN);

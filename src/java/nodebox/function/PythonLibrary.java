@@ -6,13 +6,49 @@ import nodebox.util.LoadException;
 import org.python.core.*;
 import org.python.util.PythonInterpreter;
 
+import java.io.File;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class PythonLibrary extends FunctionLibrary {
 
+    private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[a-z0-9_]+\\.py");
+
     /**
-     * Run the Python register-nodes function in the library.
+     * Given a file name, determines the namespace.
+     *
+     * @param fileName The file name. Should end in ".py".
+     * @return The namespace.
+     */
+    public static String namespaceForFile(String fileName) {
+        checkArgument(fileName.endsWith(".py"), "The file name of a Python library needs to end in .py (not %s)", fileName);
+        checkArgument(fileName.trim().length() >= 4, "The file name can not be empty (was %s).", fileName);
+        File f = new File(fileName);
+        String baseName = f.getName();
+        checkArgument(FILE_NAME_PATTERN.matcher(baseName).matches(), "The file name can only contain lowercase letters, numbers and underscore (was %s).", fileName);
+        return baseName.substring(0, baseName.length() - 3);
+    }
+
+    /**
+     * Load the Python module.
+     * <p/>
+     * The namespace is determined automatically by using the file name.
+     *
+     * @param fileName The file name.
+     * @return The new Python library.
+     * @throws LoadException If the script could not be loaded.
+     * @see #namespaceForFile(String)
+     */
+    public static PythonLibrary loadScript(String fileName) throws LoadException {
+        return loadScript(namespaceForFile(fileName), fileName);
+    }
+
+    /**
+     * Load the Python module.
      *
      * @param namespace The name space in which the library resides.
-     * @param fileName The file name.
+     * @param fileName  The file name.
      * @return The new Python library.
      * @throws LoadException If the script could not be loaded.
      */
@@ -46,6 +82,11 @@ public class PythonLibrary extends FunctionLibrary {
         this.namespace = namespace;
         this.fileName = fileName;
         this.functionMap = functionMap;
+    }
+
+    @Override
+    public String getLink() {
+        return "python:" + fileName;
     }
 
     public String getNamespace() {

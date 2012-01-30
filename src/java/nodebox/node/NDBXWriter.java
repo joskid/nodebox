@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import nodebox.function.CoreFunctions;
 import nodebox.function.FunctionLibrary;
 import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
@@ -61,7 +62,10 @@ public class NDBXWriter {
 //                varElement.setAttribute("name", variableName);
 //                varElement.setAttribute("value", variableValue);
 //            }
-            
+
+            // Write the function repository.
+            writeFunctionRepository(doc, rootElement, library.getFunctionRepository());
+
             // Write the root node.
             writeNode(doc, rootElement, library.getRoot());
 
@@ -83,6 +87,24 @@ public class NDBXWriter {
         StringWriter writer = new StringWriter();
         write(library, writer);
         return writer.toString();
+    }
+
+    /**
+     * Write out links to the function repositories used.
+     *
+     * @param doc                the XML document
+     * @param parent             the parent element
+     * @param functionRepository the function repository to write
+     */
+    private static void writeFunctionRepository(Document doc, Element parent, FunctionRepository functionRepository) {
+        for (FunctionLibrary library : functionRepository.getLibraries()) {
+            // The core functions library is implicitly included.
+            if (library == CoreFunctions.LIBRARY) continue;
+            Element el = doc.createElement("link");
+            el.setAttribute("rel", "functions");
+            el.setAttribute("href", library.getLink());
+            parent.appendChild(el);
+        }
     }
 
     /**

@@ -65,6 +65,11 @@ final class ClojureLibrary extends FunctionLibrary {
         this.functionMap = functionMap;
     }
 
+    @Override
+    public String getLink() {
+        return "clojure:" + fileName;
+    }
+
     public String getNamespace() {
         return namespace;
     }

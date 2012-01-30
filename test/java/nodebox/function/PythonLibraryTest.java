@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static junit.framework.Assert.*;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class PythonLibraryTest {
@@ -15,6 +16,26 @@ public class PythonLibraryTest {
     private final FunctionLibrary pyLibrary = PythonLibrary.loadScript("py-functions", "test/python/functions.py");
     private final FunctionRepository functions = FunctionRepository.of(pyLibrary);
     private final NodeContext context = new NodeContext(functions);
+
+    @Test
+    public void testNamespaceForFile() {
+        assertEquals("math", PythonLibrary.namespaceForFile("math.py"));
+        assertNamespaceForFileFails("blob", "needs to end in .py");
+        assertNamespaceForFileFails(".py", "can not be empty");
+        assertNamespaceForFileFails("MyFileName.py", "can only contain");
+        assertNamespaceForFileFails("my-file-name.py", "can only contain");
+        assertNamespaceForFileFails("my file name.py", "can only contain");
+    }
+
+    private void assertNamespaceForFileFails(String fileName, String message) {
+        try {
+            PythonLibrary.namespaceForFile(fileName);
+            fail("The namespaceForFile function should have failed with " + message);
+        } catch (IllegalArgumentException ex) {
+            assertTrue("Exception " + ex + " does not contain message " + message, ex.getMessage().contains(message));
+        }
+    }
+
 
     @Test
     public void testAdd() {

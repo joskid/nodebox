@@ -2,7 +2,9 @@ package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import nodebox.util.LoadException;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -11,25 +13,48 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public final class JavaLibrary extends FunctionLibrary {
 
+    public static JavaLibrary loadStaticClass(String identifier) {
+        try {
+            Class c = Class.forName(identifier);
+            Field instanceField = c.getDeclaredField("LIBRARY");
+            return (JavaLibrary) instanceField.get(null);
+        } catch (ClassNotFoundException e) {
+            throw new LoadException(identifier, e);
+        } catch (NoSuchFieldException e) {
+            throw new LoadException(identifier, e);
+        } catch (IllegalAccessException e) {
+            throw new LoadException(identifier, e);
+        } catch (ClassCastException e) {
+            throw new LoadException(identifier, e);
+        }
+    }
+
     public static JavaLibrary ofClass(String namespace, Class c, String... methodNames) {
         ArrayList<Function> functions = new ArrayList<Function>();
         for (String methodName : methodNames) {
             Function function = StaticMethodFunction.find(c, methodName);
             functions.add(function);
         }
-        return new JavaLibrary(namespace, functions);
+        return new JavaLibrary(namespace, c, functions);
     }
 
     private final String namespace;
+    private final Class clazz;
     private final ImmutableMap<String, Function> functionMap;
 
-    private JavaLibrary(String namespace, Iterable<Function> functions) {
+    private JavaLibrary(String namespace, Class clazz, Iterable<Function> functions) {
         this.namespace = namespace;
+        this.clazz = clazz;
         ImmutableMap.Builder<String, Function> b = ImmutableMap.builder();
         for (Function function : functions) {
             b.put(function.getName(), function);
         }
         functionMap = b.build();
+    }
+
+    @Override
+    public String getLink() {
+        return "java:" + clazz.getName();
     }
 
     public String getNamespace() {

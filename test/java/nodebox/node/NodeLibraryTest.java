@@ -87,6 +87,34 @@ public class NodeLibraryTest {
         }
     }
 
+    @Test
+    public void testLink() {
+        Node originalAdd = Node.ROOT
+                .withName("add")
+                .withFunction("math/add")
+                .withInputAdded(Port.floatPort("v1", 11))
+                .withInputAdded(Port.floatPort("v2", 22))
+                .withOutputAdded(Port.floatPort("number", 0));
+        NodeLibrary originalLibrary = NodeLibrary.create("test", originalAdd, FunctionRepository.of(MathFunctions.LIBRARY));
+        assertSingleResult(33.0, originalAdd, originalLibrary.getFunctionRepository());
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        assertTrue(library.getFunctionRepository().hasLibrary("math"));
+        Node add = library.getRoot();
+        assertEquals("add", add.getName());
+        assertEquals("math/add", add.getFunction());
+        assertSingleResult(33.0, add, library.getFunctionRepository());
+    }
+
+    private void assertSingleResult(Object expected, Node node, FunctionRepository functionRepository) {
+        NodeContext context = new NodeContext(functionRepository);
+        context.renderNode(node);
+        checkArgument(node.getOutputs().size() == 1, "Only nodes with single outputs are supported.");
+        Port output = node.getOutputs().get(0);
+        List<Object> values = context.getResults(node, output);
+        assertEquals(1, values.size());
+        assertEquals(expected, values.get(0));
+    }
+
     /**
      * Assert that the value that goes in to the port comes out correctly in XML.
      *

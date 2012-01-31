@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ndbx formatVersion="1.0" type="file">
+    <link href="java:nodebox.function.ListFunctions" rel="functions"/>
+    <node name="root" renderedChild="reverse">
+        <node description="Take the first item of the list." function="list/first" name="first" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Take the second item of the list." function="list/second" name="second" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Take all but the first items of the list." function="list/rest" name="rest" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Take the last item of the list." function="list/last" name="last" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Combine multiple lists into one." function="list/combine" name="combine" position="20,100" outputType="list" strategy="as-is">
+            <port name="list1" type="list" />
+            <port name="list2" type="list" />
+            <port name="list3" type="list" />
+        </node>
+        <node description="Take a slice of the original list." function="list/subList" name="subList" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+            <port name="startIndex" type="int" value="0" />
+            <port name="size" type="int" value="10" />
+        </node>
+        <node description="Reverse the list." function="list/reverse" name="reverse" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Sort items in the list." function="list/sort" name="sort" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+        <node description="Shuffle items in the list in random order." function="list/shuffle" name="shuffle" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+            <port name="seed" type="int" value="0" />
+        </node>
+        <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+        </node>
+    </node>
+</ndbx>

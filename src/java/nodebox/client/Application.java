@@ -238,10 +238,11 @@ public class Application implements Host {
 
     private void lookForLibraries() {
         NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
+        NodeLibrary listLibrary = NodeLibrary.load(new File("libraries/list/list.ndbx"), NodeRepository.of());
         //NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
         //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
         //repository = NodeRepository.of(corevectorLibrary, coreimageLibrary);
-        repository = NodeRepository.of(mathLibrary);
+        repository = NodeRepository.of(mathLibrary, listLibrary);
     }
 
     //// Application events ////

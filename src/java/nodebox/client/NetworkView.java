@@ -403,12 +403,11 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
      * This method gets called from the NodeView to connect the output port to the input port.
      *
      * @param outputNode The output node.
-     * @param outputPort The output port.
      * @param inputNode  The input node.
      * @param inputPort  The input port.
      */
-    public void connect(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
-        getDocument().connect(outputNode, outputPort, inputNode, inputPort);
+    public void connect(Node outputNode, Node inputNode, Port inputPort) {
+        getDocument().connect(outputNode, inputNode, inputPort);
     }
 
     /**

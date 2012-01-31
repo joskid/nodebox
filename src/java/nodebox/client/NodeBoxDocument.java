@@ -90,98 +90,93 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withPosition(new nodebox.graphics.Point(20, 20))
                 .withFunction("math/toNumbers")
                 .withListStrategy("flatten")
-                .withInputAdded(Port.stringPort("s", "11 22 33"))
-                .withOutputAdded(Port.floatPort("numbers", 0));
+                .withInputAdded(Port.stringPort("s", "11 22 33"));
         Node value2 = Node.ROOT.withName("toNumbers2")
                 .withPosition(new nodebox.graphics.Point(20, 100))
                 .withFunction("math/toNumbers")
                 .withListStrategy("flatten")
-                .withInputAdded(Port.stringPort("s", "100 200 300"))
-                .withOutputAdded(Port.floatPort("numbers", 0));
+                .withInputAdded(Port.stringPort("s", "100 200 300"));
         Node range1 = Node.ROOT.withName("range1")
                 .withPosition(new nodebox.graphics.Point(20, 200))
                 .withFunction("math/range")
                 .withListStrategy("flatten")
                 .withInputAdded(Port.floatPort("start", 0))
                 .withInputAdded(Port.floatPort("end", 10))
-                .withInputAdded(Port.floatPort("step", 1))
-                .withOutputAdded(Port.floatPort("numbers", 0));
+                .withInputAdded(Port.floatPort("step", 1));
         Node makePoint1 = Node.ROOT.withName("makePoint1")
                 .withPosition(new nodebox.graphics.Point(120, 120))
                 .withFunction("corevector/makePoint")
+                .withOutputType("point")
                 .withInputAdded(Port.floatPort("x", 0))
-                .withInputAdded(Port.floatPort("y", 0))
-                .withOutputAdded(Port.pointPort("point", nodebox.graphics.Point.ZERO));
+                .withInputAdded(Port.floatPort("y", 0));
         Node makePoint2 = Node.ROOT.withName("makePoint2")
                 .withPosition(new nodebox.graphics.Point(120, 220))
                 .withFunction("corevector/makePoint")
+                .withOutputType("point")
                 .withInputAdded(Port.floatPort("x", 0))
-                .withInputAdded(Port.floatPort("y", 0))
-                .withOutputAdded(Port.pointPort("point", nodebox.graphics.Point.ZERO));
+                .withInputAdded(Port.floatPort("y", 0));
         Node add = Node.ROOT.withName("add")
                 .withPosition(new nodebox.graphics.Point(120, 20))
                 .withFunction("math/add")
                 .withInputAdded(Port.floatPort("v1", 0))
-                .withInputAdded(Port.floatPort("v2", 0))
-                .withOutputAdded(Port.floatPort("number", 0));
+                .withInputAdded(Port.floatPort("v2", 0));
         Node rect1 = Node.ROOT.withName("rect1")
                 .withPosition(new nodebox.graphics.Point(220, 20))
                 .withFunction("corevector/rect")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
                 .withInputAdded(Port.floatPort("width", 100))
                 .withInputAdded(Port.floatPort("height", 100))
-                .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO))
-                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+                .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO));
         Node color1 = Node.ROOT.withName("color1")
                 .withPosition(new nodebox.graphics.Point(320, 20))
                 .withFunction("corevector/color")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withInputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"))
                 .withInputAdded(Port.colorPort("fill", nodebox.graphics.Color.BLACK))
                 .withInputAdded(Port.colorPort("stroke", nodebox.graphics.Color.BLACK))
-                .withInputAdded(Port.floatPort("strokeWidth", 0))
-                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+                .withInputAdded(Port.floatPort("strokeWidth", 0));
         Node sleepy = Node.ROOT.withName("sleepy")
                 .withPosition(new nodebox.graphics.Point(320, 100))
                 .withFunction("math/slowNumber")
-                .withInputAdded(Port.floatPort("value", 0))
-                .withOutputAdded(Port.floatPort("value", 0));
+                .withInputAdded(Port.floatPort("value", 0));
 
         Node grid1 = Node.ROOT.withName("grid1")
                 .withPosition(new nodebox.graphics.Point(220, 220))
                 .withFunction("corevector/grid")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withListStrategy("flatten")
                 .withInputAdded(Port.floatPort("width", 300))
                 .withInputAdded(Port.floatPort("height", 300))
                 .withInputAdded(Port.floatPort("rows", 10))
                 .withInputAdded(Port.floatPort("columns", 10))
-                .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
-                .withOutputAdded(Port.pointPort("points", nodebox.graphics.Point.ZERO));
+                .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO));
         Node rect2 = Node.ROOT.withName("rect2")
                 .withPosition(new nodebox.graphics.Point(320, 220))
                 .withFunction("corevector/rect")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withInputAdded(Port.pointPort("position", nodebox.graphics.Point.ZERO))
                 .withInputAdded(Port.floatPort("width", 35))
                 .withInputAdded(Port.floatPort("height", 15))
-                .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO))
-                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
+                .withInputAdded(Port.pointPort("roundness", nodebox.graphics.Point.ZERO));
         Node color2 = Node.ROOT.withName("color2")
                 .withPosition(new nodebox.graphics.Point(420, 220))
                 .withFunction("corevector/color")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withInputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"))
                 .withInputAdded(Port.colorPort("fill", nodebox.graphics.Color.BLACK))
                 .withInputAdded(Port.colorPort("stroke", nodebox.graphics.Color.BLACK))
-                .withInputAdded(Port.floatPort("strokeWidth", 0))
-                .withOutputAdded(Port.customPort("geometry", "nodebox.graphics.Geometry"));
-        
+                .withInputAdded(Port.floatPort("strokeWidth", 0));
+
         Node makeColor = Node.ROOT.withName("makeColor")
                 .withPosition(new nodebox.graphics.Point(220, 120))
                 .withFunction("corevector/makeColor")
+                .withOutputType("nodebox.graphics.Geometry")
                 .withInputAdded(Port.floatPort("red", 0))
                 .withInputAdded(Port.floatPort("green", 0))
                 .withInputAdded(Port.floatPort("blue", 0))
                 .withInputAdded(Port.floatPort("alpha", 255))
-                .withInputAdded(Port.floatPort("range", 255))
-                .withOutputAdded(Port.colorPort("color", nodebox.graphics.Color.BLACK));
+                .withInputAdded(Port.floatPort("range", 255));
 
         demoRoot = Node.ROOT
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
@@ -200,19 +195,19 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(rect2)
                 .withChildAdded(color2)
                 .withChildAdded(makeColor)
-                .connect("toNumbers1", "numbers", "add", "v1")
-                .connect("toNumbers2", "numbers", "add", "v2")
-                .connect("toNumbers1", "numbers", "makePoint1", "x")
-                .connect("toNumbers2", "numbers", "makePoint1", "y")
-                .connect("toNumbers2", "numbers", "makeColor", "red")
-                .connect("range1", "numbers", "makeColor", "green")
-                .connect("toNumbers2", "numbers", "makeColor", "blue")
-                .connect("rect1", "geometry", "color1", "geometry")
-                .connect("grid1", "points", "rect2", "position")
-                .connect("rect2", "geometry", "color2", "geometry")
-                .connect("makeColor", "color", "color2", "fill")
+                .connect("toNumbers1", "add", "v1")
+                .connect("toNumbers2", "add", "v2")
+                .connect("toNumbers1", "makePoint1", "x")
+                .connect("toNumbers2", "makePoint1", "y")
+                .connect("toNumbers2", "makeColor", "red")
+                .connect("range1", "makeColor", "green")
+                .connect("toNumbers2", "makeColor", "blue")
+                .connect("rect1", "color1", "geometry")
+                .connect("grid1", "rect2", "position")
+                .connect("rect2", "color2", "geometry")
+                .connect("makeColor", "color2", "fill")
                 .withRenderedChildName("color2");
-}
+    }
 
     public NodeBoxDocument() {
         this(NodeLibrary.create("untitled", demoRoot, THE_FUNCTION_REPOSITORY));
@@ -430,13 +425,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * Create a connection from the given output to the given input.
      *
      * @param outputNode The output node.
-     * @param outputPort The output port.
      * @param inputNode  The input node.
      * @param inputPort  The input port.
      */
-    public void connect(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
+    public void connect(Node outputNode, Node inputNode, Port inputPort) {
         addEdit("Connect");
-        controller.connect(activeNetworkPath, outputNode, outputPort, inputNode, inputPort);
+        controller.connect(activeNetworkPath, outputNode, inputNode, inputPort);
         requestRender();
     }
 
@@ -763,8 +757,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
-                Port firstOutputPort = renderedChild.getOutputs().iterator().next();
-                java.util.List<Object> results = context.getResults(renderedChild, firstOutputPort);
+                java.util.List<Object> results = context.getResults(renderedChild);
                 addressBar.setProgressVisible(false);
                 viewerPane.setOutputValues(results);
                 networkView.checkErrorAndRepaint();
@@ -1161,8 +1154,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                         NodeContext context = new NodeContext(exportLibrary.getFunctionRepository(), frame);
                         context.renderNetwork(exportNetwork);
                         Node renderedChild = exportNetwork.getRenderedChild();
-                        Port firstOutputPort = renderedChild.getOutputs().iterator().next();
-                        Object result = context.getResults(renderedChild, firstOutputPort);
+                        Object result = context.getResults(renderedChild);
                         viewer.setOutputValue(result);
                         exportDelegate.frameDone(frame, result);
 

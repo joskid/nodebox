@@ -170,10 +170,8 @@ public class NodeLibrary {
             int eventType = reader.next();
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 String tagName = reader.getLocalName();
-                if (tagName.equals("input")) {
+                if (tagName.equals("port")) {
                     node = node.withInputAdded(parsePort(reader));
-                } else if (tagName.equals("output")) {
-                    node = node.withOutputAdded(parsePort(reader));
                 } else if (tagName.equals("node")) {
                     node = node.withChildAdded(parseNode(reader, nodeRepository));
                 } else if (tagName.equals("conn")) {
@@ -203,15 +201,12 @@ public class NodeLibrary {
     }
     
     private static Connection parseConnection(XMLStreamReader reader) throws XMLStreamException {
-        String output = reader.getAttributeValue(null, "output");
+        String outputNode = reader.getAttributeValue(null, "output");
         String input = reader.getAttributeValue(null, "input");
-        Iterator<String> outputIterator = PORT_NAME_SPLITTER.split(output).iterator();
         Iterator<String> inputIterator = PORT_NAME_SPLITTER.split(input).iterator();
-        String outputNode =  outputIterator.next();
-        String outputPort = outputIterator.next();
         String inputNode = inputIterator.next();
         String inputPort = inputIterator.next();
-        return new Connection(outputNode, outputPort, inputNode, inputPort);
+        return new Connection(outputNode, inputNode, inputPort);
     }
 
     //// Saving ////

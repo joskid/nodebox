@@ -15,8 +15,8 @@ public class CoreFunctions {
         ZERO = LIBRARY.getFunction("zero");
     }
 
-    public static int zero() {
-        return 0;
+    public static double zero() {
+        return 0.0;
     }
 
 }

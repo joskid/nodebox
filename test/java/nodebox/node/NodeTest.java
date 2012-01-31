@@ -66,14 +66,10 @@ public class NodeTest {
 
     @Test
     public void testPorts() {
-        testPorts(DIRECTION_IN);
-        testPorts(DIRECTION_OUT);
-    }
-
-    public void testPorts(String direction) {
+        String direction = "";
         Port pX = Port.floatPort("x", 0);
         Port pY = Port.floatPort("y", 0);
-        Node rectNode1 = newNodeWithPortAdded(Node.ROOT.withName("rect1"), pX, direction);
+        Node rectNode1 = Node.ROOT.withName("rect1").withInputAdded(pX);
         assertNull(getNodePort(Node.ROOT, "x", direction));
         assertSame(pX, getNodePort(rectNode1, "x", direction));
         Node rectNode2 = newNodeWithPortAdded(rectNode1.withName("rect2"), pY, direction);
@@ -91,39 +87,20 @@ public class NodeTest {
     }
 
     private Node newNodeWithPortAdded(Node node, Port port, String direction) {
-        if (direction.equals(DIRECTION_IN))
             return node.withInputAdded(port);
-        else if (direction.equals(DIRECTION_OUT))
-            return node.withOutputAdded(port);
-        else
-            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
     private Node newNodeWithPortRemoved(Node node, String portName, String direction) {
-        if (direction.equals(DIRECTION_IN))
             return node.withInputRemoved(portName);
-        else if (direction.equals(DIRECTION_OUT))
-            return node.withOutputRemoved(portName);
-        else
-            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
     private Port getNodePort(Node node, String portName, String direction) {
-        if (direction.equals(DIRECTION_IN))
             return node.getInput(portName);
-        else if (direction.equals(DIRECTION_OUT))
-            return node.getOutput(portName);
-        else
-            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
+        
     }
 
     private void assertNodePortsSizeEquals(int expected, Node node, String direction) {
-        if (direction.equals(DIRECTION_IN))
             assertEquals(expected, node.getInputs().size());
-        else if (direction.equals(DIRECTION_OUT))
-            assertEquals(expected, node.getOutputs().size());
-        else
-            throw new IllegalArgumentException("Port direction should be either '" + DIRECTION_IN + "' or '" + DIRECTION_OUT + "', not " + direction);
     }
 
     public List<String> portNames(Node n) {

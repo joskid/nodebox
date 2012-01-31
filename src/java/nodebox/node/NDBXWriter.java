@@ -130,6 +130,10 @@ public class NDBXWriter {
         if (shouldWriteAttribute(node, Node.Attribute.DESCRIPTION))
             el.setAttribute("description", node.getDescription());
 
+        // Write output type
+        if (shouldWriteAttribute(node, Node.Attribute.OUTPUT_TYPE))
+            el.setAttribute("outputType", node.getOutputType());
+
         // Write image
         if (shouldWriteAttribute(node, Node.Attribute.IMAGE))
             el.setAttribute("image", node.getImage());
@@ -156,13 +160,6 @@ public class NDBXWriter {
         if (shouldWriteAttribute(node, Node.Attribute.INPUTS)) {
             for (Port port : node.getInputs()) {
                 writePort(doc, el, node, port, Port.Direction.INPUT);
-            }
-        }
-
-        // Add the output ports
-        if (shouldWriteAttribute(node, Node.Attribute.OUTPUTS)) {
-            for (Port port : node.getOutputs()) {
-                writePort(doc, el, node, port, Port.Direction.OUTPUT);
             }
         }
 
@@ -237,8 +234,7 @@ public class NDBXWriter {
             protoPort = protoNode.getInput(port.getName());
         // If the port and its prototype are equal, don't write anything.
         if (port.equals(protoPort)) return;
-        String tagName = direction == Port.Direction.INPUT ? "input" : "output";
-        Element el = doc.createElement(tagName);
+        Element el = doc.createElement("port");
         el.setAttribute("name", port.getName());
         el.setAttribute("type", port.getType());
         if (port.isStandardType()) // TODO && direction == Port.Direction.INPUT
@@ -248,7 +244,7 @@ public class NDBXWriter {
 
     private static void writeConnection(Document doc, Element parent, Connection conn) {
         Element connElement = doc.createElement("conn");
-        connElement.setAttribute("output", String.format("%s.%s", conn.getOutputNode(), conn.getOutputPort()));
+        connElement.setAttribute("output", String.format("%s", conn.getOutputNode()));
         connElement.setAttribute("input", String.format("%s.%s", conn.getInputNode(), conn.getInputPort()));
         parent.appendChild(connElement);
     }

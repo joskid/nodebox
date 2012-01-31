@@ -45,7 +45,6 @@ public class ConnectionLayer extends PLayer {
 
     @Override
     protected void paint(PPaintContext pPaintContext) {
-        // TODO: Draw port dependencies using implicitColor.
         super.paint(pPaintContext);
         Graphics2D g = pPaintContext.getGraphics();
         Node activeNetwork = networkView.getActiveNetwork();
@@ -58,9 +57,8 @@ public class ConnectionLayer extends PLayer {
             }
             Node outputNode = activeNetwork.getChild(c.getOutputNode());
             Node inputNode = activeNetwork.getChild(c.getInputNode());
-            Port outputPort = outputNode.getOutput(c.getOutputPort());
             Port inputPort = inputNode.getInput(c.getInputPort());
-            paintConnection(g, outputNode, outputPort, inputNode, inputPort);
+            paintConnection(g, outputNode, inputNode, inputPort);
         }
         // Draw temporary connection
         if (networkView.isConnecting() && networkView.getConnectionPoint() != null) {
@@ -71,8 +69,8 @@ public class ConnectionLayer extends PLayer {
         }
     }
 
-    public static void paintConnection(Graphics2D g, Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
-        GeneralPath p = connectionPath(outputNode, outputPort, inputNode, inputPort);
+    public static void paintConnection(Graphics2D g, Node outputNode, Node inputNode, Port inputPort) {
+        GeneralPath p = connectionPath(outputNode, inputNode, inputPort);
         paintConnectionPath(g, p);
     }
 
@@ -86,7 +84,7 @@ public class ConnectionLayer extends PLayer {
         g.draw(p);
     }
 
-    public static GeneralPath connectionPath(Node outputNode, Port outputPort, Node inputNode, Port inputPort) {
+    public static GeneralPath connectionPath(Node outputNode, Node inputNode, Port inputPort) {
         float x1 = (float) (inputNode.getPosition().x + 1); // Compensate for selection border
         float y1 = (float) (inputNode.getPosition().y + NodeView.getVerticalOffsetForPort(inputNode, inputPort) + NodeView.NODE_PORT_HEIGHT / 2);
         return connectionPath(outputNode, x1, y1);
@@ -112,9 +110,8 @@ public class ConnectionLayer extends PLayer {
         for (Connection c : activeNetwork.getConnections()) {
             Node outputNode = activeNetwork.getChild(c.getOutputNode());
             Node inputNode = activeNetwork.getChild(c.getInputNode());
-            Port outputPort = outputNode.getOutput(c.getOutputPort());
             Port inputPort = inputNode.getInput(c.getInputPort());
-            GeneralPath gp = connectionPath(outputNode, outputPort, inputNode, inputPort);
+            GeneralPath gp = connectionPath(outputNode, inputNode, inputPort);
             if (gp.intersects(clickRect))
                 return c;
         }

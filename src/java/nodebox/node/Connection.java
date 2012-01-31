@@ -34,7 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Connection {
 
     private final String outputNode;
-    private final String outputPort;
     private final String inputNode;
     private final String inputPort;
 
@@ -42,27 +41,20 @@ public class Connection {
      * Creates a connection between the output (upstream) node and input (downstream) node.
      *
      * @param outputNode The name of the output (upstream) Node.
-     * @param outputPort The name of the output (upstream) Node.
      * @param inputNode  The name of the input (downstream) Node.
      * @param inputPort  The name of the input (downstream) Port.
      */
-    public Connection(String outputNode, String outputPort, String inputNode, String inputPort) {
+    public Connection(String outputNode, String inputNode, String inputPort) {
         checkNotNull(outputNode);
-        checkNotNull(outputPort);
         checkNotNull(inputNode);
         checkNotNull(inputPort);
         this.outputNode = outputNode;
-        this.outputPort = outputPort;
         this.inputNode = inputNode;
         this.inputPort = inputPort;
     }
 
     public String getOutputNode() {
         return outputNode;
-    }
-
-    public String getOutputPort() {
-        return outputPort;
     }
 
     public String getInputNode() {
@@ -82,7 +74,7 @@ public class Connection {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(outputNode, outputPort, inputNode, inputPort);
+        return Objects.hashCode(outputNode, inputNode, inputPort);
     }
 
     @Override
@@ -90,14 +82,13 @@ public class Connection {
         if (!(o instanceof Connection)) return false;
         final Connection other = (Connection) o;
         return Objects.equal(outputNode, other.outputNode)
-                && Objects.equal(outputPort, other.outputPort)
                 && Objects.equal(inputNode, other.inputNode)
                 && Objects.equal(inputPort, other.inputPort);
     }
 
     @Override
     public String toString() {
-        return String.format("%s.%s <= %s.%s", getOutputNode(), getOutputPort(), getInputNode(), getInputPort());
+        return String.format("%s <= %s.%s", getOutputNode(), getInputNode(), getInputPort());
     }
 
 }

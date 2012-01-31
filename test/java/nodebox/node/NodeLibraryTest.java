@@ -1,6 +1,5 @@
 package nodebox.node;
 
-import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
 import nodebox.function.MathFunctions;
 import nodebox.graphics.Color;
@@ -77,14 +76,12 @@ public class NodeLibraryTest {
 
     @Test
     public void testPortSerialization() {
-        for (Port.Direction direction : ImmutableList.of(Port.Direction.INPUT, Port.Direction.OUTPUT)) {
-            assertPortSerialization(Port.intPort("int", 42), direction);
-            assertPortSerialization(Port.floatPort("float", 33.3), direction);
-            assertPortSerialization(Port.stringPort("string", "hello"), direction);
-            assertPortSerialization(Port.colorPort("color", Color.BLACK), direction);
-            assertPortSerialization(Port.pointPort("point", new Point(11, 22)), direction);
-            assertPortSerialization(Port.customPort("geometry", "nodebox.graphics.Geometry"), direction);
-        }
+        assertPortSerialization(Port.intPort("int", 42));
+        assertPortSerialization(Port.floatPort("float", 33.3));
+        assertPortSerialization(Port.stringPort("string", "hello"));
+        assertPortSerialization(Port.colorPort("color", Color.BLACK));
+        assertPortSerialization(Port.pointPort("point", new Point(11, 22)));
+        assertPortSerialization(Port.customPort("geometry", "nodebox.graphics.Geometry"));
     }
 
     @Test
@@ -93,8 +90,7 @@ public class NodeLibraryTest {
                 .withName("add")
                 .withFunction("math/add")
                 .withInputAdded(Port.floatPort("v1", 11))
-                .withInputAdded(Port.floatPort("v2", 22))
-                .withOutputAdded(Port.floatPort("number", 0));
+                .withInputAdded(Port.floatPort("v2", 22));
         NodeLibrary originalLibrary = NodeLibrary.create("test", originalAdd, FunctionRepository.of(MathFunctions.LIBRARY));
         assertSingleResult(33.0, originalAdd, originalLibrary.getFunctionRepository());
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
@@ -107,10 +103,7 @@ public class NodeLibraryTest {
 
     private void assertSingleResult(Object expected, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
-        context.renderNode(node);
-        checkArgument(node.getOutputs().size() == 1, "Only nodes with single outputs are supported.");
-        Port output = node.getOutputs().get(0);
-        List<Object> values = context.getResults(node, output);
+        List<Object> values = context.renderNode(node);
         assertEquals(1, values.size());
         assertEquals(expected, values.get(0));
     }
@@ -119,26 +112,17 @@ public class NodeLibraryTest {
      * Assert that the value that goes in to the port comes out correctly in XML.
      *
      * @param originalPort The port to serialize / deserialize
-     * @param direction    The port direction (input or output)
      */
-    private void assertPortSerialization(Port originalPort, Port.Direction direction) {
+    private void assertPortSerialization(Port originalPort) {
         Node originalNode;
-        if (direction == Port.Direction.INPUT) {
-            originalNode = Node.ROOT.withInputAdded(originalPort);
-        } else {
-            originalNode = Node.ROOT.withOutputAdded(originalPort);
-        }
+        originalNode = Node.ROOT.withInputAdded(originalPort);
         NodeLibrary originalLibrary = libraryWithChildren("test", originalNode);
 
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
         Node node = library.getRoot().getChild("node");
         assertNotNull(node);
         Port port;
-        if (direction == Port.Direction.INPUT) {
-            port = node.getInput(originalPort.getName());
-        } else {
-            port = node.getOutput(originalPort.getName());
-        }
+        port = node.getInput(originalPort.getName());
         assertEquals(originalPort.getName(), port.getName());
         assertEquals(originalPort.getType(), port.getType());
         assertEquals(originalPort.getValue(), port.getValue());

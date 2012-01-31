@@ -23,9 +23,9 @@ public class ClojureLibraryTest {
     public void testAdd() {
         Node addNode = Node.ROOT
                 .withName("add")
-                .withFunction("clojure-math/add")
-                .withOutputAdded(Port.intPort("output", 0));
-        List<Object> results = context.renderPort(addNode, "output");
+                .withOutputType("int")
+                .withFunction("clojure-math/add");
+        List<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 0L);
     }
 
@@ -34,11 +34,11 @@ public class ClojureLibraryTest {
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("clojure-math/add")
+                .withOutputType("int")
                 .withInputAdded(Port.intPort("v1", 1))
                 .withInputAdded(Port.intPort("v2", 2))
-                .withInputAdded(Port.intPort("v3", 3))
-                .withOutputAdded(Port.intPort("output", 0));
-        List<Object> results = context.renderPort(addNode, "output");
+                .withInputAdded(Port.intPort("v3", 3));
+        List<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 6L);
     }
 

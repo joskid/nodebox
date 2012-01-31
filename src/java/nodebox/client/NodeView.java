@@ -373,15 +373,14 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
                     Node outputNode = networkView.getConnectionSource().getNode();
                     Node inputNode = networkView.getConnectionTarget().getNode();
                     // Look for compatible ports.
-                    // TODO Use all compatible ports.
-                    java.util.List<Port> compatiblePorts = inputNode.getInputsOfType(outputNode.getOutputs().get(0).getType());
+                    java.util.List<Port> compatiblePorts = inputNode.getInputs();
                     if (compatiblePorts.isEmpty()) {
                         // There are no compatible parameters.
                     } else if (compatiblePorts.size() == 1) {
                         // Only one possible connection, make it now.
                         Port inputPort = compatiblePorts.get(0);
                         try {
-                            getDocument().connect(outputNode, outputNode.getOutputs().get(0), inputNode, inputPort);
+                            getDocument().connect(outputNode, inputNode, inputPort);
                         } catch (ConnectionError e) {
                             JOptionPane.showMessageDialog(networkView, e.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
                         }
@@ -420,7 +419,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
 
         public void actionPerformed(ActionEvent e) {
             try {
-                getDocument().connect(outputNode, outputNode.getOutputs().get(0), inputNode, inputPort);
+                getDocument().connect(outputNode, inputNode, inputPort);
             } catch (ConnectionError ce) {
                 JOptionPane.showMessageDialog(networkView, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
             }

@@ -34,7 +34,7 @@ public final class Node {
     public static String AS_IS_STRATEGY = "as-is";
     public static String FLATTEN_STRATEGY = "flatten";
 
-    public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUTS, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+    public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUT_TYPE, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
     private final Node prototype;
     private final String name;
@@ -44,7 +44,7 @@ public final class Node {
     private final String listStrategy;
     private final Point position;
     private final ImmutableList<Port> inputs;
-    private final ImmutableList<Port> outputs;
+    private final String outputType;
     private final ImmutableList<Node> children;
     private final String renderedChildName;
     private final ImmutableList<Connection> connections;
@@ -64,7 +64,7 @@ public final class Node {
         listStrategy = "map";
         position = Point.ZERO;
         inputs = ImmutableList.of();
-        outputs = ImmutableList.of();
+        outputType = Port.TYPE_FLOAT;
         children = ImmutableList.of();
         renderedChildName = "";
         connections = ImmutableList.of();
@@ -77,10 +77,10 @@ public final class Node {
     }
 
     private Node(Node prototype, String name, String description, String image, String function, String listStrategy,
-                 Point position, ImmutableList<Port> inputs, ImmutableList<Port> outputs, ImmutableList<Node> children,
+                 Point position, ImmutableList<Port> inputs, String outputType, ImmutableList<Node> children,
                  String renderedChildName, ImmutableList<Connection> connections) {
         checkAllNotNull(prototype, name, description, image, function, listStrategy,
-                position, inputs, outputs, children,
+                position, inputs, outputType, children,
                 renderedChildName, connections);
         checkArgument(!name.equals("_root"), "The name _root is a reserved internal name.");
         this.prototype = prototype;
@@ -91,7 +91,7 @@ public final class Node {
         this.listStrategy = listStrategy;
         this.position = position;
         this.inputs = inputs;
-        this.outputs = outputs;
+        this.outputType = outputType;
         this.children = children;
         this.renderedChildName = renderedChildName;
         this.connections = connections;
@@ -190,32 +190,9 @@ public final class Node {
         return getInput(name) != null;
     }
 
-    public List<Port> getOutputs() {
-        return outputs;
-    }
 
-    public Port getOutput(String name) {
-        checkNotNull(name, "Port name cannot be null.");
-        for (Port p : getOutputs()) {
-            if (p.getName().equals(name)) {
-                return p;
-            }
-        }
-        return null;
-    }
-
-    public ImmutableList<Port> getOutputsOfType(String type) {
-        ImmutableList.Builder<Port> b = ImmutableList.builder();
-        for (Port p : getOutputs()) {
-            if (p.getType().equals(type)) {
-                b.add(p);
-            }
-        }
-        return b.build();
-    }
-
-    public boolean hasOutput(String name) {
-        return getOutput(name) != null;
+    public String getOutputType() {
+        return outputType;
     }
 
     /**
@@ -261,8 +238,8 @@ public final class Node {
             return getPosition();
         } else if (attribute == Attribute.INPUTS) {
             return getInputs();
-        } else if (attribute == Attribute.OUTPUTS) {
-            return getOutputs();
+        } else if (attribute == Attribute.OUTPUT_TYPE) {
+            return getOutputType();
         } else if (attribute == Attribute.CHILDREN) {
             return getChildren();
         } else if (attribute == Attribute.RENDERED_CHILD_NAME) {
@@ -446,64 +423,15 @@ public final class Node {
     }
 
     /**
-     * Create a new node with the given output port added.
+     * Create a new node with the given output type.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
      *
-     * @param port The port to add.
+     * @param outputType The new output type.
      * @return A new Node.
      */
-    public Node withOutputAdded(Port port) {
-        checkNotNull(port, "Port cannot be null.");
-        checkArgument(!hasOutput(port.getName()), "An output port named %s already exists on node %s.", port.getName(), this);
-        ImmutableList.Builder<Port> b = ImmutableList.builder();
-        b.addAll(getOutputs());
-        b.add(port);
-        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
-    }
-
-    /**
-     * Create a new node with the given output port removed.
-     * <p/>
-     * If you call this on ROOT, extend() is called implicitly.
-     *
-     * @param portName The name of the port to remove.
-     * @return A new Node.
-     */
-    public Node withOutputRemoved(String portName) {
-        Port portToRemove = getOutput(portName);
-        checkArgument(portToRemove != null, "Output port %s does not exist on node %s.", portName, this);
-
-        ImmutableList.Builder<Port> b = ImmutableList.builder();
-        for (Port port : getOutputs()) {
-            if (portToRemove != port)
-                b.add(port);
-        }
-        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
-    }
-
-    /**
-     * Create a new node with the given output port replaced.
-     * <p/>
-     * If you call this on ROOT, extend() is called implicitly.
-     *
-     * @param portName The name of the port to replace.
-     * @param newPort  The new Port instance.
-     * @return A new Node.
-     */
-    public Node withOutputChanged(String portName, Port newPort) {
-        Port oldPort = getOutput(portName);
-        checkNotNull(oldPort, "Output port %s does not exist on node %s.", portName, this);
-        ImmutableList.Builder<Port> b = ImmutableList.builder();
-        // Add all ports back in the correct order.
-        for (Port port : getOutputs()) {
-            if (port == oldPort) {
-                b.add(newPort);
-            } else {
-                b.add(port);
-            }
-        }
-        return newNodeWithAttribute(Attribute.OUTPUTS, b.build());
+    public Node withOutputType(String outputType) {
+        return newNodeWithAttribute(Attribute.OUTPUT_TYPE, outputType);
     }
 
     /**
@@ -603,19 +531,16 @@ public final class Node {
      * Create a new node that connects the given child nodes.
      *
      * @param outputNode The name of the output (upstream) Node.
-     * @param outputPort The name of the output (upstream) Node.
      * @param inputNode  The name of the input (downstream) Node.
      * @param inputPort  The name of the input (downstream) Port.
      * @return A new Node.
      */
-    public Node connect(String outputNode, String outputPort, String inputNode, String inputPort) {
+    public Node connect(String outputNode, String inputNode, String inputPort) {
         checkArgument(hasChild(outputNode), "Node %s does not have a child named %s.", this, outputNode);
         checkArgument(hasChild(inputNode), "Node %s does not have a child named %s.", this, inputNode);
-        Node output = getChild(outputNode);
         Node input = getChild(inputNode);
-        checkArgument(output.hasOutput(outputPort), "Node %s does not have an output port %s.", outputNode, outputPort);
         checkArgument(input.hasInput(inputPort), "Node %s does not have an input port %s.", inputNode, inputPort);
-        Connection newConnection = new Connection(outputNode, outputPort, inputNode, inputPort);
+        Connection newConnection = new Connection(outputNode, inputNode, inputPort);
         ImmutableList.Builder<Connection> b = ImmutableList.builder();
         for (Connection c : getConnections()) {
             if (c.getInputNode().equals(inputNode) && c.getInputPort().equals(inputPort)) {
@@ -630,7 +555,7 @@ public final class Node {
     }
 
     public Node withConnectionAdded(Connection connection) {
-        return connect(connection.getOutputNode(), connection.getOutputPort(), connection.getInputNode(), connection.getInputPort());
+        return connect(connection.getOutputNode(), connection.getInputNode(), connection.getInputPort());
     }
 
     public boolean isConnected(String node) {
@@ -662,7 +587,7 @@ public final class Node {
         String listStrategy = this.listStrategy;
         Point position = this.position;
         ImmutableList<Port> inputs = this.inputs;
-        ImmutableList<Port> outputs = this.outputs;
+        String outputType = this.outputType;
         ImmutableList<Node> children = this.children;
         String renderedChildName = this.renderedChildName;
         ImmutableList<Connection> connections = this.connections;
@@ -692,8 +617,8 @@ public final class Node {
             case INPUTS:
                 inputs = (ImmutableList<Port>) value;
                 break;
-            case OUTPUTS:
-                outputs = (ImmutableList<Port>) value;
+            case OUTPUT_TYPE:
+                outputType = (String) value;
                 break;
             case CHILDREN:
                 children = (ImmutableList<Node>) value;
@@ -719,7 +644,7 @@ public final class Node {
         }
 
         return new Node(prototype, name, description, image, function, listStrategy, position,
-                inputs, outputs, children, renderedChildName, connections);
+                inputs, outputType, children, renderedChildName, connections);
     }
 
     //// Object overrides ////
@@ -727,7 +652,7 @@ public final class Node {
     @Override
     public int hashCode() {
         return Objects.hashCode(prototype, name, description, image, function, listStrategy, position,
-                inputs, outputs, children, renderedChildName, connections);
+                inputs, outputType, children, renderedChildName, connections);
     }
 
     @Override
@@ -742,7 +667,7 @@ public final class Node {
                 && Objects.equal(listStrategy, other.listStrategy)
                 && Objects.equal(position, other.position)
                 && Objects.equal(inputs, other.inputs)
-                && Objects.equal(outputs, other.outputs)
+                && Objects.equal(outputType, other.outputType)
                 && Objects.equal(children, other.children)
                 && Objects.equal(renderedChildName, other.renderedChildName)
                 && Objects.equal(connections, other.connections);

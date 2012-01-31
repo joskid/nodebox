@@ -40,9 +40,8 @@ public class MathFunctionsTest {
     public void testCallInvert() {
         Node invertNode = Node.ROOT
                 .withFunction("math/invert")
-                .withInputAdded(Port.floatPort("value", 5))
-                .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(ImmutableList.of(-5.0), context.renderPort(invertNode, "output"));
+                .withInputAdded(Port.floatPort("value", 5));
+        assertEquals(ImmutableList.of(-5.0), context.renderNode(invertNode));
     }
 
     /**
@@ -55,16 +54,14 @@ public class MathFunctionsTest {
         Node subtract1 = Node.ROOT
                 .withFunction("math/subtract")
                 .withInputAdded(Port.floatPort("a", 10))
-                .withInputAdded(Port.floatPort("b", 3))
-                .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(ImmutableList.of(7.0), context.renderPort(subtract1, "output"));
+                .withInputAdded(Port.floatPort("b", 3));
+        assertEquals(ImmutableList.of(7.0), context.renderNode(subtract1));
 
         Node subtract2 = Node.ROOT
                 .withFunction("math/subtract")
                 .withInputAdded(Port.floatPort("b", 3))
-                .withInputAdded(Port.floatPort("a", 10))
-                .withOutputAdded(Port.floatPort("output", 0));
-        assertEquals(ImmutableList.of(-7.0), context.renderPort(subtract2, "output"));
+                .withInputAdded(Port.floatPort("a", 10));
+        assertEquals(ImmutableList.of(-7.0), context.renderNode(subtract2));
     }
 
 }

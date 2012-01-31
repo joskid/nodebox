@@ -41,9 +41,8 @@ public class PythonLibraryTest {
     public void testAdd() {
         Node addNode = Node.ROOT
                 .withName("add")
-                .withFunction("py-functions/add")
-                .withOutputAdded(Port.intPort("output", 0));
-        List<Object> results = context.renderPort(addNode, "output");
+                .withFunction("py-functions/add");
+        List<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 0L);
     }
 
@@ -54,9 +53,8 @@ public class PythonLibraryTest {
                 .withFunction("py-functions/add")
                 .withInputAdded(Port.intPort("v1", 1))
                 .withInputAdded(Port.intPort("v2", 2))
-                .withInputAdded(Port.intPort("v3", 3))
-                .withOutputAdded(Port.intPort("output", 0));
-        List<Object> results = context.renderPort(addNode, "output");
+                .withInputAdded(Port.intPort("v3", 3));
+        List<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 6L);
     }
 
@@ -66,9 +64,8 @@ public class PythonLibraryTest {
                 .withName("multiply")
                 .withFunction("py-functions/multiply")
                 .withInputAdded(Port.floatPort("v1", 10))
-                .withInputAdded(Port.floatPort("v2", 2))
-                .withOutputAdded(Port.floatPort("output", 0));
-        List<Object> results = context.renderPort(multiplyNode, "output");
+                .withInputAdded(Port.floatPort("v2", 2));
+        List<Object> results = context.renderNode(multiplyNode);
         assertResultsEqual(results, 20.0);
     }
 
@@ -78,9 +75,8 @@ public class PythonLibraryTest {
                 .withName("multiply")
                 .withFunction("py-functions/multiply")
                 .withInputAdded(Port.stringPort("v1", "spam"))
-                .withInputAdded(Port.intPort("v2", 3))
-                .withOutputAdded(Port.intPort("output", 0));
-        List<Object> results = context.renderPort(multiplyNode, "output");
+                .withInputAdded(Port.intPort("v2", 3));
+        List<Object> results = context.renderNode(multiplyNode);
         assertResultsEqual(results, "spamspamspam");
     }
 

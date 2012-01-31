@@ -82,7 +82,11 @@ public class ViewerPane extends Pane {
         // Set the limit
         if (objects == null) {
             this.outputValuesLimit = ImmutableList.of();
+        } else if (objects instanceof List) {
+            // If the input is a List, it cannot be infinite.
+            this.outputValuesLimit = ImmutableList.copyOf(objects);
         } else {
+            // We have to limit the input, since the iterable could be infinite.
             this.outputValuesLimit = ImmutableList.copyOf(Iterables.limit(objects, viewerObjectLimit));
         }
         currentView.setOutputValues(this.outputValuesLimit);

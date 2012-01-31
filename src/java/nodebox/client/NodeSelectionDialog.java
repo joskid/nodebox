@@ -4,6 +4,7 @@ import nodebox.node.Node;
 import nodebox.node.NodeLibrary;
 import nodebox.node.NodeRepository;
 import nodebox.util.StringUtils;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -31,9 +32,10 @@ public class NodeSelectionDialog extends JDialog {
             this.library = library;
             this.repository = repository;
             searchString = "";
-            filteredNodes = repository.getNodes();
+            filteredNodes = new ArrayList<Node>();
+            filteredNodes.addAll(repository.getNodes());
             //filteredNodes.addAll(library.getExportedNodes());
-            //Collections.sort(filteredNodes, new NodeNameComparator());
+            Collections.sort(filteredNodes, new NodeNameComparator());
         }
 
         public String getSearchString() {
@@ -44,14 +46,15 @@ public class NodeSelectionDialog extends JDialog {
             this.searchString = searchString = searchString.trim().toLowerCase();
             if (searchString.length() == 0) {
                 // Add all the nodes from the repository.
-                filteredNodes = repository.getNodes();
+                filteredNodes.clear();
+                filteredNodes.addAll(repository.getNodes());
                 // Add all the exported nodes from the current library.
                 //filteredNodes.addAll(library.getExportedNodes());
-                //Collections.sort(filteredNodes, new NodeNameComparator());
+                Collections.sort(filteredNodes, new NodeNameComparator());
             } else {
                 java.util.List<Node> nodes = new ArrayList<Node>();
 
-                filteredNodes = new ArrayList<Node>();
+                filteredNodes.clear();
                 // Add all the nodes from the repository.
                 for (Node node : repository.getNodes()) {
                     if (contains(node, searchString))
@@ -63,7 +66,7 @@ public class NodeSelectionDialog extends JDialog {
 //                        nodes.add(node);
 //                }
 
-                filteredNodes = sortNodes(nodes, this.searchString);
+                filteredNodes.addAll(sortNodes(nodes, this.searchString));
             }
         }
 
@@ -89,11 +92,11 @@ public class NodeSelectionDialog extends JDialog {
                 else
                     descriptionNodes.add(node);
             }
-            //Collections.sort(startsWithNodes, new NodeNameComparator());
+            Collections.sort(startsWithNodes, new NodeNameComparator());
             sortedNodes.addAll(startsWithNodes);
-            //Collections.sort(containsNodes, new NodeNameComparator());
+            Collections.sort(containsNodes, new NodeNameComparator());
             sortedNodes.addAll(containsNodes);
-            //Collections.sort(descriptionNodes, new NodeNameComparator());
+            Collections.sort(descriptionNodes, new NodeNameComparator());
             sortedNodes.addAll(descriptionNodes);
             return sortedNodes;
         }
@@ -122,15 +125,15 @@ public class NodeSelectionDialog extends JDialog {
             Node node = (Node) value;
             String html = "<html><b>" + StringUtils.humanizeName(node.getName()) + "</b> - " + node.getDescription() + "</html>";
             setText(html);
-            /*if (isSelected) {
+            if (isSelected) {
                 setBackground(Theme.NODE_SELECTION_ACTIVE_BACKGROUND_COLOR);
             } else {
                 setBackground(Theme.NODE_SELECTION_BACKGROUND_COLOR);
-            }*/
+            }
             setEnabled(list.isEnabled());
             setFont(list.getFont());
             setIcon(new ImageIcon(NodeView.getImageForNode(node)));
-            //setBorder(Theme.BOTTOM_BORDER);
+            setBorder(Theme.BOTTOM_BORDER);
             setOpaque(true);
             return this;
         }

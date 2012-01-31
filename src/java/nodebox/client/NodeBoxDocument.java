@@ -182,6 +182,12 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withPosition(new nodebox.graphics.Point(420, 360))
                 .withFunction("math/sqrt")
                 .withInputAdded(Port.floatPort("n", 0));
+        
+        Node distance = Node.ROOT.withName("distance")
+                .withPosition(new nodebox.graphics.Point(360,360))
+                .withFunction("math/distance")
+                .withInputAdded(Port.pointPort("p1", nodebox.graphics.Point.ZERO))
+                .withInputAdded(Port.pointPort("p2", nodebox.graphics.Point.ZERO));
 
         demoRoot = Node.ROOT
                 .withInputAdded(Port.colorPort("background", nodebox.graphics.Color.WHITE))
@@ -201,6 +207,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(color2)
                 .withChildAdded(makeColor)
                 .withChildAdded(sqrt)
+                .withChildAdded(distance)
                 .connect("toNumbers1", "add", "v1")
                 .connect("toNumbers2", "add", "v2")
                 .connect("toNumbers1", "makePoint1", "x")

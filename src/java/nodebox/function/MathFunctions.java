@@ -1,11 +1,12 @@
 package nodebox.function;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkArgument;
-
+import nodebox.graphics.Point;
 /**
  * Basic math function library.
  */
@@ -14,7 +15,7 @@ public class MathFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "range", "add", "subtract", "multiply", "divide", "sqrt", "invert", "slowNumber", "toNumbers");
+        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "range", "add", "subtract", "multiply","distance", "divide", "sqrt", "invert", "slowNumber", "toNumbers");
     }
 
     public static double value(double v) {
@@ -41,6 +42,10 @@ public class MathFunctions {
     public static double divide(double a, double b) {
         checkArgument(b != 0, "Divider cannot be zero.");
         return a / b;
+    }
+
+    public static double distance(nodebox.graphics.Point p1, nodebox.graphics.Point p2) {
+        return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
     }
 
     public static double invert(double v) {

@@ -14,7 +14,7 @@ public class MathFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "range", "add", "subtract", "sqrt", "invert", "slowNumber", "toNumbers");
+        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "range", "add", "subtract", "multiply", "divide", "sqrt", "invert", "slowNumber", "toNumbers");
     }
 
     public static double value(double v) {

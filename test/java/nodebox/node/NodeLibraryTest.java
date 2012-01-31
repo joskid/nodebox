@@ -1,6 +1,8 @@
 package nodebox.node;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
+import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 public class NodeLibraryTest {
 
@@ -101,7 +104,44 @@ public class NodeLibraryTest {
         assertSingleResult(33.0, add, library.getFunctionRepository());
     }
 
-    private void assertSingleResult(Object expected, Node node, FunctionRepository functionRepository) {
+
+    /**
+     * Test if the NodeLibrary stores / loads the list strategy correctly. 
+     */
+    @Test
+    public void testListStrategyPersistence() {
+        // Default check.
+        Node toNumbers = Node.ROOT
+                .withName("toNumbers")
+                .withListStrategy(Node.FLATTEN_STRATEGY)
+                .withFunction("math/toNumbers")
+                .withInputAdded(Port.stringPort("s", "1 2 3 4 5"));
+        Node reverse = Node.ROOT
+                .withName("reverse")
+                .withListStrategy(Node.AS_IS_STRATEGY)
+                .withFunction("list/reverse")
+                .withInputAdded(Port.customPort("list", "list"));
+        Node net = Node.ROOT
+                .withChildAdded(toNumbers)
+                .withChildAdded(reverse)
+                .withRenderedChild(reverse)
+                .connect("toNumbers", "reverse", "list");
+        FunctionRepository functions = FunctionRepository.of(MathFunctions.LIBRARY, ListFunctions.LIBRARY);
+        NodeLibrary originalLibrary = NodeLibrary.create("test", net, functions);
+        ImmutableList reversedNumbers = ImmutableList.of(5.0, 4.0, 3.0, 2.0, 1.0);
+        assertResults(reversedNumbers, originalLibrary.getRoot(), functions);
+        // Now save / load the library and check the output.
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        assertResults(reversedNumbers, library.getRoot(), functions);
+    }
+    
+    private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {
+        NodeContext context = new NodeContext(functionRepository);
+        List<Object> values = context.renderNode(node);
+        assertEquals(results, values);
+    }
+
+    private void assertSingleResult(Double expected, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
         List<Object> values = context.renderNode(node);
         assertEquals(1, values.size());

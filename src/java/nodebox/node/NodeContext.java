@@ -56,14 +56,15 @@ public class NodeContext {
      * @param network The network to render.
      * @param child   The child node to render.
      * @throws NodeRenderException If processing fails.
+     * @return The list of rendered values.
      */
-    public void renderChild(Node network, Node child) throws NodeRenderException {
+    public List<Object> renderChild(Node network, Node child) throws NodeRenderException {
         checkNotNull(network);
         checkNotNull(child);
         checkArgument(network.hasChild(child));
 
         // Check if child was already rendered.
-        if (renderedNodes.contains(child)) return;
+        if (renderedNodes.contains(child)) return outputValuesMap.get(child);
         renderedNodes.add(child);
 
         // Process dependencies
@@ -79,7 +80,7 @@ public class NodeContext {
             }
         }
 
-        renderNode(child);
+        return renderNode(child);
     }
 
     /**
@@ -96,6 +97,11 @@ public class NodeContext {
     public List<Object> renderNode(Node node) throws NodeRenderException {
         checkNotNull(node);
         checkState(!outputValuesMap.containsKey(node), "Node %s already has a rendered value.", node);
+        
+        // If the node has children, forgo the operation of the current node and evaluate the child.
+        if (node.hasRenderedChild()) {
+            return renderChild(node, node.getRenderedChild());
+        }
 
         // Get the function.
         String functionName = node.getFunction();
@@ -120,6 +126,15 @@ public class NodeContext {
 
         } else {
             results = renderListUnawareNode(node, function, inputValues);
+        }
+        // Flatten the list, if necessary.
+        if (node.getListStrategy().equals(Node.FLATTEN_STRATEGY)) {
+            ImmutableList.Builder<Object> b = new ImmutableList.Builder<Object>();
+            for (Object o : results) {
+                checkState(o instanceof Iterable);
+                b.addAll((Iterable<Object>) o);
+            }
+            results = b.build();
         }
         outputValuesMap.put(node, results);
         return results;

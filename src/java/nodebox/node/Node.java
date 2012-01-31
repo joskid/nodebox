@@ -134,6 +134,10 @@ public final class Node {
         return position;
     }
 
+    public boolean hasChildren() {
+        return !children.isEmpty();
+    }
+
     public Collection<Node> getChildren() {
         return children;
     }
@@ -215,6 +219,10 @@ public final class Node {
         Node renderedChild = getChild(getRenderedChildName());
         checkNotNull(renderedChild, "The child with name %s cannot be found. This is a bug in NodeBox.", getRenderedChildName());
         return renderedChild;
+    }
+
+    public boolean hasRenderedChild() {
+        return hasChild(getRenderedChildName());
     }
 
     public List<Connection> getConnections() {

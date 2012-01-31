@@ -40,7 +40,7 @@ public class NodeContextTest {
     public static final Node toNumbersNode = Node.ROOT
             .withName("toNumbers")
             .withFunction("math/toNumbers")
-            .withListStrategy(Node.AS_IS_STRATEGY)
+            .withListStrategy(Node.FLATTEN_STRATEGY)
             .withInputAdded(Port.stringPort("string", ""));
 
     public static final Node threeNumbers = toNumbersNode

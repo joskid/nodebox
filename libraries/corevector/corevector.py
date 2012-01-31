@@ -152,14 +152,7 @@ def makePoint(x, y):
 def makeColor(r, g, b, a, range):
     return Color(r / range, g / range, b / range, a / range)
 
-def grid(*args):
-    try:
-        width, height, rows, columns, position = [arg[0] for arg in args]
-    except IndexError:
-        return []
-    except ValueError:
-        return []
-        
+def grid(width, height, rows, columns, position):
     if columns > 1:
         column_size = width / (columns - 1)
         left = position.x - width / 2

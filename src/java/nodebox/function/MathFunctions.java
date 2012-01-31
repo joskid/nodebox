@@ -91,7 +91,7 @@ public class MathFunctions {
             this.start = start;
             this.end = end;
             this.step = step;
-            this.next = start;
+            this.next = this.start;
         }
 
         public boolean hasNext() {

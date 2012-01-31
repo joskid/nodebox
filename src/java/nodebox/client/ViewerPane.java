@@ -80,7 +80,11 @@ public class ViewerPane extends Pane {
 
     public void setOutputValues(Iterable<Object> objects) {
         // Set the limit
-        this.outputValuesLimit = ImmutableList.copyOf(Iterables.limit(objects, viewerObjectLimit));
+        if (objects == null) {
+            this.outputValuesLimit = ImmutableList.of();
+        } else {
+            this.outputValuesLimit = ImmutableList.copyOf(Iterables.limit(objects, viewerObjectLimit));
+        }
         currentView.setOutputValues(this.outputValuesLimit);
     }
 
@@ -113,7 +117,7 @@ public class ViewerPane extends Pane {
     }
 
     private class SwitchCardAction extends AbstractAction {
-        
+
         private final String viewName;
         private final OutputView view;
 
@@ -172,9 +176,6 @@ public class ViewerPane extends Pane {
             SwingUtils.drawShadowText((Graphics2D) g, getText(), 5, 14);
         }
     }
-
-
-
 
 
 }

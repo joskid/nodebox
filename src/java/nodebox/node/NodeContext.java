@@ -271,7 +271,7 @@ public class NodeContext {
         }
 
         private ValueOrList(boolean isList, Object value) {
-            checkArgument(!isList || value instanceof List);
+            checkArgument(!isList || value instanceof Iterable);
             this.isList = isList;
             this.value = value;
         }

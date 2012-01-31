@@ -2,6 +2,7 @@ package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
+import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
 import nodebox.function.PythonLibrary;
 import nodebox.handle.HandleDelegate;
@@ -82,6 +83,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final Node demoRoot;
 
     private static final FunctionRepository THE_FUNCTION_REPOSITORY = FunctionRepository.of(
+            ListFunctions.LIBRARY,
             MathFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
 
@@ -178,6 +180,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withInputAdded(Port.floatPort("alpha", 255))
                 .withInputAdded(Port.floatPort("range", 255));
 
+        Node cycle = Node.ROOT.withName("cycle")
+                .withPosition(new nodebox.graphics.Point(220, 150))
+                .withFunction("list/cycle")
+                .withListStrategy(Node.AS_IS_STRATEGY)
+                .withOutputType("list")
+                .withInputAdded(Port.customPort("list", "list"));
+
         Node sqrt = Node.ROOT.withName("sqrt")
                 .withPosition(new nodebox.graphics.Point(420, 360))
                 .withFunction("math/sqrt")
@@ -206,6 +215,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                 .withChildAdded(rect2)
                 .withChildAdded(color2)
                 .withChildAdded(makeColor)
+                .withChildAdded(cycle)
                 .withChildAdded(sqrt)
                 .withChildAdded(distance)
                 .connect("toNumbers1", "add", "v1")

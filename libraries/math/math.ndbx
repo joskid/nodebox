@@ -2,34 +2,41 @@
 <ndbx formatVersion="1.0" type="file">
     <link href="java:nodebox.function.MathFunctions" rel="functions"/>
     <node name="node" renderedChild="value">
-        <node function="math/add" name="add" position="20,100" description="Add two numbers.">
+        <node description="Add two numbers." function="math/add" name="add" position="20,100">
             <port name="v1" type="float" value="0.0"/>
             <port name="v2" type="float" value="0.0"/>
         </node>
-        <node function="math/divide" name="divide" position="320,100" description="Divide two numbers.">
+        <node description="Calculate the distance between two points." function="math/distance" name="distance" position="220,200">
+            <port name="p1" type="point" value="0.00,0.00"/>
+            <port name="p2" type="point" value="0.00,0.00"/>
+        </node>
+        <node description="Divide two numbers." function="math/divide" name="divide" position="320,100">
             <port name="v1" type="float" value="0.0"/>
             <port name="v2" type="float" value="1.0"/>
         </node>
-        <node function="math/invert" name="invert" position="120,10" description="Change the sign of a number.">
+        <node description="Change the sign of a number." function="math/invert" name="invert" position="120,10">
             <port name="v1" type="float" value="0.0"/>
         </node>
-        <node function="math/multiply" name="multiply" position="220,100" description="Multiply two numbers.">
+        <node description="Multiply two numbers." function="math/multiply" name="multiply" position="220,100">
             <port name="v1" type="float" value="0.0"/>
             <port name="v2" type="float" value="0.0"/>
         </node>
-        <node function="math/range" name="range" position="20,200" strategy="flatten" description="Generate a range of numbers.">
+        <node description="Generate a range of numbers." function="math/range" name="range" position="20,200" strategy="flatten">
             <port name="start" type="float" value="0.0"/>
             <port name="end" type="float" value="10.0"/>
             <port name="step" type="float" value="1.0"/>
         </node>
-        <node function="math/subtract" name="subtract" position="120,100" description="Subtract two numbers.">
+        <node description="Calculate the square root of a number." function="math/sqrt" name="sqrt" position="410,100">
+            <port name="n" type="float" value="0.0"/>
+        </node>
+        <node description="Subtract two numbers." function="math/subtract" name="subtract" position="120,100">
             <port name="v1" type="float" value="0.0"/>
             <port name="v2" type="float" value="0.0"/>
         </node>
-        <node function="math/toNumbers" name="toNumbers" position="120,200" strategy="flatten" description="Transform a string to a list of numbers.">
+        <node description="Transform a string to a list of numbers." function="math/toNumbers" name="toNumbers" position="120,200" strategy="flatten">
             <port name="s" type="string" value="11 22 33"/>
         </node>
-        <node function="math/value" name="value" position="20,10" description="Set a number.">
+        <node description="Set a number." function="math/value" name="value" position="20,10">
             <port name="v1" type="float" value="0.0"/>
         </node>
     </node>

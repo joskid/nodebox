@@ -1245,14 +1245,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void showNodeSelectionDialog() {
         NodeRepository repository = Application.getInstance().getRepository();
         NodeSelectionDialog dialog = new NodeSelectionDialog(this, controller.getNodeLibrary(), repository);
-        Point pt = getMousePosition();
+        Point pt = networkView.getMousePosition();
         if (pt == null) {
             pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
         }
-//        pt = (Point) getCamera().localToView(pt);
+        pt = (Point) networkView.getCamera().localToView(pt);
         dialog.setVisible(true);
         if (dialog.getSelectedNode() != null) {
-//            controller.createNode()
             createNode(dialog.getSelectedNode(), new nodebox.graphics.Point(pt));
         }
     }

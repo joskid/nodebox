@@ -1243,16 +1243,18 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * Start the dialog that allows a user to create a new node.
      */
     public void showNodeSelectionDialog() {
-//        NodeSelectionDialog dialog = new NodeSelectionDialog(this, doc.getNodeLibrary(), doc.getManager());
-//        Point pt = getMousePosition();
-//        if (pt == null) {
-//            pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
-//        }
+        NodeRepository repository = Application.getInstance().getRepository();
+        NodeSelectionDialog dialog = new NodeSelectionDialog(this, controller.getNodeLibrary(), repository);
+        Point pt = getMousePosition();
+        if (pt == null) {
+            pt = new Point((int) (Math.random() * 300), (int) (Math.random() * 300));
+        }
 //        pt = (Point) getCamera().localToView(pt);
-//        dialog.setVisible(true);
-//        if (dialog.getSelectedNode() != null) {
-//            doc.createNode(dialog.getSelectedNode(), pt);
-//        }
+        dialog.setVisible(true);
+        if (dialog.getSelectedNode() != null) {
+//            controller.createNode()
+            createNode(dialog.getSelectedNode(), new nodebox.graphics.Point(pt));
+        }
     }
 
     public void reload() {

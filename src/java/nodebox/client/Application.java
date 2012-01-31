@@ -232,11 +232,16 @@ public class Application implements Host {
     }
 
     private void initPython() {
+        lookForLibraries();
+        PythonUtils.initializePython();
+    }
+
+    private void lookForLibraries() {
+        NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
         //NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
         //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
         //repository = NodeRepository.of(corevectorLibrary, coreimageLibrary);
-        repository = NodeRepository.of();
-        PythonUtils.initializePython();
+        repository = NodeRepository.of(mathLibrary);
     }
 
     //// Application events ////

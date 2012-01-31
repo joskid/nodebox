@@ -154,9 +154,9 @@ public class NodeLibrary {
         String name = reader.getAttributeValue(null, "name");
         String function = reader.getAttributeValue(null, "function");
         String listStrategy = reader.getAttributeValue(null, "strategy");
+        String description = reader.getAttributeValue(null, "description");
         String position = reader.getAttributeValue(null, "position");
         String renderedChildName = reader.getAttributeValue(null, "renderedChild");
-
         Node prototype = prototypeId == null ? Node.ROOT : nodeRepository.getNode(prototypeId);
         Node node = prototype.extend();
 
@@ -166,6 +166,8 @@ public class NodeLibrary {
             node = node.withFunction(function);
         if (listStrategy != null)
             node = node.withListStrategy(listStrategy);
+        if (description != null)
+            node = node.withDescription(description);
         if (position != null)
             node = node.withPosition(Point.valueOf(position));
 

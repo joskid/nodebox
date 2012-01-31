@@ -1,5 +1,7 @@
 package nodebox.client;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import nodebox.handle.Handle;
 import nodebox.ui.*;
 
@@ -21,9 +23,10 @@ public class ViewerPane extends Pane {
     private final NButton handlesCheck, pointsCheck, pointNumbersCheck, originCheck;
     private final JPanel contentPanel;
     private OutputView currentView;
-    private List<Object> outputValues;
+    private List<Object> outputValuesLimit;
     private final PaneTab viewerToggle;
     private final PaneTab dataSheetToggle;
+    private final int viewerObjectLimit = 1000;
 
     public ViewerPane(final NodeBoxDocument document) {
         this.document = document;
@@ -75,9 +78,10 @@ public class ViewerPane extends Pane {
         viewer.setShowPointNumbers(pointNumbersCheck.isChecked());
     }
 
-    public void setOutputValues(List<Object> objects) {
-        this.outputValues = objects;
-        currentView.setOutputValues(objects);
+    public void setOutputValues(Iterable<Object> objects) {
+        // Set the limit
+        this.outputValuesLimit = ImmutableList.copyOf(Iterables.limit(objects, viewerObjectLimit));
+        currentView.setOutputValues(this.outputValuesLimit);
     }
 
     public void toggleOrigin() {
@@ -125,7 +129,7 @@ public class ViewerPane extends Pane {
             viewerToggle.setSelected(view == viewer);
             dataSheetToggle.setSelected(view == dataSheet);
             currentView = view;
-            currentView.setOutputValues(outputValues);
+            currentView.setOutputValues(outputValuesLimit);
         }
 
     }

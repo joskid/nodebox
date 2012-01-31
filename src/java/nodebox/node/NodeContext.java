@@ -13,8 +13,8 @@ public class NodeContext {
 
     private final FunctionRepository repository;
     private final double frame;
-    private final Map<Node, List<Object>> outputValuesMap = new HashMap<Node, List<Object>>();
-    private final Map<NodePort, List<Object>> inputValuesMap = new HashMap<NodePort, List<Object>>();
+    private final Map<Node, Iterable<Object>> outputValuesMap = new HashMap<Node, Iterable<Object>>();
+    private final Map<NodePort, Iterable<Object>> inputValuesMap = new HashMap<NodePort, Iterable<Object>>();
     private final Set<Node> renderedNodes = new HashSet<Node>();
 
     public NodeContext(FunctionRepository repository) {
@@ -27,11 +27,11 @@ public class NodeContext {
         this.frame = frame;
     }
 
-    public Map<Node, List<Object>> getResultsMap() {
+    public Map<Node, Iterable<Object>> getResultsMap() {
         return outputValuesMap;
     }
 
-    public List<Object> getResults(Node node) {
+    public Iterable<Object> getResults(Node node) {
         return outputValuesMap.get(node);
     }
 
@@ -55,10 +55,10 @@ public class NodeContext {
      *
      * @param network The network to render.
      * @param child   The child node to render.
-     * @throws NodeRenderException If processing fails.
      * @return The list of rendered values.
+     * @throws NodeRenderException If processing fails.
      */
-    public List<Object> renderChild(Node network, Node child) throws NodeRenderException {
+    public Iterable<Object> renderChild(Node network, Node child) throws NodeRenderException {
         checkNotNull(network);
         checkNotNull(child);
         checkArgument(network.hasChild(child));
@@ -72,7 +72,7 @@ public class NodeContext {
             if (c.getInputNode().equals(child.getName())) {
                 Node outputNode = network.getChild(c.getOutputNode());
                 renderChild(network, outputNode);
-                List<Object> result = outputValuesMap.get(outputNode);
+                Iterable<Object> result = outputValuesMap.get(outputNode);
                 // Check if the result is null. This can happen if there is a cycle in the network.
                 if (result != null) {
                     inputValuesMap.put(NodePort.of(child, c.getInputPort()), result);
@@ -94,10 +94,10 @@ public class NodeContext {
      * @return The list of rendered values.
      * @throws NodeRenderException If processing fails.
      */
-    public List<Object> renderNode(Node node) throws NodeRenderException {
+    public Iterable<Object> renderNode(Node node) throws NodeRenderException {
         checkNotNull(node);
         checkState(!outputValuesMap.containsKey(node), "Node %s already has a rendered value.", node);
-        
+
         // If the node has children, forgo the operation of the current node and evaluate the child.
         if (node.hasRenderedChild()) {
             return renderChild(node, node.getRenderedChild());
@@ -120,7 +120,7 @@ public class NodeContext {
         }
 
         // Invoke the node function.
-        List<Object> results;
+        Iterable<Object> results;
         if (node.isListAware()) {
             results = renderListAwareNode(node, function, inputValues);
 
@@ -154,11 +154,11 @@ public class NodeContext {
      * @param inputValues A list of all values for the input ports.
      * @return The list of results.
      */
-    private List<Object> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
+    private Iterable<Object> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
         List<Object> arguments = inputValuesToArguments(inputValues);
         Object returnValues = invokeFunction(node, function, arguments);
         checkState(returnValues instanceof Iterable, "Return value of list-aware function needs to be a List.");
-        return ImmutableList.copyOf((Iterable<? extends Object>) returnValues);
+        return (Iterable<Object>) returnValues;
     }
 
     private List<Object> inputValuesToArguments(List<ValueOrList> inputValues) {
@@ -184,44 +184,49 @@ public class NodeContext {
     private List<Object> renderListUnawareNode(Node node, Function function, List<ValueOrList> inputValues) {
         checkState(!node.isListAware());
 
+        // Execute the node once if there are no input ports.
         if (node.getInputs().isEmpty()) {
-            // Execute the node once if there are no input ports.
             Object returnValue = invokeFunction(node, function, ImmutableList.of());
             return ImmutableList.of(returnValue);
-        } else {
-            int minimumSize = minimumSize(inputValues);
-            if (minimumSize == 0) {
-                // If the minimum list size is zero a list of zero elements was passed in to one of the inputs.
-                // This means the function doesn't get called, and returns an empty list.
-                return ImmutableList.of();
-            } else {
-                List<Object> results = new LinkedList<Object>();
-                int listIndex = 0;
-                boolean hasListArgument = false;
-                processInputValues:
-                while (true) {
-                    // Collect arguments by going through the input values.
-                    List<Object> arguments = new ArrayList<Object>();
-                    for (ValueOrList v : inputValues) {
-                        if (v.isList()) {
-                            // End when the first list is exhausted.
-                            if (listIndex >= v.getList().size()) break processInputValues;
-                            arguments.add(v.getList().get(listIndex));
-                            hasListArgument = true;
-                        } else {
-                            arguments.add(v.getValue());
-                        }
-                    }
-                    // Invoke the function.
-                    results.add(invokeFunction(node, function, arguments));
-                    // If none of the arguments are lists, we're done.
-                    if (!hasListArgument) break;
-                    // Otherwise increment the list index.
-                    listIndex++;
-                }
-                return results;
-            }
         }
+
+        // If the minimum list size is zero a list of zero elements was passed in to one of the inputs.
+        // This means the function doesn't get called, and returns an empty list.
+        if (!hasElements(inputValues)) {
+            return ImmutableList.of();
+        }
+
+        List<Object> results = new LinkedList<Object>();
+        Map<ValueOrList, Iterator> iteratorMap = new HashMap<ValueOrList, Iterator>();
+        int listIndex = 0;
+        boolean hasListArgument = false;
+        processInputValues:
+        while (true) {
+            // Collect arguments by going through the input values.
+            List<Object> arguments = new ArrayList<Object>();
+            for (ValueOrList v : inputValues) {
+                if (v.isList()) {
+                    // Store each iterator in the map.
+                    if (!iteratorMap.containsKey(v)) {
+                        iteratorMap.put(v, v.getList().iterator());
+                    }
+                    Iterator iterator = iteratorMap.get(v);
+                    // End when the first list is exhausted.
+                    if (!iterator.hasNext()) break processInputValues;
+                    arguments.add(iterator.next());
+                    hasListArgument = true;
+                } else {
+                    arguments.add(v.getValue());
+                }
+            }
+            // Invoke the function.
+            results.add(invokeFunction(node, function, arguments));
+            // If none of the arguments are lists, we're done.
+            if (!hasListArgument) break;
+            // Otherwise increment the list index.
+            listIndex++;
+        }
+        return results;
     }
 
     private Object invokeFunction(Node node, Function function, List<? extends Object> arguments) throws NodeRenderException {
@@ -237,22 +242,20 @@ public class NodeContext {
     }
 
     /**
-     * Get the minimum amount of elements in the list of lists.
+     * Return true if each element has a next element.
      *
-     * @param ll The list of lists.
-     * @return The minimum amount of elements.
+     * @param ll The list of lists or values.
+     * @return true if each of the lists has values.
      */
-    private static int minimumSize(List<ValueOrList> ll) {
-        if (ll.size() == 0) return 0;
-        int minSize = Integer.MAX_VALUE;
+    private static boolean hasElements(List<ValueOrList> ll) {
+        checkNotNull(ll);
+        if (ll.isEmpty()) return false;
         for (ValueOrList v : ll) {
-            if (v.isList())
-                minSize = Math.min(minSize, v.getList().size());
+            if (v.isList()) {
+                if (!v.getList().iterator().hasNext()) return false;
+            }
         }
-        // HACK If all lists are infinite (meaning they return a size() of MAX_VALUE),
-        // they are all a size of one. Infinite lists are a hack themselves to make
-        // sure that non-connected ports do not produce short lists of one element.
-        return minSize < Integer.MAX_VALUE ? minSize : 1;
+        return true;
     }
 
     private static final class ValueOrList {
@@ -263,7 +266,7 @@ public class NodeContext {
             return new ValueOrList(false, value);
         }
 
-        private static ValueOrList ofList(List list) {
+        private static ValueOrList ofList(Iterable list) {
             return new ValueOrList(true, list);
         }
 
@@ -279,9 +282,9 @@ public class NodeContext {
             return value;
         }
 
-        private List getList() {
+        private Iterable getList() {
             checkState(isList);
-            return (List) value;
+            return (Iterable) value;
         }
 
         private boolean isList() {

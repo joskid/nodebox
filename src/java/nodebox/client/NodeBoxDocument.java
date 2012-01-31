@@ -772,7 +772,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
-                java.util.List<Object> results = context.getResults(renderedChild);
+                Iterable<Object> results = context.getResults(renderedChild);
                 addressBar.setProgressVisible(false);
                 viewerPane.setOutputValues(results);
                 networkView.checkErrorAndRepaint();

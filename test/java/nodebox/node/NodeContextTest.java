@@ -1,20 +1,20 @@
 package nodebox.node;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import nodebox.function.CoreVectorFunctions;
 import nodebox.function.FunctionRepository;
+import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
 import nodebox.graphics.Point;
 import nodebox.util.SideEffects;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class NodeContextTest {
@@ -53,7 +53,13 @@ public class NodeContextTest {
             .withName("fiveNumbers")
             .withInputValue("string", "100 200 300 400 500");
 
-    public static final FunctionRepository functions = FunctionRepository.of(CoreVectorFunctions.LIBRARY, MathFunctions.LIBRARY, SideEffects.LIBRARY);
+    public static final Node cycle = Node.ROOT
+            .withName("cycle")
+            .withFunction("list/cycle")
+            .withListStrategy(Node.AS_IS_STRATEGY)
+            .withInputAdded(Port.customPort("list", "seq"));
+
+    public static final FunctionRepository functions = FunctionRepository.of(CoreVectorFunctions.LIBRARY, MathFunctions.LIBRARY, ListFunctions.LIBRARY, SideEffects.LIBRARY);
     private NodeContext context;
 
     @Before
@@ -65,39 +71,32 @@ public class NodeContextTest {
     @Test
     public void testSingleOutput() {
         context.renderNode(valuesToPointNode);
-        Map<Node, List<Object>> resultsMap = context.getResultsMap();
+        Map<Node, Iterable<Object>> resultsMap = context.getResultsMap();
         assertEquals(1, resultsMap.size());
-        List<Object> results = context.getResults(valuesToPointNode);
-        assertEquals(1, results.size());
-        assertResultsEqual(results, Point.ZERO);
+        Iterable<Object> results = context.getResults(valuesToPointNode);
+        List resultsList = ImmutableList.copyOf(results);
+        assertEquals(1, resultsList.size());
+        assertResultsEqual(resultsList, Point.ZERO);
     }
 
     @Test
     public void testSameOutputPort() {
         Node invert1 = invertNode.extend().withName("invert1").withInputValue("value", 1.0);
         Node invert2 = invertNode.extend().withName("invert2").withInputValue("value", 10.0);
-        context = new NodeContext(functions);
-        context.renderNode(invert1);
-        context.renderNode(invert2);
-        assertResultsEqual(context.getResults(invert1), -1.0);
-        assertResultsEqual(context.getResults(invert2), -10.0);
+        assertResultsEqual(context.renderNode(invert1), -1.0);
+        assertResultsEqual(context.renderNode(invert2), -10.0);
     }
 
     @Test
     public void testListAwareProcessing() {
         Node toNumbers1 = toNumbersNode.extend().withInputValue("string", "1 2 3 4");
-        context = new NodeContext(functions);
-        context.renderNode(toNumbers1);
-        List<Object> results = context.getResults(toNumbers1);
-        assertResultsEqual(results, 1.0, 2.0, 3.0, 4.0);
+        assertResultsEqual(context.renderNode(toNumbers1), 1.0, 2.0, 3.0, 4.0);
     }
 
     @Test
     public void testListUnawareProcessing() {
         Node invert1 = invertNode.extend().withName("invert1").withInputValue("value", 42.0);
-        context.renderNode(invert1);
-        List<Object> results = context.getResults(invert1);
-        assertResultsEqual(results, -42.0);
+        assertResultsEqual(context.renderNode(invert1), -42.0);
     }
 
     @Test
@@ -109,9 +108,7 @@ public class NodeContextTest {
                 .withChildAdded(invert1)
                 .connect("toNumbers1", "invert1", "value")
                 .withRenderedChildName("invert1");
-        context.renderChild(net, invert1);
-        List<Object> results = context.getResults(invert1);
-        assertResultsEqual(results, -1.0, -2.0, -3.0, -4.0);
+        assertResultsEqual(context.renderChild(net, invert1), -1.0, -2.0, -3.0, -4.0);
     }
 
     @Test
@@ -123,8 +120,7 @@ public class NodeContextTest {
                 .withChildAdded(add1)
                 .connect("noNumbers", "add1", "v1");
         context.renderChild(net, add1);
-        List<Object> results = context.getResults(add1);
-        assertTrue(results.isEmpty());
+        assertResultsEqual(context.renderChild(net, add1));
     }
 
     /**
@@ -136,9 +132,7 @@ public class NodeContextTest {
         Node getNumberNode = Node.ROOT
                 .withFunction("side-effects/getNumber");
         SideEffects.theInput = 42;
-        context.renderNode(getNumberNode);
-        List<Object> results = context.getResults(getNumberNode);
-        assertResultsEqual(results, 42L);
+        assertResultsEqual(context.renderNode(getNumberNode), 42L);
     }
 
     @Test
@@ -158,9 +152,7 @@ public class NodeContextTest {
                 .withChildAdded(invert1Node)
                 .withChildAdded(invert2Node)
                 .connect("invert1", "invert2", "value");
-        context.renderChild(net, invert2Node);
-        List<Object> results = context.getResults(invert2Node);
-        assertResultsEqual(results, 42.0);
+        assertResultsEqual(context.renderChild(net, invert2Node), 42.0);
     }
 
     /**
@@ -179,7 +171,7 @@ public class NodeContextTest {
                 .connect("toNumbers1", "inc", "number");
         context.renderChild(net, incNode);
         assertEquals(3, SideEffects.theCounter);
-        List<Object> results = context.getResults(incNode);
+        Iterable<Object> results = context.getResults(incNode);
         assertResultsEqual(results, 2.0, 3.0, 4.0);
     }
 
@@ -194,9 +186,7 @@ public class NodeContextTest {
                 .withChildAdded(toNumbers1Node)
                 .withChildAdded(add1)
                 .connect("toNumbers1", "add1", "v1");
-        context.renderChild(net, add1);
-        List<Object> results = context.getResults(add1);
-        assertResultsEqual(results, 101.0, 102.0, 103.0);
+        assertResultsEqual(context.renderChild(net, add1), 101.0, 102.0, 103.0);
     }
 
     @Test
@@ -207,8 +197,19 @@ public class NodeContextTest {
                 .withChildAdded(addNode)
                 .connect("threeNumbers", addNode.getName(), "v1")
                 .connect("fiveNumbers", addNode.getName(), "v2");
-        context.renderChild(net, addNode);
-        assertResultsEqual(context.getResults(addNode), 101.0, 202.0,303.0);
+        assertResultsEqual(context.renderChild(net, addNode), 101.0, 202.0, 303.0);
+    }
+
+    @Test
+    public void testInfiniteLists() {
+        Node net = Node.ROOT
+                .withChildAdded(threeNumbers)
+                .withChildAdded(cycle)
+                .connect("threeNumbers", "cycle", "list");
+        Iterable<Object> results =context.renderChild(net, cycle);
+        // This list is infinite! Ask only the first ten numbers.
+        List<Object> resultsList = ImmutableList.copyOf(Iterables.limit(results, 10));
+        assertResultsEqual(resultsList, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0);
     }
 
     // TODO Check list-aware node with no inputs.

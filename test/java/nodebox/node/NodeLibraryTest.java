@@ -137,13 +137,13 @@ public class NodeLibraryTest {
     
     private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
-        List<Object> values = context.renderNode(node);
+        Iterable<Object> values = context.renderNode(node);
         assertEquals(results, values);
     }
 
     private void assertSingleResult(Double expected, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
-        List<Object> values = context.renderNode(node);
+        List<Object> values = ImmutableList.copyOf(context.renderNode(node));
         assertEquals(1, values.size());
         assertEquals(expected, values.get(0));
     }

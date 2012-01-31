@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 public final class Assertions {
 
-    public static void assertResultsEqual(List<Object> result, Object... args) {
+    public static void assertResultsEqual(Iterable<Object> result, Object... args) {
         assertEquals(ImmutableList.copyOf(args), result);
     }
 

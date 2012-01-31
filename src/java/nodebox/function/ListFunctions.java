@@ -10,14 +10,14 @@ public class ListFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class, "take", "repeat", "reverse");
+        LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class, "take", "cycle", "reverse");
     }
 
     public static Iterable take(Iterable iterable, int limitSize) {
         return Iterables.limit(iterable, limitSize);
     }
 
-    public static Iterable repeat(Iterable iterable) {
+    public static Iterable cycle(Iterable iterable) {
         return Iterables.cycle(iterable);
     }
 

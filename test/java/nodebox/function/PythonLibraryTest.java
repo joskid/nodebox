@@ -42,7 +42,7 @@ public class PythonLibraryTest {
         Node addNode = Node.ROOT
                 .withName("add")
                 .withFunction("py-functions/add");
-        List<Object> results = context.renderNode(addNode);
+        Iterable<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 0L);
     }
 
@@ -54,7 +54,7 @@ public class PythonLibraryTest {
                 .withInputAdded(Port.intPort("v1", 1))
                 .withInputAdded(Port.intPort("v2", 2))
                 .withInputAdded(Port.intPort("v3", 3));
-        List<Object> results = context.renderNode(addNode);
+        Iterable<Object> results = context.renderNode(addNode);
         assertResultsEqual(results, 6L);
     }
 
@@ -65,7 +65,7 @@ public class PythonLibraryTest {
                 .withFunction("py-functions/multiply")
                 .withInputAdded(Port.floatPort("v1", 10))
                 .withInputAdded(Port.floatPort("v2", 2));
-        List<Object> results = context.renderNode(multiplyNode);
+        Iterable<Object> results = context.renderNode(multiplyNode);
         assertResultsEqual(results, 20.0);
     }
 
@@ -76,7 +76,7 @@ public class PythonLibraryTest {
                 .withFunction("py-functions/multiply")
                 .withInputAdded(Port.stringPort("v1", "spam"))
                 .withInputAdded(Port.intPort("v2", 3));
-        List<Object> results = context.renderNode(multiplyNode);
+        Iterable<Object> results = context.renderNode(multiplyNode);
         assertResultsEqual(results, "spamspamspam");
     }
 

@@ -44,7 +44,7 @@ public class NodeRepository {
     public Node getNode(String identifier) {
         checkNotNull(identifier);
         if (identifier.equals("_root")) return Node.ROOT;
-        String[] names = identifier.split(".");
+        String[] names = identifier.split("\\.");
         checkArgument(names.length == 2, "The node identifier should look like libraryname.nodename, not %s", identifier);
         String libraryName = names[0];
         NodeLibrary library = libraryMap.get(libraryName);

@@ -230,8 +230,8 @@ public class Application implements Host {
     }
 
     private void initPython() {
-        lookForLibraries();
         PythonUtils.initializePython();
+        lookForLibraries();
     }
 
     private void lookForLibraries() {

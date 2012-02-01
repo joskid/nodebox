@@ -18,7 +18,7 @@ public final class Point implements Iterable<Double> {
 
     public static Point valueOf(String s) {
         String[] args = s.split(",");
-        checkArgument(args.length == 2, "String needs two components, i.e. 12.3,45.6");
+        checkArgument(args.length == 2, "String '" + s + "' needs two components, i.e. 12.3,45.6");
         return new Point(Float.valueOf(args[0]), Float.valueOf(args[1]));
     }
 

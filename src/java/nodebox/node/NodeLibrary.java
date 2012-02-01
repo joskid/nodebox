@@ -23,6 +23,10 @@ public class NodeLibrary {
 
     public static final Splitter PORT_NAME_SPLITTER = Splitter.on(".");
 
+    public static NodeLibrary create(String libraryName, Node root) {
+        return create(libraryName, root, FunctionRepository.of());
+    }
+
     public static NodeLibrary create(String libraryName, Node root, FunctionRepository functionRepository) {
         return new NodeLibrary(libraryName, root, functionRepository);
     }
@@ -119,7 +123,7 @@ public class NodeLibrary {
                     FunctionLibrary functionLibrary = parseLink(reader);
                     functionLibraries.add(functionLibrary);
                 } else if (tagName.equals("node")) {
-                    rootNode = parseNode(reader, nodeRepository);
+                    rootNode = parseNode(reader, rootNode, nodeRepository);
                 } else {
                     throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
                 }
@@ -145,11 +149,12 @@ public class NodeLibrary {
      * Parse the <node> tag.
      *
      * @param reader         The XML stream.
+     * @param parent         The parent node.
      * @param nodeRepository The node library dependencies.
      * @return The new node.
      * @throws XMLStreamException if a parse error occurs.
      */
-    private static Node parseNode(XMLStreamReader reader, NodeRepository nodeRepository) throws XMLStreamException {
+    private static Node parseNode(XMLStreamReader reader, Node parent, NodeRepository nodeRepository) throws XMLStreamException {
         String prototypeId = reader.getAttributeValue(null, "prototype");
         String name = reader.getAttributeValue(null, "name");
         String function = reader.getAttributeValue(null, "function");
@@ -157,7 +162,7 @@ public class NodeLibrary {
         String description = reader.getAttributeValue(null, "description");
         String position = reader.getAttributeValue(null, "position");
         String renderedChildName = reader.getAttributeValue(null, "renderedChild");
-        Node prototype = prototypeId == null ? Node.ROOT : nodeRepository.getNode(prototypeId);
+        Node prototype = prototypeId == null ? Node.ROOT : lookupNode(prototypeId, parent, nodeRepository);
         Node node = prototype.extend();
 
         if (name != null)
@@ -176,9 +181,14 @@ public class NodeLibrary {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 String tagName = reader.getLocalName();
                 if (tagName.equals("port")) {
+                    String portName = reader.getAttributeValue(null, "name");
+                    // Remove the port if it is already on the prototype.
+                    if (node.hasInput(portName)) {
+                        node = node.withInputRemoved(portName);
+                    }
                     node = node.withInputAdded(parsePort(reader));
                 } else if (tagName.equals("node")) {
-                    node = node.withChildAdded(parseNode(reader, nodeRepository));
+                    node = node.withChildAdded(parseNode(reader, node, nodeRepository));
                 } else if (tagName.equals("conn")) {
                     node = node.withConnectionAdded(parseConnection(reader));
                 } else {
@@ -198,13 +208,31 @@ public class NodeLibrary {
         return node;
     }
 
+    /**
+     * Lookup the node in the node repository.
+     * <p/>
+     * If the node id consists of just a node name, without spaces, it is looked up in the parent node.
+     *
+     * @param nodeId         The node id.
+     * @param parent         The parent node.
+     * @param nodeRepository The node repository.
+     * @return The existing node.
+     */
+    private static Node lookupNode(String nodeId, Node parent, NodeRepository nodeRepository) {
+        if (nodeId.contains(".")) {
+            return nodeRepository.getNode(nodeId);
+        } else {
+            return parent.getChild(nodeId);
+        }
+    }
+
     private static Port parsePort(XMLStreamReader reader) throws XMLStreamException {
         String name = reader.getAttributeValue(null, "name");
         String type = reader.getAttributeValue(null, "type");
         String value = reader.getAttributeValue(null, "value");
         return Port.parsedPort(name, type, value);
     }
-    
+
     private static Connection parseConnection(XMLStreamReader reader) throws XMLStreamException {
         String outputNode = reader.getAttributeValue(null, "output");
         String input = reader.getAttributeValue(null, "input");

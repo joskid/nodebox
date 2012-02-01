@@ -13,6 +13,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static junit.framework.Assert.*;
 import static junit.framework.Assert.assertEquals;
+import static nodebox.util.Assertions.assertResultsEqual;
 
 public class NodeLibraryTest {
 
@@ -65,6 +66,29 @@ public class NodeLibraryTest {
         NodeLibrary library = libraryWithChildren("test", myNode);
         // Because myNode uses the _root prototype, it shouldn't write the prototype attribute.
         assertFalse(library.toXml().contains("prototype"));
+    }
+
+    @Test
+    public void testPrototypeInSameLibrary() {
+        // You can refer to a prototype in the same library as the current node.
+        Node invert = Node.ROOT
+                .withName("invert")
+                .withFunction("math/invert")
+                .withInputAdded(Port.floatPort("number", 0));
+        Node invert1 = invert.extend().withName("invert1").withInputValue("number", 42.0);
+        Node root = Node.ROOT
+                .withName("root")
+                .withChildAdded(invert)
+                .withChildAdded(invert1)
+                .withRenderedChild(invert1);
+        NodeLibrary originalLibrary = NodeLibrary.create("test", root);
+        // Assert the original library returns the correct result.
+        NodeContext context = new NodeContext(FunctionRepository.of(MathFunctions.LIBRARY));
+        assertResultsEqual(context.renderNode(root), -42.0);
+
+        // Persist / load the library and assert it still returns the correct result.
+        NodeLibrary restoredLibrary = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        assertResultsEqual(context.renderNode(restoredLibrary.getRoot()), -42.0);
     }
 
     @Test

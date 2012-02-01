@@ -187,9 +187,10 @@ public class NodeLibrary {
                     String portName = reader.getAttributeValue(null, "name");
                     // Remove the port if it is already on the prototype.
                     if (node.hasInput(portName)) {
-                        node = node.withInputRemoved(portName);
+                        node = node.withInputChanged(portName, parsePort(reader));
+                    } else {
+                        node = node.withInputAdded(parsePort(reader));
                     }
-                    node = node.withInputAdded(parsePort(reader));
                 } else if (tagName.equals("node")) {
                     node = node.withChildAdded(parseNode(reader, node, nodeRepository));
                 } else if (tagName.equals("conn")) {

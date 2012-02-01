@@ -37,18 +37,18 @@ public class NodeContextTest {
             .withFunction("math/invert")
             .withInputAdded(Port.floatPort("value", 0.0));
 
-    public static final Node toNumbersNode = Node.ROOT
-            .withName("toNumbers")
-            .withFunction("math/toNumbers")
+    public static final Node makeNumbersNode = Node.ROOT
+            .withName("makeNumbers")
+            .withFunction("math/makeNumbers")
             .withListStrategy(Node.FLATTEN_STRATEGY)
             .withInputAdded(Port.stringPort("string", ""));
 
-    public static final Node threeNumbers = toNumbersNode
+    public static final Node threeNumbers = makeNumbersNode
             .extend()
             .withName("threeNumbers")
             .withInputValue("string", "1 2 3");
 
-    public static final Node fiveNumbers = toNumbersNode
+    public static final Node fiveNumbers = makeNumbersNode
             .extend()
             .withName("fiveNumbers")
             .withInputValue("string", "100 200 300 400 500");
@@ -89,8 +89,8 @@ public class NodeContextTest {
 
     @Test
     public void testListAwareProcessing() {
-        Node toNumbers1 = toNumbersNode.extend().withInputValue("string", "1 2 3 4");
-        assertResultsEqual(context.renderNode(toNumbers1), 1.0, 2.0, 3.0, 4.0);
+        Node makeNumbers1 = makeNumbersNode.extend().withInputValue("string", "1 2 3 4");
+        assertResultsEqual(context.renderNode(makeNumbers1), 1.0, 2.0, 3.0, 4.0);
     }
 
     @Test
@@ -101,19 +101,19 @@ public class NodeContextTest {
 
     @Test
     public void testConnectedListProcessing() {
-        Node toNumbers1 = toNumbersNode.extend().withName("toNumbers1").withInputValue("string", "1 2 3 4");
+        Node makeNumbers1 = makeNumbersNode.extend().withName("makeNumbers1").withInputValue("string", "1 2 3 4");
         Node invert1 = invertNode.extend().withName("invert1");
         Node net = Node.ROOT
-                .withChildAdded(toNumbers1)
+                .withChildAdded(makeNumbers1)
                 .withChildAdded(invert1)
-                .connect("toNumbers1", "invert1", "value")
+                .connect("makeNumbers1", "invert1", "value")
                 .withRenderedChildName("invert1");
         assertResultsEqual(context.renderChild(net, invert1), -1.0, -2.0, -3.0, -4.0);
     }
 
     @Test
     public void testEmptyListProcessing() {
-        Node noNumbers = toNumbersNode.extend().withName("noNumbers").withInputValue("string", "");
+        Node noNumbers = makeNumbersNode.extend().withName("noNumbers").withInputValue("string", "");
         Node add1 = addNode.extend().withName("add1");
         Node net = Node.ROOT
                 .withChildAdded(noNumbers)
@@ -160,15 +160,15 @@ public class NodeContextTest {
      */
     @Test
     public void testExecuteAmount() {
-        Node toNumbers1Node = toNumbersNode.withName("toNumbers1").withInputValue("string", "1 2 3");
+        Node makeNumbers1 = makeNumbersNode.withName("makeNumbers1").withInputValue("string", "1 2 3");
         Node incNode = Node.ROOT
                 .withName("inc")
                 .withFunction("side-effects/increaseAndCount")
                 .withInputAdded(Port.floatPort("number", 0));
         Node net = Node.ROOT
-                .withChildAdded(toNumbers1Node)
+                .withChildAdded(makeNumbers1)
                 .withChildAdded(incNode)
-                .connect("toNumbers1", "inc", "number");
+                .connect("makeNumbers1", "inc", "number");
         context.renderChild(net, incNode);
         assertEquals(3, SideEffects.theCounter);
         Iterable<Object> results = context.getResults(incNode);
@@ -180,12 +180,12 @@ public class NodeContextTest {
      */
     @Test
     public void testListWithValue() {
-        Node toNumbers1Node = toNumbersNode.withName("toNumbers1").withInputValue("string", "1 2 3");
+        Node makeNumbers1 = makeNumbersNode.withName("makeNumbers1").withInputValue("string", "1 2 3");
         Node add1 = addNode.extend().withName("add1").withInputValue("v2", 100.0);
         Node net = Node.ROOT
-                .withChildAdded(toNumbers1Node)
+                .withChildAdded(makeNumbers1)
                 .withChildAdded(add1)
-                .connect("toNumbers1", "add1", "v1");
+                .connect("makeNumbers1", "add1", "v1");
         assertResultsEqual(context.renderChild(net, add1), 101.0, 102.0, 103.0);
     }
 

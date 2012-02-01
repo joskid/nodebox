@@ -6,8 +6,10 @@ import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.List;
 
 import static junit.framework.Assert.*;
@@ -20,6 +22,7 @@ public class NodeLibraryTest {
     private final Node child2;
     private final Node parent;
     private final Node root;
+    private final FunctionRepository functions;
 
     public NodeLibraryTest() {
         child1 = Node.ROOT.withName("child1");
@@ -29,6 +32,7 @@ public class NodeLibraryTest {
                 .withChildAdded(child2);
         root = Node.ROOT.withChildAdded(parent);
         library = NodeLibrary.create("test", root, FunctionRepository.of());
+        functions = FunctionRepository.of(MathFunctions.LIBRARY, ListFunctions.LIBRARY);
     }
 
     @Test
@@ -133,10 +137,10 @@ public class NodeLibraryTest {
     @Test
     public void testListStrategyPersistence() {
         // Default check.
-        Node toNumbers = Node.ROOT
-                .withName("toNumbers")
+        Node makeNumbers = Node.ROOT
+                .withName("makeNumbers")
                 .withListStrategy(Node.FLATTEN_STRATEGY)
-                .withFunction("math/toNumbers")
+                .withFunction("math/makeNumbers")
                 .withInputAdded(Port.stringPort("s", "1 2 3 4 5"));
         Node reverse = Node.ROOT
                 .withName("reverse")
@@ -144,17 +148,29 @@ public class NodeLibraryTest {
                 .withFunction("list/reverse")
                 .withInputAdded(Port.customPort("list", "list"));
         Node net = Node.ROOT
-                .withChildAdded(toNumbers)
+                .withChildAdded(makeNumbers)
                 .withChildAdded(reverse)
                 .withRenderedChild(reverse)
-                .connect("toNumbers", "reverse", "list");
-        FunctionRepository functions = FunctionRepository.of(MathFunctions.LIBRARY, ListFunctions.LIBRARY);
+                .connect("makeNumbers", "reverse", "list");
         NodeLibrary originalLibrary = NodeLibrary.create("test", net, functions);
         ImmutableList reversedNumbers = ImmutableList.of(5.0, 4.0, 3.0, 2.0, 1.0);
         assertResults(reversedNumbers, originalLibrary.getRoot(), functions);
         // Now save / load the library and check the output.
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
         assertResults(reversedNumbers, library.getRoot(), functions);
+    }
+    
+    @Test
+    public void testPrototypeOverridePersistence() {
+        NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
+        Node rangePrototype = mathLibrary.getRoot().getChild("range");
+        Node range1 = rangePrototype.extend().withName("range1").withInputValue("end", 5.0);
+        ImmutableList rangeList = ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0);
+        assertResults(rangeList, range1, functions);
+        NodeLibrary originalLibrary = NodeLibrary.create("test", range1, functions);
+        // Now save / load the library and check the output.
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of(mathLibrary));
+        assertResults(rangeList, library.getRoot(), functions);
     }
 
     private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {

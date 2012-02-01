@@ -11,14 +11,14 @@ import static org.junit.Assert.assertTrue;
 
 public class ConnectionTest {
 
-    public static final Node value42Node = Node.ROOT
-            .withName("value42")
-            .withFunction("math/value")
+    public static final Node number42Node = Node.ROOT
+            .withName("number42")
+            .withFunction("math/number")
             .withInputAdded(Port.floatPort("number", 42));
 
-    public static final Node value5Node = Node.ROOT
-            .withName("value5")
-            .withFunction("math/value")
+    public static final Node number5Node = Node.ROOT
+            .withName("number5")
+            .withFunction("math/number")
             .withInputAdded(Port.floatPort("number", 5));
 
     public static final Node addNode = Node.ROOT
@@ -28,8 +28,8 @@ public class ConnectionTest {
             .withInputAdded(Port.floatPort("v2", 0));
 
     public static final Node net = Node.ROOT
-            .withChildAdded(value42Node)
-            .withChildAdded(value5Node)
+            .withChildAdded(number42Node)
+            .withChildAdded(number5Node)
             .withChildAdded(addNode)
             .withRenderedChildName("add");
 
@@ -44,29 +44,29 @@ public class ConnectionTest {
     @Test
     public void testBasicConnection() {
         Node n = net;
-        assertFalse(n.isConnected("value42"));
+        assertFalse(n.isConnected("number42"));
         assertFalse(n.isConnected("add"));
-        n = n.connect("value42", "add", "v1");
-        assertTrue(n.isConnected("value42"));
+        n = n.connect("number42", "add", "v1");
+        assertTrue(n.isConnected("number42"));
         assertTrue(n.isConnected("add"));
-        n = n.connect("value5", "add", "v2");
-        assertTrue(n.isConnected("value5"));
+        n = n.connect("number5", "add", "v2");
+        assertTrue(n.isConnected("number5"));
     }
 
     @Test
     public void testReplaceConnection() {
         Node n = net;
-        n = n.connect("value42", "add", "v1");
-        assertTrue(n.isConnected("value42"));
-        n = n.connect("value5", "add", "v1");
-        assertFalse(n.isConnected("value42"));
+        n = n.connect("number42", "add", "v1");
+        assertTrue(n.isConnected("number42"));
+        n = n.connect("number5", "add", "v1");
+        assertFalse(n.isConnected("number42"));
     }
 
     @Test
     public void testExecute() {
         Node n = net
-                .connect("value42", "add", "v1")
-                .connect("value5", "add", "v2");
+                .connect("number42", "add", "v1")
+                .connect("number5", "add", "v2");
         context.renderNetwork(n);
         assertResultsEqual(context.getResults(addNode), 47.0);
     }
@@ -75,8 +75,8 @@ public class ConnectionTest {
     public void testCycles() {
         // Create an infinite loop.
         Node n = net
-                .connect("value42", "add", "v1")
-                .connect("add", "value42", "number");
+                .connect("number42", "add", "v1")
+                .connect("add", "number42", "number");
         // Infinite loops are allowed: each node is only executed once.
         context.renderNetwork(n);
         assertResultsEqual(context.getResults(addNode), 42.0);

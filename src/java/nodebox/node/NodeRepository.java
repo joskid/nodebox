@@ -3,6 +3,7 @@ package nodebox.node;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import java.io.File;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -12,6 +13,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Manages a set of node libraries.
  */
 public class NodeRepository {
+
+    public static final NodeRepository DEFAULT;
+
+    static {
+        NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
+        NodeLibrary listLibrary = NodeLibrary.load(new File("libraries/list/list.ndbx"), NodeRepository.of());
+        NodeLibrary colorLibrary = NodeLibrary.load(new File("libraries/color/color.ndbx"), NodeRepository.of());
+        NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
+        //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
+        DEFAULT = NodeRepository.of(mathLibrary, listLibrary, colorLibrary, corevectorLibrary);
+    }
 
     public static NodeRepository of() {
         return new NodeRepository(ImmutableMap.<String, NodeLibrary>of());
@@ -61,6 +73,20 @@ public class NodeRepository {
             builder.addAll(library.getRoot().getChildren());
         }
         return builder.build();
+    }
+
+    /**
+     * Find the given library that contains the given node.
+     * @param node The node to find.
+     * @return The NodeLibrary or null if the node could not be found.
+     */
+    public NodeLibrary nodeLibraryForNode(Node node) {
+        for (NodeLibrary library : libraryMap.values()) {
+            if (library.getRoot().hasChild(node)) {
+                return library;
+            }
+        }
+        return null;
     }
 
 }

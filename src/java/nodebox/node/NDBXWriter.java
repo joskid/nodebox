@@ -108,6 +108,22 @@ public class NDBXWriter {
     }
 
     /**
+     * Find the libraryname.nodename of the given node.
+     * Searches the list of default node repositories to find it.
+     *
+     * @param node The node to find.
+     * @return the node id, in the format libraryname.nodename.
+     */
+    private static String findNodeId(Node node) {
+        NodeLibrary library = NodeRepository.DEFAULT.nodeLibraryForNode(node);
+        if (library == null) {
+            return node.getName();
+        } else {
+            return String.format("%s.%s", library.getName(), node.getName());
+        }
+    }
+
+    /**
      * Write out the node.
      *
      * @param doc    the XML document
@@ -120,7 +136,7 @@ public class NDBXWriter {
 
         // Write prototype
         if (shouldWriteAttribute(node, Node.Attribute.PROTOTYPE) && node.getPrototype() != Node.ROOT)
-            el.setAttribute("prototype", node.getPrototype().getName());
+            el.setAttribute("prototype", findNodeId(node.getPrototype()));
 
         // Write name
         if (shouldWriteAttribute(node, Node.Attribute.NAME))

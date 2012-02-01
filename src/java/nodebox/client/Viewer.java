@@ -68,7 +68,7 @@ public class Viewer extends PCanvas implements OutputView, MouseListener, MouseM
             throw new RuntimeException(e);
         }
 
-        visualizers = ImmutableList.of(CanvasVisualizer.INSTANCE, GrobVisualizer.INSTANCE, PointVisualizer.INSTANCE);
+        visualizers = ImmutableList.of(CanvasVisualizer.INSTANCE, GrobVisualizer.INSTANCE, PointVisualizer.INSTANCE, ColorVisualizer.INSTANCE);
     }
 
     public Viewer(final NodeBoxDocument document) {

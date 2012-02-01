@@ -302,7 +302,26 @@ public final class Port {
     public Port withValue(Object value) {
         checkState(isStandardType(), "You can only change the value of a standard type.");
         checkArgument(correctValueForType(value), "Value '%s' is not correct for %s port.", value, getType());
-        return new Port(getName(), getType(), value);
+        return new Port(getName(), getType(), convertValue(getType(), value));
+    }
+
+    /**
+     * Convert integers to longs and floats to doubles. All other values are passed through as-is.
+     *
+     * @param type  The expcted type.
+     * @param value The original value.
+     * @return The converted value.
+     */
+    private Object convertValue(String type, Object value) {
+        if (value instanceof Integer) {
+            checkArgument(type.equals(TYPE_INT));
+            return (long) ((Integer) value);
+        } else if (value instanceof Float) {
+            checkArgument(type.equals(TYPE_FLOAT));
+            return (double) ((Float) value);
+        } else {
+            return value;
+        }
     }
 
     private void checkValueType() {
@@ -311,9 +330,9 @@ public final class Port {
 
     private boolean correctValueForType(Object value) {
         if (type.equals(TYPE_INT)) {
-            return value instanceof Long;
+            return value instanceof Long || value instanceof Integer;
         } else if (type.equals(TYPE_FLOAT)) {
-            return value instanceof Double;
+            return value instanceof Double || value instanceof Float;
         } else if (type.equals(TYPE_STRING)) {
             return value instanceof String;
         } else if (type.equals(TYPE_POINT)) {

@@ -21,6 +21,10 @@ public class Transform implements Cloneable {
         return t;
     }
 
+    public static Transform translated(Point t) {
+        return translated(t.x, t.y);
+    }
+
     public static Transform rotated(double degrees) {
         Transform t = new Transform();
         t.rotate(degrees);
@@ -43,6 +47,10 @@ public class Transform implements Cloneable {
         Transform t = new Transform();
         t.scale(sx, sy);
         return t;
+    }
+
+    public static Transform scaled(Point s) {
+        return scaled(s.x, s.y);
     }
 
     public static Transform skewed(double skew) {
@@ -74,6 +82,10 @@ public class Transform implements Cloneable {
     }
 
     //// Transform changes ////
+
+    public void translate(Point point) {
+        affineTransform.translate(point.x, point.y);
+    }
 
     public void translate(double tx, double ty) {
         affineTransform.translate(tx, ty);

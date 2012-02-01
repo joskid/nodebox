@@ -1,12 +1,14 @@
 package nodebox.function;
 
-import java.awt.*;
+import nodebox.graphics.Point;
+import nodebox.util.Geometry;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import nodebox.graphics.Point;
+
 /**
  * Basic math function library.
  */
@@ -15,53 +17,44 @@ public class MathFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class, "value", "range", "add", "subtract", "multiply","distance", "divide", "sqrt", "invert", "slowNumber", "toNumbers");
+        LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
+                "number",  "invert", "add", "subtract", "multiply", "divide", "sqrt",
+                "makeNumbers",
+                "range",
+                "radians", "degrees", "angle", "distance", "coordinates", "reflect",
+                "slowNumber");
     }
 
-    public static double value(double v) {
-        return v;
+    public static double number(double n) {
+        return n;
     }
 
-    public static double add(double a, double b) {
-        return a + b;
+    public static double add(double n1, double n2) {
+        return n1 + n2;
     }
 
-    public static double subtract(double a, double b) {
-        return a - b;
+    public static double subtract(double n1, double n2) {
+        return n1 - n2;
     }
 
-    public static double multiply(double a, double b) {
-        return a * b;
+    public static double multiply(double n1, double n2) {
+        return n1 * n2;
     }
 
-
-    public static double sqrt(double a) {
-        return Math.sqrt(a);
+    public static double sqrt(double n) {
+        return Math.sqrt(n);
     }
 
-    public static double divide(double a, double b) {
-        checkArgument(b != 0, "Divider cannot be zero.");
-        return a / b;
+    public static double divide(double n1, double n2) {
+        checkArgument(n2 != 0, "Divider cannot be zero.");
+        return n1 / n2;
     }
 
-    public static double distance(nodebox.graphics.Point p1, nodebox.graphics.Point p2) {
-        return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
+    public static double invert(double n) {
+        return -n;
     }
 
-    public static double invert(double v) {
-        return -v;
-    }
-
-    public static double slowNumber(double v) {
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {
-            return -999;
-        }
-        return v;
-    }
-
-    public static Iterable<Double> toNumbers(String s) {
+    public static Iterable<Double> makeNumbers(String s) {
         ArrayList<Double> numbers = new ArrayList<Double>();
         if (!s.isEmpty()) {
             for (String part : s.split(" ")) {
@@ -121,5 +114,57 @@ public class MathFunctions {
         }
     }
 
+    public static double radians(double degrees) {
+        return Geometry.radians(degrees);
+    }
+
+    public static double degrees(double radians) {
+        return Geometry.degrees(radians);
+    }
+
+    /**
+     * Calculate the angle between two points.
+     *
+     * @param p1 The first point.
+     * @param p2 The second point.
+     * @return The angle in radians.
+     */
+    public static double angle(Point p1, Point p2) {
+        return Geometry.angle(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    /**
+     * The distance between two points.
+     */
+    public static double distance(Point p1, Point p2) {
+        return Geometry.distance(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    /**
+     * The location of a point based on angle and distance.
+     */
+    public static Point coordinates(Point p, double distance, double angle) {
+        double x = p.x + Math.cos(radians(angle)) * distance;
+        double y = p.y + Math.sin(radians(angle)) * distance;
+        return new Point(x, y);
+    }
+
+    /**
+     * The reflection of a point through an origin point.
+     */
+    public static Point reflect(Point p1, Point p2, double distance, double angle) {
+        distance *= distance(p1, p2);
+        angle += angle(p1, p2);
+        return coordinates(p1, distance, angle);
+    }
+
+    public static double slowNumber(double n) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ignored) {
+            return -999;
+        }
+        return n;
+    }
 
 }

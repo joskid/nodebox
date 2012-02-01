@@ -1,6 +1,7 @@
 package nodebox.node;
 
 import com.google.common.collect.ImmutableList;
+import nodebox.client.PythonUtils;
 import nodebox.function.FunctionRepository;
 import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
@@ -25,6 +26,7 @@ public class NodeLibraryTest {
     private final FunctionRepository functions;
 
     public NodeLibraryTest() {
+        PythonUtils.initializePython();
         child1 = Node.ROOT.withName("child1");
         child2 = Node.ROOT.withName("child2");
         parent = Node.ROOT.withName("parent")

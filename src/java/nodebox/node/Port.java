@@ -13,6 +13,7 @@ public final class Port {
     public static final String TYPE_INT = "int";
     public static final String TYPE_FLOAT = "float";
     public static final String TYPE_STRING = "string";
+    public static final String TYPE_BOOLEAN = "boolean";
     public static final String TYPE_POINT = "point";
     public static final String TYPE_COLOR = "color";
 
@@ -31,14 +32,15 @@ public final class Port {
     public static final ImmutableSet<String> STANDARD_TYPES;
 
     static {
-        DEFAULT_VALUES = ImmutableMap.of(
-                TYPE_INT, 0L,
-                TYPE_FLOAT, 0.0,
-                TYPE_STRING, "",
-                TYPE_POINT, Point.ZERO,
-                TYPE_COLOR, Color.BLACK
-        );
-        STANDARD_TYPES = ImmutableSet.of(TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_POINT, TYPE_COLOR);
+        ImmutableMap.Builder<String, Object> b = ImmutableMap.builder();
+        b.put(TYPE_INT, 0L);
+        b.put(TYPE_FLOAT, 0.0);
+        b.put(TYPE_BOOLEAN, false);
+        b.put(TYPE_STRING, "");
+        b.put(TYPE_POINT, Point.ZERO);
+        b.put(TYPE_COLOR, Color.BLACK);
+        DEFAULT_VALUES = b.build();
+        STANDARD_TYPES = ImmutableSet.of(TYPE_INT, TYPE_FLOAT, TYPE_BOOLEAN, TYPE_STRING, TYPE_POINT, TYPE_COLOR);
     }
 
     private final String name;
@@ -55,6 +57,12 @@ public final class Port {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
         return new Port(name, TYPE_FLOAT, value);
+    }
+
+    public static Port booleanPort(String name, boolean value) {
+        checkNotNull(name, "Name cannot be null.");
+        checkNotNull(value, "Value cannot be null.");
+        return new Port(name, TYPE_BOOLEAN, value);
     }
 
     public static Port stringPort(String name, String value) {
@@ -118,6 +126,8 @@ public final class Port {
                     value = Double.valueOf(stringValue);
                 } else if (type.equals("string")) {
                     value = stringValue;
+                } else if (type.equals("boolean")) {
+                    value = Boolean.valueOf(stringValue);
                 } else if (type.equals("point")) {
                     value = Point.valueOf(stringValue);
                 } else if (type.equals("color")) {
@@ -224,6 +234,22 @@ public final class Port {
     }
 
     /**
+     * Return the value stored in the port as a boolean.
+     * <p/>
+     * If the port has a different type, false is returned.
+     *
+     * @return The value as a Float or 0f if the value cannot be converted.
+     */
+    public boolean booleanValue() {
+        checkValueType();
+        if (type.equals(TYPE_BOOLEAN)) {
+            return (Boolean) value;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Return the value stored in the port as a Port.
      * <p/>
      * If the port has a different type, Point.ZERO is returned.
@@ -281,6 +307,8 @@ public final class Port {
             return Widget.FLOAT;
         } else if (getType().equals(TYPE_STRING)) {
             return Widget.STRING;
+        } else if (getType().equals(TYPE_BOOLEAN)) {
+            return Widget.TOGGLE;
         } else if (getType().equals(TYPE_POINT)) {
             return Widget.POINT;
         } else if (getType().equals(TYPE_COLOR)) {
@@ -335,6 +363,8 @@ public final class Port {
             return value instanceof Double || value instanceof Float;
         } else if (type.equals(TYPE_STRING)) {
             return value instanceof String;
+        } else if (type.equals(TYPE_BOOLEAN)) {
+            return value instanceof Boolean;
         } else if (type.equals(TYPE_POINT)) {
             return value instanceof Point;
         } else if (type.equals(TYPE_COLOR)) {

@@ -34,14 +34,12 @@ public class ToggleControl extends AbstractPortControl {
 
     public void setValueForControl(Object v) {
         if (v == null) return;
-        int value = (Integer) v;
-        checkBox.setChecked(value == 1);
-        //checkBox.setSelected(value == 1);
+        boolean value = (Boolean) v;
+        checkBox.setChecked(value);
     }
 
     public void toggle() {
-        setPortValue(checkBox.isChecked() ? 1 : 0);
-
+        setPortValue(checkBox.isChecked());
     }
 
 }

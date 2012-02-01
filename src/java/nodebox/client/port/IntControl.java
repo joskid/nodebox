@@ -45,8 +45,13 @@ public class IntControl extends AbstractPortControl implements ChangeListener, A
     }
 
     public void setValueForControl(Object v) {
-        int value = (Integer) v;
-        draggable.setValue(value);
+        if (v instanceof Integer) {
+            draggable.setValue((Integer) v);
+        } else if (v instanceof Long) {
+            draggable.setValue((Long) v);
+        } else {
+            throw new IllegalArgumentException("This function only accept integers or longs, not " + v);
+        }
     }
 
     public void stateChanged(ChangeEvent e) {

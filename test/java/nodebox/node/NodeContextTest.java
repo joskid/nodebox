@@ -190,7 +190,7 @@ public class NodeContextTest {
     }
 
     @Test
-    public void testListPolicies() {
+    public void testShortestList() {
         Node net = Node.ROOT
                 .withChildAdded(threeNumbers)
                 .withChildAdded(fiveNumbers)
@@ -198,6 +198,20 @@ public class NodeContextTest {
                 .connect("threeNumbers", addNode.getName(), "v1")
                 .connect("fiveNumbers", addNode.getName(), "v2");
         assertResultsEqual(context.renderChild(net, addNode), 101.0, 202.0, 303.0);
+    }
+
+    @Test
+    public void testWrapInListStrategy() {
+        Node sum = Node.ROOT
+                .withName("sum")
+                .withFunction("math/sum")
+                .withListStrategy("wrap-in-list")
+                .withInputAdded(Port.floatPort("numbers", 0));
+        Node net = Node.ROOT
+                .withChildAdded(sum)
+                .withChildAdded(threeNumbers)
+                .connect("threeNumbers", sum.getName(), "numbers");
+        assertResultsEqual(context.renderChild(net, sum), 6.0);
     }
 
     @Test

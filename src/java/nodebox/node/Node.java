@@ -33,6 +33,7 @@ public final class Node {
     public static String MAP_STRATEGY = "map";
     public static String AS_IS_STRATEGY = "as-is";
     public static String FLATTEN_STRATEGY = "flatten";
+    public static String WRAP_IN_LIST_STRATEGY = "wrap-in-list";
 
     public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUT_TYPE, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
@@ -124,10 +125,8 @@ public final class Node {
     }
 
     public boolean isListAware() {
-        // HACK this is a quick way to port old code into the list strategy pattern.
-        // The "as-is" strategy, where lists are passed as-is, could be called "list-aware", so
-        // we check for that.
-        return listStrategy.equals(AS_IS_STRATEGY);
+        // The strategies where lists are passed in are "list-aware".
+        return listStrategy.equals(AS_IS_STRATEGY) || listStrategy.equals(WRAP_IN_LIST_STRATEGY);
     }
 
     public Point getPosition() {

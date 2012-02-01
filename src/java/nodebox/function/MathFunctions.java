@@ -1,5 +1,7 @@
 package nodebox.function;
 
+import com.google.common.collect.Iterables;
+import com.google.common.primitives.Doubles;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
@@ -19,6 +21,7 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt",
+                "sum",
                 "makeNumbers",
                 "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect",
@@ -52,6 +55,14 @@ public class MathFunctions {
 
     public static double invert(double n) {
         return -n;
+    }
+
+    public static double sum(Iterable<Double> numbers) {
+        double sum = 0;
+        for (Double d : numbers) {
+            sum += d;
+        }
+        return sum;
     }
 
     public static Iterable<Double> makeNumbers(String s) {

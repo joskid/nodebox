@@ -156,9 +156,13 @@ public class NodeContext {
      */
     private Iterable<Object> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
         List<Object> arguments = inputValuesToArguments(inputValues);
-        Object returnValues = invokeFunction(node, function, arguments);
-        checkState(returnValues instanceof Iterable, "Return value of list-aware function needs to be a List.");
-        return (Iterable<Object>) returnValues;
+        Object returnValue = invokeFunction(node, function, arguments);
+        if (node.getListStrategy().equals(Node.AS_IS_STRATEGY)) {
+        checkState(returnValue instanceof Iterable, "Return value of list-aware function needs to be a List.");
+        return (Iterable<Object>) returnValue;
+        } else {
+            return ImmutableList.of(returnValue);
+        }
     }
 
     private List<Object> inputValuesToArguments(List<ValueOrList> inputValues) {

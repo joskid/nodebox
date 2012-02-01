@@ -6,7 +6,8 @@
             <port name="red" type="float" />
             <port name="green" type="float" />
             <port name="blue" type="float" />
-            <port name="alpha" type="float" />
+            <port name="alpha" type="float" value="255.0" />
+            <port name="range" type="float" value="255.0" />
         </node>
     </node>
 </ndbx>

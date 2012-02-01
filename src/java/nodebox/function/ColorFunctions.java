@@ -10,8 +10,9 @@ public final class ColorFunctions {
         LIBRARY = JavaLibrary.ofClass("color", ColorFunctions.class, "rgb");
     }
 
-    public static Color rgb(double red, double green, double blue, double alpha) {
-        return new Color(red, green, blue, alpha);
+    public static Color rgb(double red, double green, double blue, double alpha, double range) {
+        range = Math.max(range, 1);
+        return new Color(red / range, green / range, blue / range, alpha / range);
     }
 
 }

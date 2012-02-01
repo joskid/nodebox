@@ -46,7 +46,7 @@
 
         <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580"
               prototype="filter" description="Connects all points in a path.">
-            <port type="int" name="closed" value="1"/>
+            <port type="boolean" name="closed" value="true"/>
         </node>
 
         <node function="corevector/copy" name="copy" image="copy.png" outputType="geometry" position="170,340"
@@ -74,16 +74,16 @@
               prototype="filter" description="Delete points or paths that lie within the bounding path.">
             <port type="geometry" name="bounding"/>
             <port type="string" name="scope" value="points"/>
-            <port type="string" name="operation" value="1"/>
+            <port type="boolean" name="delete_selected" value="true"/>
         </node>
 
         <node function="corevector/delete" name="delete" image="delete.png" outputType="geometry" position="170,580"
               prototype="filter" description="Delete points or paths that lie within the given bounds.">
-            <port type="string" name="scope" value="points"/>
-            <port type="string" name="operation" value="1"/>
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="100.0"/>
             <port type="float" name="height" value="100.0"/>
+            <port type="string" name="scope" value="points"/>
+            <port type="boolean" name="delete_selected" value="true"/>
         </node>
 
         <node function="corevector/distribute" name="distribute" image="distribute.png" outputType="geometry"
@@ -110,7 +110,7 @@
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="300.0"/>
             <port type="float" name="height" value="300.0"/>
-            <port type="int" name="keepProportions" value="1" label="Keep Proportions"/>
+            <port type="true" name="keep_proportions" value="true"/>
         </node>
 
         <node function="corevector/freehand" name="freehand" image="freehand.png" outputType="geometry"
@@ -195,7 +195,7 @@
               prototype="filter" description="Mirrors and copies the geometry across an invisible axis.">
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="angle" value="120.0"/>
-            <port type="int" name="keep_original" value="1" label="Keep Original"/>
+            <port type="boolean" name="keep_original" value="true"/>
         </node>
 
         <node function="corevector/resample" name="resample" image="resample.png" outputType="geometry"
@@ -230,7 +230,7 @@
             <port type="int" name="amount" value="20"/>
             <port type="float" name="dist" value="20.0" label="Distribution"/>
             <port type="float" name="start" value="0.0"/>
-            <port type="int" name="keepGeometry" value="1" label="Keep Geometry"/>
+            <port type="boolean" name="keep_geometry" value="true"/>
         </node>
 
         <node function="corevector/snap" name="snap" image="snap.png" outputType="geometry" position="410,500"
@@ -268,9 +268,9 @@
             <port type="string" name="font" value="Verdana"/>
             <port type="float" name="size" value="20.0"/>
             <port type="float" name="start" value="0.0"/>
-            <port type="int" name="loop" value="1"/>
+            <port type="boolean" name="loop" value="true"/>
             <port type="float" name="dy" value="2.0" label="Vertical Distance"/>
-            <port type="int" name="keepGeometry" value="1" label="Keep Geometry"/>
+            <port type="boolean" name="keep_geometry" value="true"/>
         </node>
 
         <node function="corevector/textpath" name="textpath" image="textpath.png" outputType="geometry"
@@ -318,17 +318,18 @@
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
-        <node function="corevector/wiggle_points" name="wiggle_points" image="wiggle.png" outputType="geometry" position="170,510"
+        <node function="corevector/wiggle_points" name="wiggle_points" image="wiggle.png" outputType="geometry"
+              position="170,510"
               prototype="filter" description="Shift points by a random amount.">
             <port type="point" name="offset" value="10,10" label="Offset"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
         <node name="wiggle_paths" position="170,510"
-              prototype="wiggle_points" description="Shift paths by a random amount." />
+              prototype="wiggle_points" description="Shift paths by a random amount."/>
 
         <node name="wiggle_contours" position="170,510"
-              prototype="wiggle_points" description="Shift contours by a random amount." />
+              prototype="wiggle_points" description="Shift contours by a random amount."/>
 
     </node>
 </ndbx>

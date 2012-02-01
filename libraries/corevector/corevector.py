@@ -1,9 +1,9 @@
 from math import pi, sin, cos, radians
-#from random import seed as _seed, uniform
+from random import seed as _seed, uniform
 
 from java.awt.geom import Arc2D
 
-from nodebox.graphics import Geometry, Path, Color, Transform, Text, Point, Rect
+from nodebox.graphics import Geometry, Path, Contour, Color, Transform, Text, Point, Rect
 from nodebox.util.Geometry import coordinates, angle, distance
 
 def align(shape, x, y, halign="center", valign="middle"):
@@ -122,26 +122,26 @@ def curve(path_data):
     if not path_data: return None
     return svg.path_from_string(path_data).asGeometry()
 
-def delete_bounding(shape, bounding, scope="points", delete_inside=True):
+def delete_bounding(shape, bounding, scope="points", delete_selected=True):
     """Delete points or paths that lie within the bounding path."""
-    if self.shape is None: return None
+    if shape is None: return None
     # We're going to reconstruct the entire geometry, 
     # leaving out the points we don't need.
-    if self.scope == "points":
+    if scope == "points":
         new_geo = Geometry()
-        for old_path in self.shape.paths:
+        for old_path in shape.paths:
             new_path = Path(old_path, False) # cloneContours = False
             for old_contour in old_path.contours:
                 new_contour = Contour()
                 for point in old_contour.points:
-                    if bounding.contains(point) == delete_inside:
+                    if bounding.contains(point) == delete_selected:
                         new_contour.addPoint(point.x, point.y)
                 new_path.add(new_contour)
             new_geo.add(new_path)    
         return new_geo
-    elif self.scope == "paths":
+    elif scope == "paths":
         new_geo = Geometry()
-        for old_path in self.shape.paths:
+        for old_path in shape.paths:
             selected = False
             # Paths are eagerly selected: 
             # Even if only one point is inside of the bounding volume 
@@ -149,14 +149,14 @@ def delete_bounding(shape, bounding, scope="points", delete_inside=True):
             for point in old_path.points:
                 if bounding.contains(point):
                     selected = True
-            if selected is op:
+            if selected is delete_selected:
                 new_geo.add(old_path.clone())
         return new_geo
 
-def delete(shape, position, width, height, scope="points", delete_inside=True):
+def delete(shape, position, width, height, scope="points", delete_selected=True):
     """Delete points or paths that lie within the given bounds."""
     bounding = Rect.centeredRect(position.x, position.y, width, height)
-    return delete_bounding(shape, bounding, scope, delete_inside)
+    return delete_bounding(shape, bounding, scope, delete_selected)
 
 # TODO distribute
 
@@ -235,13 +235,13 @@ def group(shapes):
     [g.extend(shape) for shape in shapes]
     return g
 
-def import_svg(file, centered=False, position=Point.ZERO):
+def import_svg(file_name, centered=False, position=Point.ZERO):
     """Import geometry from a SVG file."""
     # We defer loading the SVG library until we need it.
     # This makes creating a node faster.
     import svg
-    if not self.file: return None
-    f = file(self.file, 'r')
+    if not file_name: return None
+    f = file(file_name, 'r')
     s = f.read()
     f.close()
     g = Geometry()
@@ -336,9 +336,9 @@ def resample_by_amount(shape, points, per_contour=False):
     return shape.resampleByAmount(points, per_contour)
 
 def resample(shape, method, length, points, per_contour=False):
-    if self.method == 'length':
+    if method == 'length':
         return resample_by_length(shape, length)
-        return self.shape.resampleByLength(self.length)
+        return shape.resampleByLength(length)
     else:
         return resample_by_amount(shape, points, per_contour)
 

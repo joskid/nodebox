@@ -9,5 +9,12 @@
             <port name="alpha" type="float" value="255.0" />
             <port name="range" type="float" value="255.0" />
         </node>
+        <node description="Create an HSB color." function="color/hsb" name="hsb_color" position="20,100" outputType="color">
+            <port name="hue" type="float" />
+            <port name="saturation" type="float" />
+            <port name="brightness" type="float" />
+            <port name="alpha" type="float" value="255.0" />
+            <port name="range" type="float" value="255.0" />
+        </node>
     </node>
 </ndbx>

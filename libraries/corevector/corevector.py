@@ -90,6 +90,8 @@ def connect(shape, closed=True):
         p.lineto(point.x, point.y)
     if closed:
         p.close()
+    p.stroke = Color.BLACK
+    p.strokeWidth = 1.0
     return p.asGeometry()
 
 def copy(shape, copies, transform_order='tsr', translate=Point.ZERO, rotate=0, scale=Point.ZERO):

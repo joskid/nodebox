@@ -27,14 +27,6 @@
             <port type="float" name="start_angle" value="0.0"/>
             <port type="float" name="degrees" value="45.0"/>
             <port type="string" name="type" value="pie"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port type="float" name="strokeWidth" value="0.0"/>
-        </node>
-
-        <node function="corevector/code" name="code" image="code.png" outputType="geometry" position="90,10"
-              prototype="generator" description="Create geometry using NodeBox 1 code.">
-            <port type="int" name="seed" value="0"/>
         </node>
 
         <node function="corevector/color" name="color" image="color.png" outputType="geometry" position="250,340"
@@ -45,41 +37,30 @@
         </node>
 
         <node function="corevector/compound" name="compound" image="compound.png" outputType="geometry"
-              position="90,340" prototype="filter" description="Add, subtract or intersect geometry.">
+              position="90,340" prototype="generator" description="Add, subtract or intersect geometry.">
+            <port type="geometry" name="shape1"/>
+            <port type="geometry" name="shape2"/>
             <port type="string" name="function" value="united"/>
             <port type="int" name="invert_difference" value="0"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="0.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
         <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580"
               prototype="filter" description="Connects all points in a path.">
             <port type="int" name="closed" value="1"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="1.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
         <node function="corevector/copy" name="copy" image="copy.png" outputType="geometry" position="170,340"
               prototype="filter" description="Create multiple copies of a shape.">
             <port bounding="hard" type="int" name="copies" value="1" min="1.0"/>
             <port type="string" name="order" value="tsr"/>
-            <port type="float" name="tx" value="0.0" label="Translate X"/>
-            <port type="float" name="ty" value="0.0" label="Translate Y"/>
-            <port type="float" name="r" value="0.0" label="Rotate"/>
-            <port type="float" name="sx" value="0.0" label="Scale X"/>
-            <port type="float" name="sy" value="0.0" label="Scale Y"/>
-            <port type="int" name="stamp" value="0" label="Copy Stamping"/>
-            <port type="string" name="expr" value="" label="Expression"/>
+            <port type="point" name="translate" value="0,0" label="Translate"/>
+            <port type="float" name="rotate" value="0.0" label="Rotate"/>
+            <port type="point" name="scale" value="0,0" label="Scale"/>
         </node>
 
         <node function="corevector/curve" name="curve" image="curve.png" outputType="geometry" position="330,170"
               prototype="generator" description="Create an arbitrary curve or path">
             <port type="string" name="path" value=""/>
-            <port type="color" name="fill" value="#00000000"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="1.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
         <node function="corevector/datastamp" name="datastamp" image="csv.png" outputType="geometry" position="250,670"
@@ -88,8 +69,16 @@
             <port type="string" name="tableName" value="data" label="Table Name"/>
         </node>
 
+        <node function="corevector/delete_bounding" name="delete_bounding" image="delete_bounding.png"
+              outputType="geometry" position="180,590"
+              prototype="filter" description="Delete points or paths that lie within the bounding path.">
+            <port type="geometry" name="bounding"/>
+            <port type="string" name="scope" value="points"/>
+            <port type="string" name="operation" value="1"/>
+        </node>
+
         <node function="corevector/delete" name="delete" image="delete.png" outputType="geometry" position="170,580"
-              prototype="filter" description="Delete points or paths that lie within certain bounds.">
+              prototype="filter" description="Delete points or paths that lie within the given bounds.">
             <port type="string" name="scope" value="points"/>
             <port type="string" name="operation" value="1"/>
             <port type="point" name="position" value="0,0"/>
@@ -127,25 +116,28 @@
         <node function="corevector/freehand" name="freehand" image="freehand.png" outputType="geometry"
               position="410,170" prototype="generator" description="Freehand drawing.">
             <port type="string" name="path" value=""/>
-            <port type="color" name="fill" value="#00000000"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="1.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
-        <node function="corevector/geonet" name="geonet" image="geonet.png" outputType="geometry" position="10,10"
+        <node name="geonet" image="geonet.png" outputType="geometry" position="10,10"
               description="A network of geometry nodes.">
         </node>
 
         <node function="corevector/grid" name="grid" image="grid.png" outputType="geometry" position="170,90"
               prototype="generator" description="Create a grid of points." strategy="flatten">
-            <port type="float" name="width" value="300.0"/>
-            <port type="float" name="height" value="300.0"/>
             <port type="int" name="rows" value="10"/>
             <port type="int" name="columns" value="10"/>
+            <port type="float" name="width" value="300.0"/>
+            <port type="float" name="height" value="300.0"/>
             <port type="point" name="position" value="0,0"/>
         </node>
 
-        <node function="corevector/import" name="import" image="import.png" outputType="geometry" position="250,90"
+        <node function="corevector/group" name="group" image="group.png" outputType="geometry" position="90,420"
+              prototype="generator" description="Combine multiple geometries together." strategy="as-is">
+            <port type="geometry" name="shapes"/>
+        </node>
+
+        <node function="corevector/import_svg" name="import_svg" image="import.png" outputType="geometry"
+              position="250,90"
               prototype="generator" description="Import geometry from a SVG file.">
             <port type="string" name="file" value=""/>
             <port type="int" name="centered" value="0" label="Center on Canvas"/>
@@ -158,15 +150,12 @@
             <port type="point" name="point2" value="100,100"/>
         </node>
 
-        <node function="corevector/line_angle" name="line-angle" image="line-angle.png" outputType="geometry" position="180,180"
+        <node function="corevector/line_angle" name="line-angle" image="line-angle.png" outputType="geometry"
+              position="180,180"
               prototype="generator" description="Draw a line between a point and angle and distance.">
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="angle" value="0.0"/>
             <port type="float" name="distance" value="120.0"/>
-        </node>
-
-        <node function="corevector/merge" name="merge" image="merge.png" outputType="geometry" position="90,420"
-              prototype="generator" description="Combine multiple geometries together.">
         </node>
 
         <node function="corevector/null" name="null" image="null.png" outputType="geometry" position="170,420"
@@ -175,23 +164,27 @@
 
         <node function="corevector/place" name="place" image="place.png" outputType="geometry" position="250,420"
               prototype="filter" description="Place shapes on points of a template">
-            <port type="int" name="stamp" value="0" label="Copy Stamping"/>
-            <port type="string" name="expr" value="" label="Expression"/>
+            <port type="geometry" name="template"/>
         </node>
 
         <node function="corevector/polygon" name="polygon" image="polygon.png" outputType="geometry" position="250,170"
-              prototype="generator" description="Draw a polygon">
+              prototype="generator" description="Draw a polygon.">
             <port type="point" name="position" value="0,0"/>
             <port bounding="hard" type="float" name="radius" value="100.0" min="0.0"/>
             <port bounding="hard" type="int" name="sides" value="3" min="3.0"/>
             <port type="int" name="align" value="0"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="0.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
         <node function="corevector/rect" name="rect" image="rect.png" outputType="geometry" position="330,90"
-              prototype="generator" description="Create rectangles and rounded rectangles.">
+              prototype="generator" description="Create a rectangle.">
+            <port type="point" name="position" value="0,0"/>
+            <port type="float" name="width" value="100.0"/>
+            <port type="float" name="height" value="100.0"/>
+        </node>
+
+        <node function="corevector/rounded_rect" name="rounded_rect" image="rounded_rect.png" outputType="geometry"
+              position="340,100"
+              prototype="generator" description="Create a rounded rectangle.">
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="100.0"/>
             <port type="float" name="height" value="100.0"/>
@@ -202,7 +195,7 @@
               prototype="filter" description="Mirrors and copies the geometry across an invisible axis.">
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="angle" value="120.0"/>
-            <port type="int" name="keepOriginal" value="1" label="Keep Original"/>
+            <port type="int" name="keep_original" value="1" label="Keep Original"/>
         </node>
 
         <node function="corevector/resample" name="resample" image="resample.png" outputType="geometry"
@@ -213,19 +206,30 @@
             <port type="int" name="perContour" value="0" label="Per Contour"/>
         </node>
 
+        <node function="corevector/resample_by_length" name="resample_by_length" image="resample.png"
+              outputType="geometry"
+              position="330,420" prototype="filter" description="Distribute points along a shape.">
+            <port bounding="hard" type="float" name="length" value="10.0" min="1.0"/>
+        </node>
+
+        <node function="corevector/resample_by_amount" name="resample_by_amount" image="resample.png"
+              outputType="geometry"
+              position="330,420" prototype="filter" description="Distribute points along a shape.">
+            <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
+            <port type="int" name="perContour" value="0" label="Per Contour"/>
+        </node>
+
         <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="geometry" position="410,420"
-              prototype="filter" description="Generate points within the boundaries of a shape.">
+              prototype="filter" description="Generate points within the boundaries of a shape." strategy="flatten">
             <port bounding="hard" type="int" name="amount" value="20" min="0.0"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
-        <node function="corevector/shapeonpath" name="shapeonpath" image="shapeonpath.png" outputType="geometry"
+        <node function="corevector/shape_on_path" name="shape_on_path" image="shape_on_path.png" outputType="geometry"
               position="90,670" prototype="filter" description="Copies shapes on a path.">
             <port type="int" name="amount" value="20"/>
             <port type="float" name="dist" value="20.0" label="Distribution"/>
             <port type="float" name="start" value="0.0"/>
-            <port type="int" name="stamp" value="0" label="Copy Stamping"/>
-            <port type="string" name="expr" value="=" label="Expression"/>
             <port type="int" name="keepGeometry" value="1" label="Keep Geometry"/>
         </node>
 
@@ -254,11 +258,11 @@
         </node>
 
         <node function="corevector/switch" name="switch" image="switch.png" outputType="geometry" position="330,580"
-              prototype="merge" description="Switches between multiple inputs.">
-            <port type="int" name="select" value="0"/>
+              prototype="group" description="Switches between multiple inputs." strategy="as-is">
+            <port type="int" name="index" value="0"/>
         </node>
 
-        <node function="corevector/textonpath" name="textonpath" image="txtonpath.png" outputType="geometry"
+        <node function="corevector/text_on_path" name="text_on_path" image="txtonpath.png" outputType="geometry"
               position="170,670" prototype="filter" description="Text following a path">
             <port type="string" name="text" value="text following a path"/>
             <port type="string" name="font" value="Verdana"/>
@@ -266,45 +270,65 @@
             <port type="float" name="start" value="0.0"/>
             <port type="int" name="loop" value="1"/>
             <port type="float" name="dy" value="2.0" label="Vertical Distance"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="0.0" label="Stroke Width" bounding="hard" type="float"/>
             <port type="int" name="keepGeometry" value="1" label="Keep Geometry"/>
         </node>
 
         <node function="corevector/textpath" name="textpath" image="textpath.png" outputType="geometry"
               position="90,170" prototype="generator" description="Create a path out of text.">
             <port type="string" name="text" value="hello"/>
-            <port type="string" name="font" value="Verdana"/>
-            <port type="float" name="size" value="24.0"/>
+            <port type="string" name="font_name" value="Verdana"/>
+            <port type="float" name="font_size" value="24.0"/>
             <port type="string" name="align" value="CENTER"/>
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="0.0"/>
             <port type="float" name="height" value="0.0"/>
-            <port type="color" name="fill" value="#000000ff"/>
-            <port type="color" name="stroke" value="#000000ff"/>
-            <port name="strokeWidth" min="0.0" value="0.0" label="Stroke Width" bounding="hard" type="float"/>
         </node>
 
         <node function="corevector/transform" name="transform" image="transform.png" outputType="geometry"
               position="90,500" prototype="filter"
               description="Transforms the location, rotation and scale of a shape.">
             <port type="string" name="order" value="trs"/>
-            <port type="float" name="tx" value="0.0" label="Translate X"/>
-            <port type="float" name="ty" value="0.0" label="Translate Y"/>
-            <port type="float" name="r" value="0.0" label="Rotate"/>
-            <port type="float" name="sx" value="100.0" label="Scale X"/>
-            <port type="float" name="sy" value="100.0" label="Scale Y"/>
+            <port type="point" name="translate" value="0,0" label="Translate"/>
+            <port type="float" name="angle" value="0.0" label="Rotation"/>
+            <port type="point" name="scale" value="100,100" label="Scale"/>
+        </node>
+
+        <node function="corevector/translate" name="translate" image="translate.png" outputType="geometry"
+              position="100,500" prototype="filter"
+              description="Move the shape, changing its position.">
+            <port type="point" name="translate" value="0,0" label="Translate"/>
+        </node>
+
+        <node function="corevector/rotate" name="rotate" image="rotate.png" outputType="geometry"
+              position="100,510" prototype="filter"
+              description="Rotate the shape according to the given angle.">
+            <port type="float" name="angle" value="0.0" label="Rotation"/>
+        </node>
+
+        <node function="corevector/scale" name="scale" image="scale.png" outputType="geometry"
+              position="100,520" prototype="filter"
+              description="Change the size of the shape by scaling it.">
+            <port type="point" name="scale" value="100,100" label="Scale"/>
         </node>
 
         <node function="corevector/wiggle" name="wiggle" image="wiggle.png" outputType="geometry" position="170,500"
               prototype="filter" description="Shift points by a random amount.">
             <port type="string" name="scope" value="points"/>
-            <port type="float" name="wx" value="30.0" label="Wiggle X"/>
-            <port type="float" name="wy" value="30.0" label="Wiggle Y"/>
+            <port type="point" name="offset" value="10,10" label="Offset"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
+        <node function="corevector/wiggle_points" name="wiggle_points" image="wiggle.png" outputType="geometry" position="170,510"
+              prototype="filter" description="Shift points by a random amount.">
+            <port type="point" name="offset" value="10,10" label="Offset"/>
+            <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
+        </node>
+
+        <node name="wiggle_paths" position="170,510"
+              prototype="wiggle_points" description="Shift paths by a random amount." />
+
+        <node name="wiggle_contours" position="170,510"
+              prototype="wiggle_points" description="Shift contours by a random amount." />
 
     </node>
 </ndbx>

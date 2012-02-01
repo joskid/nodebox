@@ -1,10 +1,7 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
-import nodebox.function.FunctionRepository;
-import nodebox.function.ListFunctions;
-import nodebox.function.MathFunctions;
-import nodebox.function.PythonLibrary;
+import nodebox.function.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -83,6 +80,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final FunctionRepository THE_FUNCTION_REPOSITORY = FunctionRepository.of(
             ListFunctions.LIBRARY,
             MathFunctions.LIBRARY,
+            ColorFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
  
     public NodeBoxDocument() {
@@ -130,7 +128,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     public NodeBoxDocument(File file) throws RuntimeException {
-        this(NodeLibrary.load(file, NodeRepository.of()));
+        this(NodeLibrary.load(file, Application.getInstance().getRepository()));
         lastFilePath = file.getParentFile().getAbsolutePath();
         setDocumentFile(file);
     }

@@ -36,8 +36,7 @@ public final class Color implements Cloneable {
     public static final Color WHITE = new Color(1);
 
     private final double r, g, b, a;
-    private double h, s, v;
-    private boolean hasHSB = false;
+    private final double h, s, v;
 
     public static double clamp(double v) {
         return Math.max(0.0, Math.min(1.0, v));
@@ -127,32 +126,35 @@ public final class Color implements Cloneable {
      * @param m the specified color mode.
      */
     public Color(double x, double y, double z, double a, Mode m) {
-        checkArgument(m == Mode.RGB, "HSB / CMYK not supported");
-        this.r = clamp(x);
-        this.g = clamp(y);
-        this.b = clamp(z);
-        this.a = clamp(a);
-//
-//        switch (m) {
-//            case RGB:
-//                this.r = clamp(x);
-//                this.g = clamp(y);
-//                this.b = clamp(z);
-//                this.a = clamp(a);
-//                updateHSB();
-//                updateCMYK();
-//                break;
-//            case HSB:
-//                this.h = clamp(x);
-//                this.s = clamp(y);
-//                this.v = clamp(z);
-//                this.a = clamp(a);
-//                updateRGB();
-//                updateCMYK();
-//                break;
-//            case CMYK:
-//                throw new RuntimeException("CMYK color mode is not implemented yet.");
-//        }
+        checkArgument(m != Mode.CMYK, "CMYK not supported");
+
+        switch (m) {
+            case CMYK:
+                throw new RuntimeException("CMYK color mode is not implemented yet.");
+            case HSB:
+                this.h = clamp(x);
+                this.s = clamp(y);
+                this.v = clamp(z);
+                this.a = clamp(a);
+                double[] rgb = updateRGB();
+                this.r = rgb[0];
+                this.g = rgb[1];
+                this.b = rgb[2];
+                //updateCMYK();
+                break;
+            case RGB:
+            default:
+                this.r = clamp(x);
+                this.g = clamp(y);
+                this.b = clamp(z);
+                this.a = clamp(a);
+                double[] hsb = updateHSB();
+                this.h = hsb[0];
+                this.s = hsb[1];
+                this.v = hsb[2];
+                //updateCMYK();
+                break;
+        }
     }
 
     public Color(String colorName) {
@@ -168,8 +170,11 @@ public final class Color implements Cloneable {
         this.g = g255 / 255.0;
         this.b = b255 / 255.0;
         this.a = a255 / 255.0;
-        updateHSB();
-        updateCMYK();
+        double[] hsb = updateHSB();
+        this.h = hsb[0];
+        this.s = hsb[1];
+        this.v = hsb[2];
+        //updateCMYK();
     }
 
     /**
@@ -181,12 +186,7 @@ public final class Color implements Cloneable {
      * @param color the color object.
      */
     public Color(java.awt.Color color) {
-        this.r = color.getRed() / 255.0;
-        this.g = color.getGreen() / 255.0;
-        this.b = color.getBlue() / 255.0;
-        this.a = color.getAlpha() / 255.0;
-        updateHSB();
-        updateCMYK();
+        this(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, color.getAlpha() / 255.0);
     }
 
     /**
@@ -198,12 +198,7 @@ public final class Color implements Cloneable {
      * @param other the color object.
      */
     public Color(Color other) {
-        this.r = other.r;
-        this.g = other.g;
-        this.b = other.b;
-        this.a = other.a;
-        updateHSB();
-        updateCMYK();
+        this(other.r, other.g, other.b, other.a);
     }
 
     public double getRed() {
@@ -243,74 +238,65 @@ public final class Color implements Cloneable {
     }
 
     public double getHue() {
-        updateHSB();
         return h;
     }
 
     public double getH() {
-        updateHSB();
         return h;
     }
 
     public double getSaturation() {
-        updateHSB();
         return s;
     }
 
     public double getS() {
-        updateHSB();
         return s;
     }
 
     public double getBrightness() {
-        updateHSB();
         return v;
     }
 
     public double getV() {
-        updateHSB();
         return v;
     }
 
-//    private void updateRGB() {
-//        if (s == 0)
-//            this.r = this.g = this.b = this.v;
-//        else {
-//            double h = this.h;
-//            if (this.h == 1.0)
-//                h = 0.999998;
-//            double s = this.s;
-//            double v = this.v;
-//            double f, p, q, t;
-//            h = h / (60.0/360);
-//            int i = (int) Math.floor(h);
-//            f = h - i;
-//            p = v * (1 - s);
-//            q = v * (1 - s * f);
-//            t = v * (1 - s * (1 - f));
-//
-//            double rgb[];
-//            if (i == 0)
-//                rgb = new double[]{v, t, p};
-//            else if (i == 1)
-//                rgb = new double[]{q, v, p};
-//            else if (i == 2)
-//                rgb = new double[]{p, v, t};
-//            else if (i == 3)
-//                rgb = new double[]{p, q, v};
-//            else if (i == 4)
-//                rgb = new double[]{t, p, v};
-//            else
-//                rgb = new double[]{v, p, q};
-//
-//            this.r = rgb[0];
-//            this.g = rgb[1];
-//            this.b = rgb[2];
-//        }
-//    }
+    private double[] updateRGB() {
+        if (s == 0)
+            return new double[] { this.v, this.v, this.v };
+        else {
+            double h = this.h;
+            if (this.h == 1.0)
+                h = 0.999998;
+            double s = this.s;
+            double v = this.v;
+            double f, p, q, t;
+            h = h / (60.0/360);
+            int i = (int) Math.floor(h);
+            f = h - i;
+            p = v * (1 - s);
+            q = v * (1 - s * f);
+            t = v * (1 - s * (1 - f));
 
-    private void updateHSB() {
-        if (hasHSB) return;
+            double rgb[];
+            if (i == 0)
+                rgb = new double[]{v, t, p};
+            else if (i == 1)
+                rgb = new double[]{q, v, p};
+            else if (i == 2)
+                rgb = new double[]{p, v, t};
+            else if (i == 3)
+                rgb = new double[]{p, q, v};
+            else if (i == 4)
+                rgb = new double[]{t, p, v};
+            else
+                rgb = new double[]{v, p, q};
+
+            return new double[] {rgb[0], rgb[1], rgb[2]};
+        }
+    }
+
+    private double[] updateHSB() {
         double h = 0;
         double s = 0;
         double v = Math.max(Math.max(r, g), b);
@@ -332,10 +318,7 @@ public final class Color implements Cloneable {
         if (h < 0)
             h = h + 1;
 
-        this.h = h;
-        this.s = s;
-        this.v = v;
-        hasHSB = true;
+        return new double[] {h, s, v};
     }
 
     private void updateCMYK() {

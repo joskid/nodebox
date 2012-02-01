@@ -2,6 +2,28 @@ from math import pi, sin, cos, radians
 from nodebox.graphics import Geometry, Path, Color, Transform, Text, Point
 from nodebox.util.Geometry import coordinates, angle, distance
 
+def align(shape, x, y, halign="center", valign="middle"):
+    if shape is None: return None
+    new_shape = shape.clone()
+    if halign == "left":
+        dx = x - new_shape.bounds.x
+    elif halign == "right":
+        dx = x - new_shape.bounds.x - new_shape.bounds.width
+    elif halign == "center":
+        dx = x - new_shape.bounds.x - new_shape.bounds.width / 2
+    else:
+        dx = 0
+    if valign == "top":
+        dy = y - new_shape.bounds.y
+    elif valign == "bottom":
+        dy = y - new_shape.bounds.y - new_shape.bounds.height
+    elif valign == "middle":
+        dy = y - new_shape.bounds.y - new_shape.bounds.height / 2
+    else:
+        dy = 0
+    new_shape.translate(dx, dy)
+    return new_shape
+
 def color(shape, fill, stroke, strokeWidth):
     if shape is None: return None
     new_shape = shape.clone()
@@ -14,7 +36,14 @@ def color(shape, fill, stroke, strokeWidth):
             path.strokeColor = None
     return new_shape
     
-def line(position, distance, angle):
+def line(point1, point2):
+    p = Path()
+    p.line(point1.x, point1.y, point2.x, point2.y)
+    p.strokeColor = Color.BLACK
+    p.strokeWidth = 1
+    return p.asGeometry()
+
+def line_angle(position, distance, angle):
     p = Path()
     x1, y1 = coordinates(position.x, position.y, distance, angle)
     p.line(position.x, position.y, x1, y1)

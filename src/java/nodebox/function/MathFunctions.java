@@ -18,7 +18,7 @@ public class MathFunctions {
 
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
-                "number",  "invert", "add", "subtract", "multiply", "divide", "sqrt",
+                "number", "invert", "add", "subtract", "multiply", "divide", "sqrt",
                 "makeNumbers",
                 "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect",

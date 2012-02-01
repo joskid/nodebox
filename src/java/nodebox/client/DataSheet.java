@@ -1,7 +1,6 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
-import nodebox.ui.PaneView;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -92,7 +91,7 @@ public class DataSheet extends JPanel implements OutputView {
     }
 
     private final class DataTableModel extends AbstractTableModel {
-        
+
         private List<Object> outputValues = ImmutableList.of();
         private List dataTemplate = ImmutableList.of();
 
@@ -113,7 +112,7 @@ public class DataSheet extends JPanel implements OutputView {
             }
             fireTableChanged(new TableModelEvent(this, TableModelEvent.ALL_COLUMNS));
         }
-        
+
         private List seq(Object o) {
             // Inspect the first object.
             if (o instanceof Iterable) {
@@ -122,7 +121,7 @@ public class DataSheet extends JPanel implements OutputView {
                 return ImmutableList.of(o);
             }
         }
-        
+
         public int getRowCount() {
             return outputValues.size();
         }

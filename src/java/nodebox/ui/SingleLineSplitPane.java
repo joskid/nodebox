@@ -34,7 +34,7 @@ public class SingleLineSplitPane extends CustomSplitPane {
                         g.drawLine(cx, r.y, cx, r.height);
 
                     } else {
-                        int cy = r.y + r.height/ 2;
+                        int cy = r.y + r.height / 2;
                         g.drawLine(r.x, cy, r.width, cy);
                     }
                 }

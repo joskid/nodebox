@@ -1,7 +1,7 @@
 package nodebox.util;
 
-import nodebox.util.waves.*;
 import junit.framework.TestCase;
+import nodebox.util.waves.*;
 
 public class WavesTest extends TestCase {
     public void testConvertFromMinMax() {

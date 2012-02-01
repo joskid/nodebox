@@ -13,9 +13,9 @@ public abstract class GraphicsTestCase extends TestCase {
 
     protected void addRect(IGeometry g, double x, double y, double width, double height) {
         g.addPoint(x, y);
-        g.addPoint(x+width, y);
-        g.addPoint(x+width, y+height);
-        g.addPoint(x, y+height);
+        g.addPoint(x + width, y);
+        g.addPoint(x + width, y + height);
+        g.addPoint(x, y + height);
     }
 
 }

@@ -5,7 +5,7 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 public class PortTest {
-    
+
     @Test
     public void testParsedPort() {
         assertEquals(42, Port.parsedPort("myInt", "int", "42").intValue());
@@ -22,5 +22,5 @@ public class PortTest {
         assertEquals(0.0, Port.parsedPort("myInt", "float", null).floatValue());
         assertEquals("", Port.parsedPort("myInt", "string", null).stringValue());
     }
-    
+
 }

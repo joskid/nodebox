@@ -206,7 +206,7 @@ public class NodeContextTest {
                 .withChildAdded(threeNumbers)
                 .withChildAdded(cycle)
                 .connect("threeNumbers", "cycle", "list");
-        Iterable<Object> results =context.renderChild(net, cycle);
+        Iterable<Object> results = context.renderChild(net, cycle);
         // This list is infinite! Ask only the first ten numbers.
         List<Object> resultsList = ImmutableList.copyOf(Iterables.limit(results, 10));
         assertResultsEqual(resultsList, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0);

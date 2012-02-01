@@ -3,7 +3,7 @@ package nodebox.util;
 import static junit.framework.Assert.assertEquals;
 
 public class InfiniteListTest {
-    
+
     public void testBasic() {
         final String hello = "HELLO";
         InfiniteList<String> list = InfiniteList.of("hello");

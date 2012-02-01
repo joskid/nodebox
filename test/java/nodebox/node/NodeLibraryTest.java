@@ -10,9 +10,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static junit.framework.Assert.*;
-import static junit.framework.Assert.assertEquals;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class NodeLibraryTest {
@@ -130,7 +128,7 @@ public class NodeLibraryTest {
 
 
     /**
-     * Test if the NodeLibrary stores / loads the list strategy correctly. 
+     * Test if the NodeLibrary stores / loads the list strategy correctly.
      */
     @Test
     public void testListStrategyPersistence() {
@@ -158,7 +156,7 @@ public class NodeLibraryTest {
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
         assertResults(reversedNumbers, library.getRoot(), functions);
     }
-    
+
     private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
         Iterable<Object> values = context.renderNode(node);

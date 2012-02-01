@@ -226,7 +226,7 @@ public class Canvas extends AbstractTransformable {
 
     public BufferedImage asImage() {
         Rect bounds = getBounds();
-        BufferedImage img = new BufferedImage((int) Math.round(bounds.getWidth()), (int)Math.round(bounds.getHeight()), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage img = new BufferedImage((int) Math.round(bounds.getWidth()), (int) Math.round(bounds.getHeight()), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.translate(-bounds.getX(), -bounds.getY());

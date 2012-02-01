@@ -164,7 +164,7 @@ public class NodeLibrary {
         String renderedChildName = reader.getAttributeValue(null, "renderedChild");
         Node prototype = prototypeId == null ? Node.ROOT : lookupNode(prototypeId, parent, nodeRepository);
         if (prototype == null) {
-            throw new XMLStreamException("Prototype " + prototypeId +  " could not be found.", reader.getLocation());
+            throw new XMLStreamException("Prototype " + prototypeId + " could not be found.", reader.getLocation());
         }
         Node node = prototype.extend();
 

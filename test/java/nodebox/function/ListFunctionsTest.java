@@ -7,7 +7,7 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 public class ListFunctionsTest {
-    
+
     @Test
     public void testFirst() {
         assertElements(ListFunctions.first(ImmutableList.of()));
@@ -46,7 +46,7 @@ public class ListFunctionsTest {
         assertElements(ListFunctions.combine(ImmutableList.of(1), ImmutableList.of()), 1);
         assertElements(ListFunctions.combine(ImmutableList.of(1), ImmutableList.of(2)), 1, 2);
     }
-    
+
     @Test
     public void testSubList() {
         assertElements(ListFunctions.subList(ImmutableList.of(1, 2, 3, 4), 0, 100), 1, 2, 3, 4);
@@ -95,8 +95,8 @@ public class ListFunctionsTest {
     private void assertElements(Iterable<?> iterable, Object... items) {
         assertEquals(ImmutableList.copyOf(iterable), ImmutableList.copyOf(items));
     }
-    
-    private void assertFirstElements(Iterable<?> iterable, Object ... items) {
+
+    private void assertFirstElements(Iterable<?> iterable, Object... items) {
         assertElements(Iterables.limit(iterable, items.length), items);
     }
 

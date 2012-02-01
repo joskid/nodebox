@@ -26,21 +26,21 @@ public class PaneHeader extends JPanel {
     public static PaneHeader withoutName(Pane pane) {
         return new PaneHeader(pane, false);
     }
-    
+
     public PaneHeader(Pane pane) {
         this(pane, true);
     }
-    
+
     public PaneHeader(Pane pane, boolean addNameLabel) {
         super(new FlowLayout(FlowLayout.LEADING, 5, 2));
         setPreferredSize(new Dimension(100, 25));
         setMinimumSize(new Dimension(100, 25));
         setMaximumSize(new Dimension(100, 25));
         if (addNameLabel) {
-        add(new PaneNameLabel(pane.getPaneName()));
-        add(new Divider());
+            add(new PaneNameLabel(pane.getPaneName()));
+            add(new Divider());
         }
-    }    
+    }
 
     @Override
     protected void paintComponent(Graphics g) {

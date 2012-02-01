@@ -2,8 +2,8 @@ package nodebox.client;
 
 import nodebox.node.ConnectionError;
 import nodebox.node.Port;
-import nodebox.ui.Theme;
 import nodebox.ui.ShadowLabel;
+import nodebox.ui.Theme;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

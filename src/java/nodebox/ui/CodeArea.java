@@ -1,7 +1,5 @@
 package nodebox.ui;
 
-import nodebox.util.StringUtils;
-
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.UndoableEditEvent;
@@ -381,7 +379,7 @@ public class CodeArea extends JEditorPane implements UndoableEditListener {
         }
     }
 
-      /**
+    /**
      * Given a position of a numeric character a text stream, finds and returns the left and right edges of the
      * entire number.
      *
@@ -428,5 +426,5 @@ public class CodeArea extends JEditorPane implements UndoableEditListener {
     public static boolean isNumeric(char c) {
         return c >= '0' && c <= '9';
     }
-    
+
 }

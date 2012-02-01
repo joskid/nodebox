@@ -2,7 +2,9 @@ package nodebox.graphics;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Base class for all geometric (vector) data.
@@ -781,8 +783,9 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
      * a smooth bezier path betweem them.
      * Curvature is only useful if the path has more than  three points.
      * </p>
-     * @param points     the points of which to construct the path from.
-     * @param curvature  the smoothness of the generated path (0: straight, 1: smooth)
+     *
+     * @param points    the points of which to construct the path from.
+     * @param curvature the smoothness of the generated path (0: straight, 1: smooth)
      * @return a new Path.
      */
     public static Path findPath(Point[] points, double curvature) {
@@ -809,7 +812,7 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
             return path;
         }
 
-        curvature = 4 + (1.0-curvature)*40;
+        curvature = 4 + (1.0 - curvature) * 40;
 
         HashMap<Integer, Double> dx, dy, bi, ax, ay;
         dx = new HashMap<Integer, Double>();
@@ -818,33 +821,33 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         ax = new HashMap<Integer, Double>();
         ay = new HashMap<Integer, Double>();
         dx.put(0, 0.0);
-        dx.put(points.length-1, 0.0);
+        dx.put(points.length - 1, 0.0);
         dy.put(0, 0.0);
-        dy.put(points.length-1, 0.0);
+        dy.put(points.length - 1, 0.0);
         bi.put(1, -0.25);
-        ax.put(1, (points[2].x-points[0].x-dx.get(0)) / 4);
-        ay.put(1, (points[2].y-points[0].y-dy.get(0)) / 4);
+        ax.put(1, (points[2].x - points[0].x - dx.get(0)) / 4);
+        ay.put(1, (points[2].y - points[0].y - dy.get(0)) / 4);
 
-        for (int i = 2; i < points.length-1; i++) {
-            bi.put(i, -1 / (curvature + bi.get(i-1)));
-            ax.put(i, -(points[i+1].x-points[i-1].x-ax.get(i-1)) * bi.get(i));
-            ay.put(i, -(points[i+1].y-points[i-1].y-ay.get(i-1)) * bi.get(i));
+        for (int i = 2; i < points.length - 1; i++) {
+            bi.put(i, -1 / (curvature + bi.get(i - 1)));
+            ax.put(i, -(points[i + 1].x - points[i - 1].x - ax.get(i - 1)) * bi.get(i));
+            ay.put(i, -(points[i + 1].y - points[i - 1].y - ay.get(i - 1)) * bi.get(i));
         }
 
         for (int i = points.length - 2; i >= 1; i--) {
-            dx.put(i, ax.get(i) + dx.get(i+1) * bi.get(i));
-            dy.put(i, ay.get(i) + dy.get(i+1) * bi.get(i));
+            dx.put(i, ax.get(i) + dx.get(i + 1) * bi.get(i));
+            dy.put(i, ay.get(i) + dy.get(i + 1) * bi.get(i));
         }
 
         Path path = new Path();
         path.moveto(points[0].x, points[0].y);
-        for (int i = 0; i < points.length-1; i++) {
+        for (int i = 0; i < points.length - 1; i++) {
             path.curveto(points[i].x + dx.get(i),
-                         points[i].y + dy.get(i),
-                         points[i+1].x - dx.get(i+1),
-                         points[i+1].y - dy.get(i+1),
-                         points[i+1].x,
-                         points[i+1].y);
+                    points[i].y + dy.get(i),
+                    points[i + 1].x - dx.get(i + 1),
+                    points[i + 1].y - dy.get(i + 1),
+                    points[i + 1].x,
+                    points[i + 1].y);
         }
 
         return path;

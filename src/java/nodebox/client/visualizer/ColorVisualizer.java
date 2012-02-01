@@ -39,7 +39,7 @@ public final class ColorVisualizer implements Visualizer {
         AffineTransform t = g.getTransform();
         int x = 0;
         int y = 0;
-        
+
         for (Object o : objects) {
             Color c = (Color) o;
             drawColor(g, c, x, y);
@@ -50,7 +50,6 @@ public final class ColorVisualizer implements Visualizer {
             }
         }
     }
-    
 
     private void drawColor(Graphics2D g, Color c, int x, int y) {
         g.setColor(java.awt.Color.WHITE);

@@ -87,20 +87,20 @@ public class NodeTest {
     }
 
     private Node newNodeWithPortAdded(Node node, Port port, String direction) {
-            return node.withInputAdded(port);
+        return node.withInputAdded(port);
     }
 
     private Node newNodeWithPortRemoved(Node node, String portName, String direction) {
-            return node.withInputRemoved(portName);
+        return node.withInputRemoved(portName);
     }
 
     private Port getNodePort(Node node, String portName, String direction) {
-            return node.getInput(portName);
-        
+        return node.getInput(portName);
+
     }
 
     private void assertNodePortsSizeEquals(int expected, Node node, String direction) {
-            assertEquals(expected, node.getInputs().size());
+        assertEquals(expected, node.getInputs().size());
     }
 
     public List<String> portNames(Node n) {

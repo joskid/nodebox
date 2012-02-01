@@ -18,9 +18,7 @@
  */
 package nodebox.client;
 
-import nodebox.function.FunctionRepository;
 import nodebox.node.NodeLibrary;
-import nodebox.node.NodeLibraryController;
 import nodebox.node.NodeRepository;
 import nodebox.ui.*;
 import nodebox.versioncheck.Host;

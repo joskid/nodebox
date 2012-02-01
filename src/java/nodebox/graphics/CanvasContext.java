@@ -279,5 +279,6 @@ public class CanvasContext extends AbstractGraphicsContext {
 
     protected void inheritFromContext(Image i) {
         TransformDelegate d = i.getTransformDelegate();
-        d.transform(i, transform, true);    }
+        d.transform(i, transform, true);
+    }
 }

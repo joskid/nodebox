@@ -56,7 +56,7 @@ public class FunctionRepository {
         }
         return n;
     }
-    
+
     public Collection<FunctionLibrary> getLibraries() {
         return libraryMap.values();
     }

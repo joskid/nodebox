@@ -14,7 +14,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class NodeRepository {
 
     public static NodeRepository of() {
-        return new NodeRepository(ImmutableMap.<String,NodeLibrary>of());
+        return new NodeRepository(ImmutableMap.<String, NodeLibrary>of());
     }
 
     public static NodeRepository of(NodeLibrary... libraries) {

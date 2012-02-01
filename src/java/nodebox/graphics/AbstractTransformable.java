@@ -5,7 +5,7 @@ public abstract class AbstractTransformable implements Grob {
     private TransformDelegate transformDelegate = DefaultTransformDelegate.getDefaultDelegate();
 
     private Transform transform;
-    
+
     //// Transformations ////
 
     public void translate(double tx, double ty) {
@@ -50,6 +50,6 @@ public abstract class AbstractTransformable implements Grob {
     public void setTransformDelegate(TransformDelegate d) {
         transformDelegate = d;
     }
-    
+
     public abstract Grob clone();
 }

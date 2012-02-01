@@ -94,6 +94,7 @@ public class SyntaxStyle {
 
     /**
      * Returns the font metrics for the styled font.
+     *
      * @param font The font.
      * @return The font's FontMetrics.
      */

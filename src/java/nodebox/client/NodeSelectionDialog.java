@@ -3,8 +3,8 @@ package nodebox.client;
 import nodebox.node.Node;
 import nodebox.node.NodeLibrary;
 import nodebox.node.NodeRepository;
-import nodebox.util.StringUtils;
 import nodebox.ui.Theme;
+import nodebox.util.StringUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

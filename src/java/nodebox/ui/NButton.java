@@ -203,7 +203,7 @@ public class NButton extends JComponent implements MouseListener {
             g2.setColor(Theme.TEXT_WARNING_COLOR);
         } else if (armed) {
             g2.setColor(Theme.TEXT_ARMED_COLOR);
-        } else if(!isEnabled()) {
+        } else if (!isEnabled()) {
             g2.setColor(Theme.TEXT_DISABLED_COLOR);
         } else {
             g2.setColor(Theme.TEXT_NORMAL_COLOR);

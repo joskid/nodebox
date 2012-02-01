@@ -6,8 +6,6 @@ import nodebox.node.Port;
 import nodebox.util.LoadException;
 import org.junit.Test;
 
-import java.util.List;
-
 import static junit.framework.Assert.*;
 import static nodebox.util.Assertions.assertResultsEqual;
 

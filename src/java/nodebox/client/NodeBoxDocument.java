@@ -82,7 +82,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             MathFunctions.LIBRARY,
             ColorFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
- 
+
     public NodeBoxDocument() {
         this(NodeLibrary.create("untitled", Node.ROOT.withName("root"), THE_FUNCTION_REPOSITORY));
     }

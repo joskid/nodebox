@@ -182,6 +182,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         networkView.updateNodes();
         networkView.singleSelect(newNode);
         portView.setActiveNode(newNode);
+
+        requestRender();
     }
 
 
@@ -606,7 +608,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * <p/>
      * If all checks pass, a renderNetwork request is made.
      */
-    public void requestRender() {
+    public synchronized void requestRender() {
         // If we're already rendering, request the next renderNetwork.
         if (isRendering.get()) {
             shouldRender.set(true);

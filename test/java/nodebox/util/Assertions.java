@@ -16,19 +16,19 @@ public final class Assertions {
     
     static private final FunctionRepository functionRepository = FunctionRepository.of(MathFunctions.LIBRARY, ListFunctions.LIBRARY);
 
-    public static void assertResultsEqual(Iterable<Object> result, Object... args) {
+    public static void assertResultsEqual(Iterable<?> result, Object... args) {
         assertEquals(ImmutableList.copyOf(args), ImmutableList.copyOf(result));
     }
     
     public static void assertResultsEqual(Node network, Node child, Object... args) {
         NodeContext context = new NodeContext(functionRepository);
-        Iterable<Object> values = context.renderChild(network, child);
+        Iterable<?> values = context.renderChild(network, child);
         assertResultsEqual(values, args);
     }
 
     public static void assertResultsEqual(Node node, Object... args) {
         NodeContext context = new NodeContext(functionRepository);
-        Iterable<Object> values = context.renderNode(node);
+        Iterable<?> values = context.renderNode(node);
         assertResultsEqual(values, args);
     }
 }

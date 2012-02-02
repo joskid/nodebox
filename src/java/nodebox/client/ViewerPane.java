@@ -78,7 +78,7 @@ public class ViewerPane extends Pane {
         viewer.setShowPointNumbers(pointNumbersCheck.isChecked());
     }
 
-    public void setOutputValues(Iterable<Object> objects) {
+    public void setOutputValues(Iterable<?> objects) {
         // Set the limit
         if (objects == null) {
             this.outputValuesLimit = ImmutableList.of();

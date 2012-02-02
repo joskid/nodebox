@@ -20,7 +20,7 @@ public class ClojureLibraryTest {
                 .withName("add")
                 .withOutputType("int")
                 .withFunction("clojure-math/add");
-        Iterable<Object> results = context.renderNode(addNode);
+        Iterable<?> results = context.renderNode(addNode);
         assertResultsEqual(results, 0L);
     }
 
@@ -33,7 +33,7 @@ public class ClojureLibraryTest {
                 .withInputAdded(Port.intPort("v1", 1))
                 .withInputAdded(Port.intPort("v2", 2))
                 .withInputAdded(Port.intPort("v3", 3));
-        Iterable<Object> results = context.renderNode(addNode);
+        Iterable<?> results = context.renderNode(addNode);
         assertResultsEqual(results, 6L);
     }
 

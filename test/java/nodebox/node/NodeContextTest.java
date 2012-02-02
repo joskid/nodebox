@@ -71,9 +71,9 @@ public class NodeContextTest {
     @Test
     public void testSingleOutput() {
         context.renderNode(valuesToPointNode);
-        Map<Node, Iterable<Object>> resultsMap = context.getResultsMap();
+        Map<Node, Iterable<?>> resultsMap = context.getResultsMap();
         assertEquals(1, resultsMap.size());
-        Iterable<Object> results = context.getResults(valuesToPointNode);
+        Iterable<?> results = context.getResults(valuesToPointNode);
         List resultsList = ImmutableList.copyOf(results);
         assertEquals(1, resultsList.size());
         assertResultsEqual(resultsList, Point.ZERO);
@@ -171,7 +171,7 @@ public class NodeContextTest {
                 .connect("makeNumbers1", "inc", "number");
         context.renderChild(net, incNode);
         assertEquals(3, SideEffects.theCounter);
-        Iterable<Object> results = context.getResults(incNode);
+        Iterable<?> results = context.getResults(incNode);
         assertResultsEqual(results, 2.0, 3.0, 4.0);
     }
 
@@ -220,7 +220,7 @@ public class NodeContextTest {
                 .withChildAdded(threeNumbers)
                 .withChildAdded(cycle)
                 .connect("threeNumbers", "cycle", "list");
-        Iterable<Object> results = context.renderChild(net, cycle);
+        Iterable<?> results = context.renderChild(net, cycle);
         // This list is infinite! Ask only the first ten numbers.
         List<Object> resultsList = ImmutableList.copyOf(Iterables.limit(results, 10));
         assertResultsEqual(resultsList, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0);

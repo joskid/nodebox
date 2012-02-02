@@ -13,8 +13,8 @@ public class NodeContext {
 
     private final FunctionRepository repository;
     private final double frame;
-    private final Map<Node, Iterable<Object>> outputValuesMap = new HashMap<Node, Iterable<Object>>();
-    private final Map<NodePort, Iterable<Object>> inputValuesMap = new HashMap<NodePort, Iterable<Object>>();
+    private final Map<Node, Iterable<?>> outputValuesMap = new HashMap<Node, Iterable<?>>();
+    private final Map<NodePort, Iterable<?>> inputValuesMap = new HashMap<NodePort, Iterable<?>>();
     private final Set<Node> renderedNodes = new HashSet<Node>();
 
     public NodeContext(FunctionRepository repository) {
@@ -27,11 +27,11 @@ public class NodeContext {
         this.frame = frame;
     }
 
-    public Map<Node, Iterable<Object>> getResultsMap() {
+    public Map<Node, Iterable<?>> getResultsMap() {
         return outputValuesMap;
     }
 
-    public Iterable<Object> getResults(Node node) {
+    public Iterable<?> getResults(Node node) {
         return outputValuesMap.get(node);
     }
 
@@ -56,7 +56,7 @@ public class NodeContext {
      * @return The list of rendered values.
      * @throws NodeRenderException If processing fails.
      */
-    public Iterable<Object> renderChild(Node network, Node child) throws NodeRenderException {
+    public Iterable<?> renderChild(Node network, Node child) throws NodeRenderException {
         checkNotNull(network);
         checkNotNull(child);
         checkArgument(network.hasChild(child));
@@ -71,7 +71,7 @@ public class NodeContext {
             if (c.getInputNode().equals(child.getName())) {
                 Node outputNode = network.getChild(c.getOutputNode());
                 renderChild(network, outputNode);
-                Iterable<Object> result = outputValuesMap.get(outputNode);
+                Iterable<?> result = outputValuesMap.get(outputNode);
                 // Check if the result is null. This can happen if there is a cycle in the network.
                 if (result != null) {
                     inputValuesMap.put(NodePort.of(child, c.getInputPort()), result);
@@ -93,7 +93,7 @@ public class NodeContext {
      * @return The list of rendered values.
      * @throws NodeRenderException If processing fails.
      */
-    public Iterable<Object> renderNode(Node node) throws NodeRenderException {
+    public Iterable<?> renderNode(Node node) throws NodeRenderException {
         checkNotNull(node);
         checkState(!outputValuesMap.containsKey(node), "Node %s already has a rendered value.", node);
 
@@ -119,7 +119,7 @@ public class NodeContext {
         }
 
         // Invoke the node function.
-        Iterable<Object> results;
+        Iterable<?> results;
         if (node.isListAware()) {
             results = renderListAwareNode(node, function, inputValues);
 
@@ -131,7 +131,7 @@ public class NodeContext {
             ImmutableList.Builder<Object> b = new ImmutableList.Builder<Object>();
             for (Object o : results) {
                 checkState(o instanceof Iterable);
-                b.addAll((Iterable<Object>) o);
+                b.addAll((Iterable<?>) o);
             }
             results = b.build();
         }
@@ -153,12 +153,12 @@ public class NodeContext {
      * @param inputValues A list of all values for the input ports.
      * @return The list of results.
      */
-    private Iterable<Object> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
+    private Iterable<?> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
         List<Object> arguments = inputValuesToArguments(inputValues);
         Object returnValue = invokeFunction(node, function, arguments);
         if (node.getListStrategy().equals(Node.AS_IS_STRATEGY)) {
         checkState(returnValue instanceof Iterable, "Return value of list-aware function needs to be a List.");
-        return (Iterable<Object>) returnValue;
+        return (Iterable<?>) returnValue;
         } else {
             return ImmutableList.of(returnValue);
         }
@@ -201,7 +201,6 @@ public class NodeContext {
 
         List<Object> results = new LinkedList<Object>();
         Map<ValueOrList, Iterator> iteratorMap = new HashMap<ValueOrList, Iterator>();
-        int listIndex = 0;
         boolean hasListArgument = false;
         processInputValues:
         while (true) {
@@ -227,13 +226,11 @@ public class NodeContext {
             results.add(invokeFunction(node, function, arguments));
             // If none of the arguments are lists, we're done.
             if (!hasListArgument) break;
-            // Otherwise increment the list index.
-            listIndex++;
         }
         return results;
     }
 
-    private Object invokeFunction(Node node, Function function, List<? extends Object> arguments) throws NodeRenderException {
+    private Object invokeFunction(Node node, Function function, List<?> arguments) throws NodeRenderException {
         try {
             return function.invoke(arguments.toArray());
         } catch (Exception e) {

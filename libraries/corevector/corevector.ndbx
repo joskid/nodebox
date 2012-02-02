@@ -325,11 +325,17 @@
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
+        <node description="Creates a point based on two numbers." function="corevector/valuesToPoint" name="Make Point" outputType="geometry"  position="410,300">
+            <port name="x" type="float" value="0.0"/>
+            <port name="y" type="float" value="0.0"/>
+        </node>
+
         <node name="wiggle_paths" position="170,510"
               prototype="wiggle_points" description="Shift paths by a random amount."/>
 
         <node name="wiggle_contours" position="170,510"
               prototype="wiggle_points" description="Shift contours by a random amount."/>
+
 
     </node>
 </ndbx>

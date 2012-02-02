@@ -46,47 +46,57 @@ public final class Port {
     private final String name;
     private final String type;
     private final Object value;
+    private final Double min;
+    private final Double max;
 
     public static Port intPort(String name, long value) {
+        return intPort(name, value, null, null);
+    }
+
+    public static Port intPort(String name, long value, Integer min, Integer max) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_INT, value);
+        return new Port(name, TYPE_INT, value, min != null ? min.doubleValue() : null, max != null ? max.doubleValue() : null);
     }
 
     public static Port floatPort(String name, double value) {
+        return floatPort(name, value, null, null);
+    }
+
+    public static Port floatPort(String name, double value, Double min, Double max) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_FLOAT, value);
+        return new Port(name, TYPE_FLOAT, value, min, max);
     }
 
     public static Port booleanPort(String name, boolean value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_BOOLEAN, value);
+        return new Port(name, TYPE_BOOLEAN, value, null, null);
     }
 
     public static Port stringPort(String name, String value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_STRING, value);
+        return new Port(name, TYPE_STRING, value, null, null);
     }
 
     public static Port pointPort(String name, Point value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_POINT, value);
+        return new Port(name, TYPE_POINT, value, null, null);
     }
 
     public static Port colorPort(String name, Color value) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_COLOR, value);
+        return new Port(name, TYPE_COLOR, value, null, null);
     }
 
     public static Port customPort(String name, String type) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
-        return new Port(name, type, null);
+        return new Port(name, type, null, null, null);
     }
 
     /**
@@ -100,7 +110,7 @@ public final class Port {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
         // If the type is not found in the default values, get() returns null, which is what we need for custom types.
-        return new Port(name, type, DEFAULT_VALUES.get(type));
+        return new Port(name, type, DEFAULT_VALUES.get(type), null, null);
     }
 
     /**
@@ -136,16 +146,18 @@ public final class Port {
                     throw new AssertionError("Unknown type " + type);
                 }
             }
-            return new Port(name, type, value);
+            return new Port(name, type, value, null, null);
         } else {
             return Port.customPort(name, type);
         }
     }
 
-    private Port(String name, String type, Object value) {
+    private Port(String name, String type, Object value, Double min, Double max) {
         this.name = name;
         this.type = type;
-        this.value = value;
+        this.min = min;
+        this.max = max;
+        this.value = clampValue(value);
     }
 
     public String getName() {
@@ -330,13 +342,13 @@ public final class Port {
     public Port withValue(Object value) {
         checkState(isStandardType(), "You can only change the value of a standard type.");
         checkArgument(correctValueForType(value), "Value '%s' is not correct for %s port.", value, getType());
-        return new Port(getName(), getType(), convertValue(getType(), value));
+        return new Port(getName(), getType(), clampValue(convertValue(getType(), value)), min, max);
     }
 
     /**
      * Convert integers to longs and floats to doubles. All other values are passed through as-is.
      *
-     * @param type  The expcted type.
+     * @param type  The expected type.
      * @param value The original value.
      * @return The converted value.
      */
@@ -349,6 +361,32 @@ public final class Port {
             return (double) ((Float) value);
         } else {
             return value;
+        }
+    }
+
+    /**
+     * Convert integers to longs and floats to doubles. All other values are passed through as-is.
+     *
+     * @param value The original value.
+     * @return The converted value.
+     */
+    private Object clampValue(Object value) {
+        if (getType().equals(TYPE_FLOAT)) {
+            return clamp((Double) value);
+        } else if (getType().equals(TYPE_INT)) {
+            return (long) clamp(((Long) value).doubleValue());
+        } else {
+            return value;
+        }
+    }
+
+    private double clamp(double v) {
+        if (min != null && v < min) {
+            return min;
+        } else if (max != null && v > max) {
+            return max;
+        } else {
+        return v;
         }
     }
 

@@ -7,7 +7,6 @@ import nodebox.function.ListFunctions;
 import nodebox.function.MathFunctions;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -175,6 +174,23 @@ public class NodeLibraryTest {
         assertResults(rangeList, library.getRoot(), functions);
     }
 
+    /**
+     * Test if ports can persist their min / max values.
+     */
+    @Test
+    public void testMinMaxPersistence() {
+
+        Node originalRoot = Node.ROOT.withName("root").withInputAdded(Port.floatPort("v", 5.0, 0.0, 10.0));
+
+        NodeLibrary originalLibrary = NodeLibrary.create("test", originalRoot);
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        Port v = library.getRoot().getInput("v");
+        assertEquals(0.0, v.getMinimumValue());
+        assertEquals(10.0, v.getMaximumValue());
+                
+
+    }
+
     private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {
         NodeContext context = new NodeContext(functionRepository);
         Iterable<Object> values = context.renderNode(node);
@@ -207,7 +223,6 @@ public class NodeLibraryTest {
         assertEquals(originalPort.getType(), port.getType());
         assertEquals(originalPort.getValue(), port.getValue());
     }
-
 
     private NodeLibrary libraryWithChildren(String libraryName, Node... children) {
         Node root = Node.ROOT.withName("root");

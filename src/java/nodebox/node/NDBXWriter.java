@@ -255,6 +255,10 @@ public class NDBXWriter {
         el.setAttribute("type", port.getType());
         if (port.isStandardType()) // TODO && direction == Port.Direction.INPUT
             el.setAttribute("value", port.stringValue());
+        if (port.getMinimumValue() != null)
+        el.setAttribute("min", String.valueOf(port.getMinimumValue()));
+        if (port.getMaximumValue() != null)
+            el.setAttribute("max", String.valueOf(port.getMaximumValue()));
         parent.appendChild(el);
     }
 

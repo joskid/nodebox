@@ -24,15 +24,12 @@ public class IntControl extends AbstractPortControl implements ChangeListener, A
         intFormat.setMaximumFractionDigits(0);
         draggable.setNumberFormat(intFormat);
         // Set bounding
-        // TODO add bounding
-//        if (port.getBoundingMethod() == Parameter.BoundingMethod.HARD) {
-//            Float minimumValue = port.getMinimumValue();
-//            if (minimumValue != null)
-//                draggable.setMinimumValue(minimumValue);
-//            Float maximumValue = port.getMaximumValue();
-//            if (maximumValue != null)
-//                draggable.setMaximumValue(maximumValue);
-//        }
+        Double minimumValue = port.getMinimumValue();
+        if (minimumValue != null)
+            draggable.setMinimumValue(minimumValue);
+        Double maximumValue = port.getMaximumValue();
+        if (maximumValue != null)
+            draggable.setMaximumValue(maximumValue);
         add(draggable);
         setPreferredSize(draggable.getPreferredSize());
         setValueForControl(port.getValue());

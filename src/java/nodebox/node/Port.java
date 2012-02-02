@@ -46,27 +46,27 @@ public final class Port {
     private final String name;
     private final String type;
     private final Object value;
-    private final Double min;
-    private final Double max;
+    private final Double minimumValue;
+    private final Double maximumValue;
 
     public static Port intPort(String name, long value) {
         return intPort(name, value, null, null);
     }
 
-    public static Port intPort(String name, long value, Integer min, Integer max) {
+    public static Port intPort(String name, long value, Integer minimumValue, Integer maximumValue) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_INT, value, min != null ? min.doubleValue() : null, max != null ? max.doubleValue() : null);
+        return new Port(name, TYPE_INT, value, minimumValue != null ? minimumValue.doubleValue() : null, maximumValue != null ? maximumValue.doubleValue() : null);
     }
 
     public static Port floatPort(String name, double value) {
         return floatPort(name, value, null, null);
     }
 
-    public static Port floatPort(String name, double value, Double min, Double max) {
+    public static Port floatPort(String name, double value, Double minimumValue, Double maximumValue) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_FLOAT, value, min, max);
+        return new Port(name, TYPE_FLOAT, value, minimumValue, maximumValue);
     }
 
     public static Port booleanPort(String name, boolean value) {
@@ -118,45 +118,68 @@ public final class Port {
      *
      * @param name        The port name.
      * @param type        The port type.
-     * @param stringValue The port value as a string, e.g. "32.5"
+     * @param stringValue The port value as a string, e.g. "32.5".
+     *
      * @return A new Port.
      */
+
     public static Port parsedPort(String name, String type, String stringValue) {
+        return parsedPort(name, type, stringValue, null, null);
+    }
+
+    /**
+     * Create a new Port with the given value as a string parsed to the correct format.
+     *
+     * @param name        The port name.
+     * @param type        The port type.
+     * @param valueString The port value as a string, e.g. "32.5".
+     * @param minString The minimum value as a string.
+     * @param maxString The maximum value as a string.
+*                    
+     * @return A new Port.
+     */
+    public static Port parsedPort(String name, String type, String valueString, String minString, String maxString) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
         if (STANDARD_TYPES.contains(type)) {
             Object value;
-            if (stringValue == null) {
+            if (valueString == null) {
                 value = DEFAULT_VALUES.get(type);
                 checkNotNull(value);
             } else {
                 if (type.equals("int")) {
-                    value = Long.valueOf(stringValue);
+                    value = Long.valueOf(valueString);
                 } else if (type.equals("float")) {
-                    value = Double.valueOf(stringValue);
+                    value = Double.valueOf(valueString);
                 } else if (type.equals("string")) {
-                    value = stringValue;
+                    value = valueString;
                 } else if (type.equals("boolean")) {
-                    value = Boolean.valueOf(stringValue);
+                    value = Boolean.valueOf(valueString);
                 } else if (type.equals("point")) {
-                    value = Point.valueOf(stringValue);
+                    value = Point.valueOf(valueString);
                 } else if (type.equals("color")) {
-                    value = Color.valueOf(stringValue);
+                    value = Color.valueOf(valueString);
                 } else {
                     throw new AssertionError("Unknown type " + type);
                 }
             }
-            return new Port(name, type, value, null, null);
+            Double minimumValue = null;
+            Double maximumValue = null;
+            if (minString != null)
+                minimumValue = Double.valueOf(minString);
+            if (maxString != null)
+                maximumValue = Double.valueOf(maxString);
+            return new Port(name, type, value, minimumValue, maximumValue);
         } else {
             return Port.customPort(name, type);
         }
     }
 
-    private Port(String name, String type, Object value, Double min, Double max) {
+    private Port(String name, String type, Object value, Double minimumValue, Double maximumValue) {
         this.name = name;
         this.type = type;
-        this.min = min;
-        this.max = max;
+        this.minimumValue = minimumValue;
+        this.maximumValue = maximumValue;
         this.value = clampValue(value);
     }
 
@@ -170,6 +193,14 @@ public final class Port {
 
     public String getType() {
         return type;
+    }
+
+    public Double getMinimumValue() {
+        return minimumValue;
+    }
+
+    public Double getMaximumValue() {
+        return maximumValue;
     }
 
     /**
@@ -342,7 +373,7 @@ public final class Port {
     public Port withValue(Object value) {
         checkState(isStandardType(), "You can only change the value of a standard type.");
         checkArgument(correctValueForType(value), "Value '%s' is not correct for %s port.", value, getType());
-        return new Port(getName(), getType(), clampValue(convertValue(getType(), value)), min, max);
+        return new Port(getName(), getType(), clampValue(convertValue(getType(), value)), minimumValue, maximumValue);
     }
 
     /**
@@ -381,10 +412,10 @@ public final class Port {
     }
 
     private double clamp(double v) {
-        if (min != null && v < min) {
-            return min;
-        } else if (max != null && v > max) {
-            return max;
+        if (minimumValue != null && v < minimumValue) {
+            return minimumValue;
+        } else if (maximumValue != null && v > maximumValue) {
+            return maximumValue;
         } else {
         return v;
         }

@@ -20,15 +20,12 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
         draggable.addChangeListener(this);
         setPreferredSize(draggable.getPreferredSize());
         // Set bounding
-        // TODO Fix bounding method
-//        if (port.getBoundingMethod() == Parameter.BoundingMethod.HARD) {
-//            Float minimumValue = port.getMinimumValue();
-//            if (minimumValue != null)
-//                draggable.setMinimumValue(minimumValue);
-//            Float maximumValue = port.getMaximumValue();
-//            if (maximumValue != null)
-//                draggable.setMaximumValue(maximumValue);
-//        }
+        Double minimumValue = port.getMinimumValue();
+        if (minimumValue != null)
+            draggable.setMinimumValue(minimumValue);
+        Double maximumValue = port.getMaximumValue();
+        if (maximumValue != null)
+            draggable.setMaximumValue(maximumValue);
         add(draggable);
         setValueForControl(port.getValue());
     }

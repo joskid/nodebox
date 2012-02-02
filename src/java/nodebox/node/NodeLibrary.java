@@ -234,7 +234,9 @@ public class NodeLibrary {
         String name = reader.getAttributeValue(null, "name");
         String type = reader.getAttributeValue(null, "type");
         String value = reader.getAttributeValue(null, "value");
-        return Port.parsedPort(name, type, value);
+        String min = reader.getAttributeValue(null, "min");
+        String max = reader.getAttributeValue(null, "max");
+        return Port.parsedPort(name, type, value, min, max);
     }
 
     private static Connection parseConnection(XMLStreamReader reader) throws XMLStreamException {

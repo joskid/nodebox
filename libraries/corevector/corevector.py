@@ -347,7 +347,7 @@ def resample(shape, method, length, points, per_contour=False):
 def scatter(shape, amount, seed):
     """Generate points within the boundaries of a shape."""
     if shape is None: return None
-    seed(seed)
+    _seed(seed)
     bx, by, bw, bh = list(shape.bounds)
     points = []
     for i in xrange(amount):

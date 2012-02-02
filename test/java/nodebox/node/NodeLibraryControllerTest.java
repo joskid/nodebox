@@ -60,4 +60,16 @@ public class NodeLibraryControllerTest {
         assertEquals(42, controller.getNode("/number").getInput("value").intValue());
     }
 
+    @Test
+    public void testConnectNodes() {
+        Node number1Node = Node.ROOT.withName("number1").withInputAdded(Port.floatPort("value", 20));
+        Node number2Node = Node.ROOT.withName("number2").withInputAdded(Port.floatPort("value", 5));
+        Node invertNode = Node.ROOT.withName("invert").withFunction("math/invert").withInputAdded(Port.floatPort("value", 0));
+        controller.addNode("/", number1Node);
+        controller.addNode("/", number2Node);
+        controller.addNode("/", invertNode);
+        controller.connect("/", number1Node, invertNode, invertNode.getInput("value"));
+        NodeLibrary library = controller.getNodeLibrary();
+    }
+
 }

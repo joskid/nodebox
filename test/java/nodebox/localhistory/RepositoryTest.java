@@ -1,19 +1,23 @@
 package nodebox.localhistory;
 
-import junit.framework.TestCase;
 import nodebox.util.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 
-public class RepositoryTest extends TestCase {
+import static junit.framework.Assert.*;
+
+public class RepositoryTest {
 
     private File tempDirectory;
     private File localHistoryDirectory;
     private File testDirectory;
     private LocalHistoryManager manager;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         // Create a temporary folder
         tempDirectory = File.createTempFile("localhistory", "");
         assertTrue(tempDirectory.delete());
@@ -24,9 +28,15 @@ public class RepositoryTest extends TestCase {
         assertTrue(testDirectory.mkdir());
     }
 
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(tempDirectory);
+    }
+
     /**
      * Basic sanity test to see if object hashing works.
      */
+    @Test
     public void testHashObject() {
         Repository r = manager.createRepository(testDirectory);
         String fileName = "greeting";
@@ -35,6 +45,7 @@ public class RepositoryTest extends TestCase {
         assertEquals("943a702d06f34599aee1f8da8ef9f7296031d699", r.hashObject("greeting"));
     }
 
+    @Test
     public void testCreate() {
         Repository r = manager.createRepository(testDirectory);
         // Creating the repository should have created the _history/testproject folder
@@ -55,6 +66,7 @@ public class RepositoryTest extends TestCase {
     /**
      * Test adding files to the project and see if they show up in the repository.
      */
+    @Test
     public void testAddFile() {
         Repository r = manager.createRepository(testDirectory);
         // Assert this repository is empty: no objects, and the head commit returns None.
@@ -81,11 +93,6 @@ public class RepositoryTest extends TestCase {
         assertEquals(commitId2, r.getHead().getId());
         // Assert the parent commit refers to our previous commit.
         assertEquals(commitId1, r.getHead().getParentId());
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        FileUtils.deleteDirectory(tempDirectory);
     }
 
     private void createProjectFile(String fileName, String contents) {

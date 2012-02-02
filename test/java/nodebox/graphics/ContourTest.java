@@ -1,9 +1,18 @@
 package nodebox.graphics;
 
+import org.junit.Test;
+
 import java.util.List;
 
-public class ContourTest extends GraphicsTestCase {
+import static junit.framework.Assert.*;
+import static nodebox.graphics.GraphicsTestUtils.addRect;
+import static nodebox.graphics.GraphicsTestUtils.assertPointEquals;
 
+public class ContourTest {
+
+    public static final double SIDE = GraphicsTestUtils.SIDE;
+
+    @Test
     public void testPointAt() {
         Contour c1 = new Contour();
         c1.addPoint(0, 0);
@@ -25,6 +34,7 @@ public class ContourTest extends GraphicsTestCase {
         //assertEquals(new Point(150, 0), c2.pointAt(1.5));
     }
 
+    @Test
     public void testPointAtEmptyPath() {
         Contour c = new Contour();
         try {
@@ -39,6 +49,7 @@ public class ContourTest extends GraphicsTestCase {
         assertPointEquals(33, 44, c.pointAt(-12));
     }
 
+    @Test
     public void testPointAtClosed() {
         Contour c = new Contour();
         c.addPoint(0, 0);
@@ -56,6 +67,7 @@ public class ContourTest extends GraphicsTestCase {
         assertPointEquals(0, 0, c.pointAt(1));
     }
 
+    @Test
     public void testPointAtMultiple() {
         Contour c1 = new Contour();
         c1.addPoint(0, 0);
@@ -70,12 +82,13 @@ public class ContourTest extends GraphicsTestCase {
         assertPointEquals(150, 0, c1.pointAt(1.5));
     }
 
+    @Test
     public void testLength() {
-        testLength(0, 0);
-        testLength(100, 200);
+        assertLength(0, 0);
+        assertLength(100, 200);
     }
 
-    private void testLength(double x, double y) {
+    private void assertLength(double x, double y) {
         Contour c = new Contour();
         c.addPoint(x, y);
         c.addPoint(x + SIDE, y);
@@ -86,7 +99,7 @@ public class ContourTest extends GraphicsTestCase {
         assertEquals(SIDE * 4, c.getLength());
     }
 
-
+    @Test
     public void testMakePoints() {
         Point[] points;
         // A contour that is "open", which means it doesn't describe the last point.
@@ -142,12 +155,14 @@ public class ContourTest extends GraphicsTestCase {
 //        assertEquals(new Point(25, 25), points[5]);
     }
 
+    @Test
     public void testMakePointsEmptyPath() {
         Contour c = new Contour();
         Point[] points = c.makePoints(10);
         assertEquals(0, points.length);
     }
 
+    @Test
     public void testResample() {
         Contour r;
         List<Point> points;
@@ -177,6 +192,7 @@ public class ContourTest extends GraphicsTestCase {
         assertPointEquals(0, SIDE, points.get(3));
     }
 
+    @Test
     public void testResampleByLength() {
         Contour r;
         Contour c1 = new Contour();
@@ -200,6 +216,7 @@ public class ContourTest extends GraphicsTestCase {
      * Contour uses a length cache to speed up pointAt, makePoints and resample operations.
      * Check if the cache is properly invalidated.
      */
+    @Test
     public void testCacheInvalidation() {
         Contour c = new Contour();
         c.addPoint(0, 0);
@@ -214,6 +231,7 @@ public class ContourTest extends GraphicsTestCase {
     /**
      * Check the bounds for an empty contour.
      */
+    @Test
     public void testEmptyBounds() {
         Contour c = new Contour();
         Rect r = c.getBounds();

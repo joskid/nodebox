@@ -41,4 +41,5 @@ public class ClojureLibraryTest {
     public void testNoVarAtEnd() {
         ClojureLibrary.loadScript("test/clojure/no-var-at-end.clj");
     }
+
 }

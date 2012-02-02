@@ -1,17 +1,27 @@
 package nodebox.graphics;
 
+import org.junit.Test;
+
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static nodebox.graphics.GraphicsTestUtils.addRect;
+import static nodebox.graphics.GraphicsTestUtils.assertPointEquals;
 
 /**
  * Use cases for geometric operations.
  */
-public class PathTest extends GraphicsTestCase {
+public class PathTest {
 
+    public static final double SIDE = GraphicsTestUtils.SIDE;
+
+    @Test
     public void testEmptyPath() {
         Path p = new Path();
         assertEquals(0, p.getPoints().size());
     }
 
+    @Test
     public void testMakeEllipse() {
         Path p = new Path();
         p.ellipse(10, 20, 30, 40);
@@ -44,6 +54,7 @@ public class PathTest extends GraphicsTestCase {
 //        assertEquals(new Rect(10, 0, 10, 40), result.getBounds());
 //    }
 
+    @Test
     public void testCustomAttributes() {
         // Add a velocity to each point of the path.
         Path p = new Path();
@@ -51,6 +62,7 @@ public class PathTest extends GraphicsTestCase {
         assertEquals(4, p.getPointCount());
     }
 
+    @Test
     public void testTransform() {
         Path p = new Path();
         p.rect(10, 20, 30, 40);
@@ -61,6 +73,7 @@ public class PathTest extends GraphicsTestCase {
     /**
      * How easy is it to convert the contours of a path to paths themselves?
      */
+    @Test
     public void testContoursToPaths() {
         // Create a path with two contours.
         Path p = new Path();
@@ -74,6 +87,7 @@ public class PathTest extends GraphicsTestCase {
         }
     }
 
+    @Test
     public void testLength() {
         testLength(0, 0);
         testLength(200, 300);

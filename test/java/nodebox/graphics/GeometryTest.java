@@ -1,9 +1,15 @@
 package nodebox.graphics;
 
+import org.junit.Test;
+
 import java.util.List;
 
-public class GeometryTest extends GraphicsTestCase {
+import static junit.framework.Assert.*;
+import static nodebox.graphics.GraphicsTestUtils.assertPointEquals;
 
+public class GeometryTest {
+
+    @Test
     public void testBounds() {
         Path r1 = new Path();
         r1.rect(10, 20, 30, 40);
@@ -12,6 +18,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertEquals(Rect.centeredRect(10, 20, 30, 40), g1.getBounds());
     }
 
+    @Test
     public void testTransformedBounds() {
         Path r1 = new Path();
         r1.rect(10, 20, 30, 40);
@@ -26,6 +33,7 @@ public class GeometryTest extends GraphicsTestCase {
     /**
      * Check the bounds for an empty path.
      */
+    @Test
     public void testEmptyBounds() {
         assertEquals(new Rect(), new Geometry().getBounds());
         Path p1 = new Path();
@@ -44,6 +52,7 @@ public class GeometryTest extends GraphicsTestCase {
     /**
      * Check if a contour is empty.
      */
+    @Test
     public void testIsEmpty() {
         Geometry g1 = new Geometry();
         assertTrue(g1.isEmpty());
@@ -53,6 +62,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertFalse(g2.isEmpty());
     }
 
+    @Test
     public void testTransformedElements() {
         Path r1 = new Path();
         r1.rect(10, 20, 30, 40);
@@ -70,6 +80,7 @@ public class GeometryTest extends GraphicsTestCase {
      * Geometry added to the group is not cloned. Test if you can still change
      * the original geometry.
      */
+    @Test
     public void testAdd() {
         Path p = new Path();
         p.rect(10, 20, 30, 40);
@@ -81,6 +92,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertEquals(Rect.centeredRect(15, 27, 30, 40), g.getBounds());
     }
 
+    @Test
     public void testTranslatePointsOfGroup() {
         Path p1 = new Path();
         Path p2 = new Path();
@@ -95,6 +107,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertEquals(Rect.centeredRect(30, 27, 60, 40), g2.getBounds());
     }
 
+    @Test
     public void testColors() {
         Path p1 = new Path();
         Path p2 = new Path();
@@ -112,6 +125,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertEquals(red, p2.getFillColor());
     }
 
+    @Test
     public void testMakePoints() {
         // Create a continuous line from 0,0 to 100,0.
         // The line is composed of one path from 0-50
@@ -145,6 +159,7 @@ public class GeometryTest extends GraphicsTestCase {
      * Group uses a path length cache to speed up pointAt, makePoints and resample operations.
      * Check if the cache is properly invalidated.
      */
+    @Test
     public void testCacheInvalidation() {
         Geometry g = new Geometry();
         assertEquals(0.0, g.getLength());
@@ -162,6 +177,7 @@ public class GeometryTest extends GraphicsTestCase {
         assertEquals(75.0, g.getLength());
     }
 
+    @Test
     public void testLength() {
         Geometry g = new Geometry();
         Path p1 = new Path();

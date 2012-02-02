@@ -1,11 +1,14 @@
 package nodebox.graphics;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class PointTest extends TestCase {
+import static junit.framework.Assert.*;
 
+public class PointTest {
+
+    @Test
     public void testIterator() {
         Point pt = new Point(22, 33);
         Iterator<Double> iterator = pt.iterator();
@@ -18,4 +21,5 @@ public class PointTest extends TestCase {
         } catch (Exception ignored) {
         }
     }
+
 }

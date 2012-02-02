@@ -1,11 +1,14 @@
 package nodebox.graphics;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class GraphicsContextTest extends TestCase {
+import static junit.framework.Assert.*;
 
+public class GraphicsContextTest {
+
+    @Test
     public void testSize() {
         CanvasContext ctx = new CanvasContext();
         ctx.size(200, 300);
@@ -15,6 +18,7 @@ public class GraphicsContextTest extends TestCase {
         assertEquals(300.0, ctx.getCanvas().getHeight());
     }
 
+    @Test
     public void testInheritFromContext() {
         CanvasContext ctx = new CanvasContext();
         Color c = new Color();
@@ -31,6 +35,7 @@ public class GraphicsContextTest extends TestCase {
         assertEquals(Text.Align.RIGHT, t.getAlign());
     }
 
+    @Test
     public void testGrid() {
         CanvasContext ctx = new CanvasContext();
         Iterator<Point> points = ctx.grid(2, 3, 3, 5);

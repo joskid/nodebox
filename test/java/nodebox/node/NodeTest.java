@@ -10,9 +10,6 @@ import static junit.framework.Assert.*;
 
 public class NodeTest {
 
-    static final private String DIRECTION_IN = "in";
-    static final private String DIRECTION_OUT = "out";
-
     @Test
     public void testPath() {
         assertEquals("/child", Node.path("/", Node.ROOT.withName("child")));
@@ -66,40 +63,38 @@ public class NodeTest {
 
     @Test
     public void testPorts() {
-        String direction = "";
         Port pX = Port.floatPort("x", 0);
         Port pY = Port.floatPort("y", 0);
         Node rectNode1 = Node.ROOT.withName("rect1").withInputAdded(pX);
-        assertNull(getNodePort(Node.ROOT, "x", direction));
-        assertSame(pX, getNodePort(rectNode1, "x", direction));
-        Node rectNode2 = newNodeWithPortAdded(rectNode1.withName("rect2"), pY, direction);
-        assertSame(pX, getNodePort(rectNode2, "x", direction));
-        assertSame(pY, getNodePort(rectNode2, "y", direction));
-        assertNull(getNodePort(rectNode1, "y", direction));
-        assertNodePortsSizeEquals(0, Node.ROOT, direction);
-        assertNodePortsSizeEquals(1, rectNode1, direction);
-        assertNodePortsSizeEquals(2, rectNode2, direction);
-        Node rectNode3 = newNodeWithPortRemoved(rectNode2.withName("rect3"), "x", direction);
-        assertNodePortsSizeEquals(2, rectNode2, direction);
-        assertNodePortsSizeEquals(1, rectNode3, direction);
-        assertNull(getNodePort(rectNode3, "x", direction));
-        assertSame(pY, getNodePort(rectNode3, "y", direction));
+        assertNull(getNodePort(Node.ROOT, "x"));
+        assertSame(pX, getNodePort(rectNode1, "x"));
+        Node rectNode2 = newNodeWithPortAdded(rectNode1.withName("rect2"), pY);
+        assertSame(pX, getNodePort(rectNode2, "x"));
+        assertSame(pY, getNodePort(rectNode2, "y"));
+        assertNull(getNodePort(rectNode1, "y"));
+        assertNodePortsSizeEquals(0, Node.ROOT);
+        assertNodePortsSizeEquals(1, rectNode1);
+        assertNodePortsSizeEquals(2, rectNode2);
+        Node rectNode3 = newNodeWithPortRemoved(rectNode2.withName("rect3"), "x");
+        assertNodePortsSizeEquals(2, rectNode2);
+        assertNodePortsSizeEquals(1, rectNode3);
+        assertNull(getNodePort(rectNode3, "x"));
+        assertSame(pY, getNodePort(rectNode3, "y"));
     }
 
-    private Node newNodeWithPortAdded(Node node, Port port, String direction) {
+    private Node newNodeWithPortAdded(Node node, Port port) {
         return node.withInputAdded(port);
     }
 
-    private Node newNodeWithPortRemoved(Node node, String portName, String direction) {
+    private Node newNodeWithPortRemoved(Node node, String portName) {
         return node.withInputRemoved(portName);
     }
 
-    private Port getNodePort(Node node, String portName, String direction) {
+    private Port getNodePort(Node node, String portName) {
         return node.getInput(portName);
-
     }
 
-    private void assertNodePortsSizeEquals(int expected, Node node, String direction) {
+    private void assertNodePortsSizeEquals(int expected, Node node) {
         assertEquals(expected, node.getInputs().size());
     }
 

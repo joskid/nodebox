@@ -1,11 +1,14 @@
 package nodebox.ui;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.File;
 
-public class ImageFormatTest extends TestCase {
+import static junit.framework.Assert.assertEquals;
 
+public class ImageFormatTest {
+
+    @Test
     public void testEnsureFileFormat() {
         assertEquals("test.pdf", ImageFormat.PDF.ensureFileExtension("test"));
         assertEquals("test.pdf", ImageFormat.PDF.ensureFileExtension("test.pdf"));

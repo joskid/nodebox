@@ -165,7 +165,6 @@ public class NodeLibraryTest {
         NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
         Node rangePrototype = mathLibrary.getRoot().getChild("range");
         Node range1 = rangePrototype.extend().withName("range1").withInputValue("end", 5.0);
-        ImmutableList rangeList = ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0);
         assertResultsEqual(range1, 0.0, 1.0, 2.0, 3.0, 4.0);
         NodeLibrary originalLibrary = NodeLibrary.create("test", range1, functions);
         // Now save / load the library and check the output.

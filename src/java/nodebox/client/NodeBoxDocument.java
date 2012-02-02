@@ -62,7 +62,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final AtomicBoolean isRendering = new AtomicBoolean(false);
     private final AtomicBoolean shouldRender = new AtomicBoolean(false);
     private final ExecutorService renderService;
-    private final AtomicReference<Future> currentRender = new AtomicReference<Future>();
+    private Future currentRender = null;
 
     // GUI components
     private final NodeBoxMenuBar menuBar;
@@ -625,7 +625,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      *
      * @param context The node context.
      */
-    public void startRendering(final NodeContext context) {
+    public synchronized void startRendering(final NodeContext context) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progressPanel.setInProgress(true);
@@ -636,9 +636,9 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     /**
      * Ask the document to stop the active rendering.
      */
-    public void stopRendering() {
-        if (currentRender.get() != null) {
-            currentRender.get().cancel(true);
+    public synchronized void stopRendering() {
+        if (currentRender!= null) {
+            currentRender.cancel(true);
         }
     }
 
@@ -649,7 +649,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @param context         The node context.
      * @param renderedNetwork The network that was rendered.
      */
-    public void finishedRendering(final NodeContext context, final Node renderedNetwork) {
+    public synchronized void finishedRendering(final NodeContext context, final Node renderedNetwork) {
+        currentRender = null;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progressPanel.setInProgress(false);
@@ -690,8 +691,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
         final NodeLibrary renderLibrary = getNodeLibrary();
         final Node renderNetwork = getActiveNetwork();
-        checkState(currentRender.get() == null);
-        currentRender.set(renderService.submit(new Runnable() {
+        checkState(currentRender == null, "Another render is still in progress.");
+        currentRender = renderService.submit(new Runnable() {
             public void run() {
                 final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
                 startRendering(context);
@@ -705,7 +706,6 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
                 // We finished rendering so set the renderNetwork flag off.
                 isRendering.set(false);
-                currentRender.set(null);
 
                 finishedRendering(context, renderNetwork);
 
@@ -718,7 +718,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                     });
                 }
             }
-        }));
+        });
     }
 
 //    public void setActiveNodeCode(String source) {
@@ -1123,11 +1123,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     public void deleteSelection() {
-        java.util.List<Node> selectedNodes = networkView.getSelectedNodes();
-        if (! selectedNodes.isEmpty())
-            removeNodes(selectedNodes);
-        else if (networkView.hasSelectedConnection())
-            networkView.deleteSelectedConnection();
+        removeNodes(networkView.getSelectedNodes());
     }
 
     /**

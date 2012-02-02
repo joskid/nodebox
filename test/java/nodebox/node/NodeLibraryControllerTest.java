@@ -64,17 +64,28 @@ public class NodeLibraryControllerTest {
     @Test
     public void testSimpleConnection() {
         assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
-        Node numberNode = Node.ROOT.withName("number").withFunction("math/number").withInputAdded(Port.floatPort("value", 20));
-        Node invertNode = Node.ROOT.withName("invert").withFunction("math/invert").withInputAdded(Port.floatPort("value", 0));
-        controller.addNode("/", numberNode);
-        controller.addNode("/", invertNode);
-        controller.connect("/", numberNode, invertNode, invertNode.getInput("value"));
+        createSimpleConnection();
         assertEquals(1, controller.getNodeLibrary().getRoot().getConnections().size());
         Connection c = controller.getNodeLibrary().getRoot().getConnections().get(0);
         assertEquals("invert", c.getInputNode());
         assertEquals("value", c.getInputPort());
         assertEquals("number", c.getOutputNode());
-        assertResultsEqual(controller.getNodeLibrary().getRoot(), invertNode, -20.0);
+        assertResultsEqual(controller.getNodeLibrary().getRoot(), controller.getNode("/invert"), -20.0);
     }
 
+    @Test
+    public void testSimpleDisconnect() {
+        createSimpleConnection();
+        Connection c = controller.getNodeLibrary().getRoot().getConnections().get(0);
+        controller.disconnect("/", c);
+        assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
+    }
+
+    private void createSimpleConnection() {
+        Node numberNode = Node.ROOT.withName("number").withFunction("math/number").withInputAdded(Port.floatPort("value", 20));
+        Node invertNode = Node.ROOT.withName("invert").withFunction("math/invert").withInputAdded(Port.floatPort("value", 0));
+        controller.addNode("/", numberNode);
+        controller.addNode("/", invertNode);
+        controller.connect("/", numberNode, invertNode, invertNode.getInput("value"));
+    }
 }

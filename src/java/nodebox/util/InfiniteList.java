@@ -119,15 +119,15 @@ public final class InfiniteList<E> implements List<E> {
         throw new UnsupportedOperationException();
     }
 
-    public ListIterator listIterator() {
+    public ListIterator<E> listIterator() {
         throw new UnsupportedOperationException();
     }
 
-    public ListIterator listIterator(int i) {
+    public ListIterator<E> listIterator(int i) {
         throw new UnsupportedOperationException();
     }
 
-    public List subList(int i, int i1) {
+    public List<E> subList(int i, int i1) {
         throw new UnsupportedOperationException();
     }
 }

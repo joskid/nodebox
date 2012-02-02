@@ -158,6 +158,13 @@
             <port type="float" name="distance" value="120.0"/>
         </node>
 
+        <node function="corevector/makePoint" name="Make Point" image="filter.png" outputType="geometry"
+              position="170,510"
+              prototype="generator" description="Creates a point based on two numbers.">
+            <port type="float" name="x" value="0.0" label="x"/>
+            <port type="float" name="y" value="0.0" label="y"/>
+        </node>
+
         <node function="corevector/null" name="null" image="null.png" outputType="geometry" position="170,420"
               prototype="filter" description="Does nothing.">
         </node>
@@ -323,11 +330,6 @@
               prototype="filter" description="Shift points by a random amount.">
             <port type="point" name="offset" value="10,10" label="Offset"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
-        </node>
-
-        <node description="Creates a point based on two numbers." function="corevector/valuesToPoint" name="Make Point" outputType="geometry"  position="410,300">
-            <port name="x" type="float" value="0.0"/>
-            <port name="y" type="float" value="0.0"/>
         </node>
 
         <node name="wiggle_paths" position="170,510"

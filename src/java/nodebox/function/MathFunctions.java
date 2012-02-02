@@ -22,7 +22,7 @@ public class MathFunctions {
                 "sum", "average",
                 "makeNumbers",
                 "range",
-                "radians", "degrees", "angle", "distance", "coordinates", "reflect",
+                "radians", "degrees", "angle", "distance", "coordinates", "reflect","sin","cos",
                 "slowNumber");
     }
 
@@ -182,6 +182,14 @@ public class MathFunctions {
         distance *= distance(p1, p2);
         angle += angle(p1, p2);
         return coordinates(p1, distance, angle);
+    }
+
+    public static double sin(double n) {
+        return Math.sin(n);
+    }
+
+    public static double cos(double n) {
+        return Math.cos(n);
     }
 
     public static double slowNumber(double n) {

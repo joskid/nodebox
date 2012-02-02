@@ -18,6 +18,9 @@
             <port name="distance" type="float" value="100.0"/>
             <port name="angle" type="float" value="0.0"/>
         </node>
+        <node description="Returns the trigonometric cosine of an angle" function="math/cos" name="cos" position="410,100">
+            <port name="value" type="float" value="0.0"/>
+        </node>
         <node description="Convert radians to degrees." function="math/degrees" name="degrees" position="120,300">
             <port name="radians" type="float" value="0.0"/>
         </node>
@@ -58,6 +61,9 @@
             <port name="point2" type="point" value="100.00,100.00"/>
             <port name="distance" type="float" value="100.0"/>
             <port name="angle" type="float" value="0.0"/>
+        </node>
+        <node description="Returns the trigonometric sine of an angle" function="math/sin" name="sin" position="410,100">
+            <port name="value" type="float" value="0.0"/>
         </node>
         <node description="Test node that takes 1 second to calculate a number." function="math/slowNumber" name="slow_number" position="20,400">
             <port name="value" type="float" value="0.0"/>

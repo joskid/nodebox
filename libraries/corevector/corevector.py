@@ -38,7 +38,7 @@ def arc(position, width, height, start_angle, degrees, arc_type):
     else:
         awt_type = Arc2D.OPEN
     p = Path(Arc2D.Double(position.x-width/2, position.y-height/2, width, height, -start_angle, -degrees, awt_type))
-    return p.asGeometry()
+    return p
 
 def color(shape, fill, stroke, strokeWidth):
     """Change the color of the input shape."""
@@ -71,11 +71,11 @@ def compound(shape1, shape2, function="united", invert_difference=False):
     if compound1 is None or compound2 is None: return None
     # Combine the two compound paths using the given function.
     if function == "united":
-        return compound1.united(compound2).asGeometry()
+        return compound1.united(compound2)
     elif f == "subtracted":
-        return compound1.subtracted(compound2).asGeometry()
+        return compound1.subtracted(compound2)
     elif f == "intersected":
-        return compound1.intersected(compound2).asGeometry()
+        return compound1.intersected(compound2)
     else:
         return None
 
@@ -92,7 +92,7 @@ def connect(shape, closed=True):
         p.close()
     p.stroke = Color.BLACK
     p.strokeWidth = 1.0
-    return p.asGeometry()
+    return p
 
 def copy(shape, copies, transform_order='tsr', translate=Point.ZERO, rotate=0, scale=Point.ZERO):
     """Create multiple copies of a shape."""
@@ -122,7 +122,7 @@ def copy(shape, copies, transform_order='tsr', translate=Point.ZERO, rotate=0, s
 def curve(path_data):
     import svg
     if not path_data: return None
-    return svg.path_from_string(path_data).asGeometry()
+    return svg.path_from_string(path_data)
 
 def delete_bounding(shape, bounding, scope="points", delete_selected=True):
     """Delete points or paths that lie within the bounding path."""
@@ -180,7 +180,7 @@ def edit(shape, point_deltas):
 def ellipse(position, width, height):
     p = Path()
     p.ellipse(position.x, position.y, width, height)
-    return p.asGeometry()
+    return p
 
 def fit(shape, position, width, height, keepProportions):
     """Fit a shape within bounds."""
@@ -263,7 +263,7 @@ def line(point1, point2):
     p.line(point1.x, point1.y, point2.x, point2.y)
     p.strokeColor = Color.BLACK
     p.strokeWidth = 1
-    return p.asGeometry()
+    return p
 
 def line_angle(position, distance, angle):
     p = Path()
@@ -271,7 +271,7 @@ def line_angle(position, distance, angle):
     p.line(position.x, position.y, x1, y1)
     p.strokeColor = Color.BLACK
     p.strokeWidth = 1
-    return p.asGeometry()
+    return p
 
 def null(shape):
     """Return the shape as-is."""
@@ -297,19 +297,19 @@ def polygon(position, radius, sides, align):
         else:
             p.lineto(x1, y1)
     p.close()
-    return p.asGeometry()
+    return p
 
 def rect(position, width, height):
     """Create a rectangle."""
     p = Path()
     p.rect(position.x, position.y, width, height)
-    return p.asGeometry()
+    return p
 
 def rounded_rect(position, width, height, roundness):
     """Create a rounded rectangle."""
     p = Path()
     p.roundedRect(position.x, position.y, width, height, roundness.x, roundness.y)
-    return p.asGeometry()
+    return p
 
 def reflect(shape, position, angle, keep_original):
     """Mirrors and copies the geometry across an invisible axis."""
@@ -388,7 +388,7 @@ def star(position, points, outer, inner):
         y = position.y + radius * cos(angle)
         p.lineto(x, y)
     p.close()
-    return p.asGeometry()
+    return p
 
 def switch(shapes, index=0):
     selected_shape = shapes.get(index, None)
@@ -411,7 +411,7 @@ def textpath(text, font_name="Verdana", font_size=24, align="CENTER", position=P
         t.align = Text.Align.valueOf(align)
     except:
         pass
-    return t.path.asGeometry()
+    return t.path
     
 def transform(shape, order, translate, angle, scale):
     """Transforms the location, rotation and scale of a shape."""

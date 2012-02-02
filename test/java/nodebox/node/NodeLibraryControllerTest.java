@@ -52,7 +52,15 @@ public class NodeLibraryControllerTest {
         assertSame(child, library.getNodeForPath("/parent/child"));
         assertNotSame("No longer the same since the new parent has an extra child.", parent, library.getNodeForPath("/parent"));
     }
-
+    
+    @Test
+    public void testCreateNode() {
+        Node proto = Node.ROOT.withName("protoNode");
+        controller.createNode("/", proto);
+        assertTrue(controller.getNodeLibrary().getRoot().hasChild("protoNode1"));
+        assertSame(proto, controller.getNodeLibrary().getNodeForPath("/protoNode1").getPrototype());
+    }
+    
     @Test
     public void testRemoveNode() {
         Node child = Node.ROOT.withName("child");
@@ -69,6 +77,37 @@ public class NodeLibraryControllerTest {
         assertEquals(10, controller.getNode("/number").getInput("value").intValue());
         controller.setPortValue("/number", "value", 42);
         assertEquals(42, controller.getNode("/number").getInput("value").intValue());
+    }
+
+    @Test
+    public void testUniqueNodeName() {
+        Node proto = Node.ROOT.withName("protoNode");
+        controller.createNode("/", proto);
+        controller.createNode("/", proto);
+        controller.createNode("/", proto);
+        Node rootNode = controller.getNodeLibrary().getRoot();
+        assertFalse(rootNode.hasChild("protoNode"));
+        assertTrue(rootNode.hasChild("protoNode1"));
+        assertTrue(rootNode.hasChild("protoNode2"));
+        assertTrue(rootNode.hasChild("protoNode3"));
+
+        controller.removeNode("/","protoNode2");
+        rootNode = controller.getNodeLibrary().getRoot();
+        assertFalse(rootNode.hasChild("protoNode2"));
+
+        controller.createNode("/", proto);
+        rootNode = controller.getNodeLibrary().getRoot();
+        assertTrue(rootNode.hasChild("protoNode2"));
+        assertFalse(rootNode.hasChild("protoNode4"));
+    }
+    
+    @Test
+    public void testSimpleRename() {
+        Node child = Node.ROOT.withName("child");
+        controller.addNode("/", child);
+        controller.renameNode("/", "/child", "n");
+        assertFalse(controller.getNodeLibrary().getRoot().hasChild("child"));
+        assertTrue(controller.getNodeLibrary().getRoot().hasChild("n"));
     }
 
     @Test

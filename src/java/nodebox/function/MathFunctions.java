@@ -19,7 +19,7 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum", "average",
+                "sum", "average","smallerThan","biggerThan","equals",
                 "makeNumbers",
                 "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect","sin","cos",
@@ -76,6 +76,19 @@ public class MathFunctions {
             counter++;
         }
         return sum/counter;
+    }
+
+    public static boolean smallerThan(double n1, double n2) {
+        return n1 < n2;
+    }
+
+    public static boolean biggerThan(double n1, double n2) {
+        return n1 > n2;
+    }
+
+
+    public static boolean equals(double n1, double n2) {
+        return n1 == n2;
     }
 
     public static Iterable<Double> makeNumbers(String s) {

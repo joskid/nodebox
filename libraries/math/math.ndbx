@@ -53,6 +53,10 @@
             <port name="value1" type="float" value="0.0"/>
             <port name="value2" type="float" value="0.0"/>
         </node>
+        <node description="Returns if a value is not equal to another value" function="math/notEquals" name="not equals" position="120,100">
+            <port name="value1" type="float" value="0.0"/>
+            <port name="value2" type="float" value="0.0"/>
+        </node>
         <node description="Set a number." function="math/number" name="number" position="20,10">
             <port name="value" type="float" value="0.0"/>
         </node>

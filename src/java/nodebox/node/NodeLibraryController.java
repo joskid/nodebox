@@ -90,7 +90,8 @@ public class NodeLibraryController {
     }
 
     public void disconnect(String parentPath, Connection connection) {
-
+        Node newParent = getNode(parentPath).disconnect(connection);
+        replaceNodeInPath(parentPath, newParent);
     }
 
     /**

@@ -561,6 +561,24 @@ public final class Node {
         return newNodeWithAttribute(Attribute.CONNECTIONS, b.build());
     }
 
+    /**
+     * Create a new node with the given connection removed.
+     *
+     * @param connection The connection to remove.
+     * @return A new Node.
+     */
+    public Node disconnect(Connection connection) {
+        checkArgument(getConnections().contains(connection), "Node %s does not have a connection %s", this, connection);
+        ImmutableList.Builder<Connection> b = ImmutableList.builder();
+        b.addAll(getConnections());
+        for (Connection c : getConnections()) {
+            if (c != connection) {
+                b.add(c);
+            }
+        }
+        return newNodeWithAttribute(Attribute.CONNECTIONS, b.build());
+    }
+
     public Node withConnectionAdded(Connection connection) {
         return connect(connection.getOutputNode(), connection.getInputNode(), connection.getInputPort());
     }

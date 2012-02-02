@@ -225,6 +225,20 @@ public class NodeContextTest {
         List<Object> resultsList = ImmutableList.copyOf(Iterables.limit(results, 10));
         assertResultsEqual(resultsList, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 3.0, 1.0);
     }
+    
+    @Test
+    public void testFilterStrategy() {
+        Node filterEven = Node.ROOT
+                .withName("filterEven")
+                .withFunction("math/even")
+                .withListStrategy(Node.FILTER_STRATEGY)
+                .withInputAdded(Port.floatPort("value", 0.0));
+        Node net = Node.ROOT
+                .withChildAdded(threeNumbers)
+                .withChildAdded(filterEven)
+                .connect("threeNumbers", "filterEven", "value");
+        assertResultsEqual(net, filterEven, 2.0);
+    }
 
     // TODO Check list-aware node with no inputs.
     // TODO Check list-aware node with no outputs.

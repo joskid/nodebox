@@ -19,10 +19,11 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum", "average","smallerThan","biggerThan","equals","notEquals",
+                "sum", "average", "smallerThan", "biggerThan", "equals", "notEquals",
+                "even", "odd",
                 "makeNumbers",
                 "range",
-                "radians", "degrees", "angle", "distance", "coordinates", "reflect","sin","cos",
+                "radians", "degrees", "angle", "distance", "coordinates", "reflect", "sin", "cos",
                 "slowNumber");
     }
 
@@ -42,6 +43,11 @@ public class MathFunctions {
         return n1 * n2;
     }
 
+    public static double divide(double n1, double n2) {
+        checkArgument(n2 != 0, "Divider cannot be zero.");
+        return n1 / n2;
+    }
+
     public static double sqrt(double n) {
         return Math.sqrt(n);
     }
@@ -51,9 +57,24 @@ public class MathFunctions {
         return Math.log(n);
     }
 
-    public static double divide(double n1, double n2) {
-        checkArgument(n2 != 0, "Divider cannot be zero.");
-        return n1 / n2;
+    /**
+     * Return true if the given number is even.
+     *
+     * @param n The number to check.
+     * @return true if even
+     */
+    public static boolean even(double n) {
+        return n % 2 == 0;
+    }
+
+    /**
+     * Return true if the given number is not even.
+     *
+     * @param n The number to check.
+     * @return true if odd
+     */
+    public static boolean odd(double n) {
+        return n % 2 != 0;
     }
 
     public static double invert(double n) {
@@ -75,7 +96,7 @@ public class MathFunctions {
             sum += d;
             counter++;
         }
-        return sum/counter;
+        return sum / counter;
     }
 
     public static boolean smallerThan(double n1, double n2) {

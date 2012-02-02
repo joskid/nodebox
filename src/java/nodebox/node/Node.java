@@ -32,10 +32,11 @@ public final class Node {
         }
     }
 
-    public static String MAP_STRATEGY = "map";
     public static String AS_IS_STRATEGY = "as-is";
-    public static String FLATTEN_STRATEGY = "flatten";
     public static String WRAP_IN_LIST_STRATEGY = "wrap-in-list";
+    public static String MAP_STRATEGY = "map";
+    public static String FLATTEN_STRATEGY = "flatten";
+    public static String FILTER_STRATEGY = "filter";
 
     public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUT_TYPE, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
@@ -126,11 +127,6 @@ public final class Node {
 
     public String getListStrategy() {
         return listStrategy;
-    }
-
-    public boolean isListAware() {
-        // The strategies where lists are passed in are "list-aware".
-        return listStrategy.equals(AS_IS_STRATEGY) || listStrategy.equals(WRAP_IN_LIST_STRATEGY);
     }
 
     public Point getPosition() {

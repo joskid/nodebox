@@ -120,91 +120,155 @@ public class NodeContext {
 
         // Invoke the node function.
         Iterable<?> results;
-        if (node.isListAware()) {
-            results = renderListAwareNode(node, function, inputValues);
-
+        if (node.getListStrategy().equals(Node.AS_IS_STRATEGY)) {
+            results = renderAsIsStrategy(node, function, inputValues);
+        } else if (node.getListStrategy().equals(Node.WRAP_IN_LIST_STRATEGY)) {
+            results = renderWrapInListStrategy(node, function, inputValues);
+        } else if (node.getListStrategy().equals(Node.MAP_STRATEGY)) {
+            results = renderMapStrategy(node, function, inputValues);
+        } else if (node.getListStrategy().equals(Node.FLATTEN_STRATEGY)) {
+            results = renderFlattenStrategy(node, function, inputValues);
+        } else if (node.getListStrategy().equals(Node.FILTER_STRATEGY)) {
+            results = renderFilterStrategy(node, function, inputValues);
         } else {
-            results = renderListUnawareNode(node, function, inputValues);
+            throw new NodeRenderException(node, "Node " + node + " has an unknown list strategy " + node.getListStrategy());
         }
-        // Flatten the list, if necessary.
-        if (node.getListStrategy().equals(Node.FLATTEN_STRATEGY)) {
-            ImmutableList.Builder<Object> b = new ImmutableList.Builder<Object>();
-            for (Object o : results) {
-                checkState(o instanceof Iterable);
-                b.addAll((Iterable<?>) o);
-            }
-            results = b.build();
-        }
+
         outputValuesMap.put(node, results);
         return results;
     }
 
     /**
-     * Render a list-aware node.
+     * Render an as-is node.
      * <p/>
-     * List-aware nodes know that the inputs and outputs of a node are always lists,
+     * As-is nodes know that the inputs and outputs of a node are always lists,
      * and operate on this list. The function is called with each argument as a list.
-     * The function itself takes care of all looping and returns a list.
      * <p/>
-     * This is useful for nodes that reduce the list, ie. filter / sum nodes.
+     * Examples of as-is nodes are "reverse", "sublist", "shuffle", ...
      *
      * @param node        The node to render.
      * @param function    The node's function implementation.
      * @param inputValues A list of all values for the input ports.
      * @return The list of results.
      */
-    private Iterable<?> renderListAwareNode(Node node, Function function, List<ValueOrList> inputValues) {
+    private Iterable<?> renderAsIsStrategy(Node node, Function function, List<ValueOrList> inputValues) {
         List<Object> arguments = inputValuesToArguments(inputValues);
         Object returnValue = invokeFunction(node, function, arguments);
-        if (node.getListStrategy().equals(Node.AS_IS_STRATEGY)) {
         checkState(returnValue instanceof Iterable, "Return value of list-aware function needs to be a List.");
         return (Iterable<?>) returnValue;
-        } else {
-            return ImmutableList.of(returnValue);
-        }
-    }
-
-    private List<Object> inputValuesToArguments(List<ValueOrList> inputValues) {
-        List<Object> arguments = new ArrayList<Object>(inputValues.size());
-        for (ValueOrList v : inputValues) {
-            arguments.add(v.value);
-        }
-        return arguments;
     }
 
     /**
-     * Render a node that is not list-aware.
+     * Render a node using the wrap-in-list strategy.
      * <p/>
-     * The function processes the input values one by one, and returns.
-     * This function takes care of looping through all executions.
-     * The list matching strategy defines how multiple inputs are combined.
+     * Wrap-in-list nodes receive a list and return a single value.
+     * The NodeContext wraps this value into a list with one element.
+     * <p/>
+     * Example of wrap-in-list nodes are "sum", "avg".
+     *
+     * @param node        The node to render.
+     * @param function    The node's function implementation.
+     * @param inputValues A list of all values for the input ports.
+     * @return The list of results.
+     */
+    private Iterable<?> renderWrapInListStrategy(Node node, Function function, List<ValueOrList> inputValues) {
+        List<Object> arguments = inputValuesToArguments(inputValues);
+        Object returnValue = invokeFunction(node, function, arguments);
+        return ImmutableList.of(returnValue);
+    }
+
+    /**
+     * Render a node using the map strategy.
+     * <p/>
+     * Map nodes do not know anything about lists. The function processes the input values one by one,
+     * each one returning a simple value. These values are combined into a list.
+     * If the input lists are of different length, stop after the shortest list.
      *
      * @param node        The node to render.
      * @param function    The node's function implementation.
      * @param inputValues A list of all values for the input ports.
      * @return The list of return values.
      */
-    private List<Object> renderListUnawareNode(Node node, Function function, List<ValueOrList> inputValues) {
-        checkState(!node.isListAware());
-
-        // Execute the node once if there are no input ports.
+    private List<?> renderMapStrategy(final Node node, final Function function, List<ValueOrList> inputValues) {
+        // If the node has no input ports, execute the node once for its side effects.
         if (node.getInputs().isEmpty()) {
             Object returnValue = invokeFunction(node, function, ImmutableList.of());
             return ImmutableList.of(returnValue);
         }
 
-        // If the minimum list size is zero a list of zero elements was passed in to one of the inputs.
-        // This means the function doesn't get called, and returns an empty list.
-        if (!hasElements(inputValues)) {
+        return renderMapStrategyInternal(node, inputValues, new FunctionInvoker() {
+            public void call(List<Object> arguments, List<Object> results) {
+                results.add(invokeFunction(node, function, arguments));
+            }
+        });
+    }
+
+    /**
+     * Render a node using the flatten strategy.
+     * <p/>
+     * Flatten nodes take in one value and return a list. All these lists are combined.
+     * <p/>
+     * Example of flatten nodes are "grid", "scatter".
+     *
+     * @param node        The node to render.
+     * @param function    The node's function implementation.
+     * @param inputValues A list of all values for the input ports.
+     * @return The list of results.
+     */
+    private List<?> renderFlattenStrategy(Node node, Function function, List<ValueOrList> inputValues) {
+        List<?> results = renderMapStrategy(node, function, inputValues);
+        ImmutableList.Builder<Object> b = new ImmutableList.Builder<Object>();
+        for (Object o : results) {
+            checkState(o instanceof Iterable);
+            b.addAll((Iterable<?>) o);
+        }
+        return b.build();
+    }
+
+    /**
+     * Render a node using the filter strategy.
+     * <p/>
+     * Filter nodes do not know anything about lists. The function returns true / false, and the values for
+     * which the function returns true are returned.
+     * <p/>
+     * Example of filter nodes are "even", "greater-than".
+     *
+     * @param node        The node to render.
+     * @param function    The node's function implementation.
+     * @param inputValues A list of all values for the input ports.
+     * @return The list of results.
+     */
+    private List<?> renderFilterStrategy(final Node node, final Function function, List<ValueOrList> inputValues) {
+        return renderMapStrategyInternal(node, inputValues, new FunctionInvoker() {
+            public void call(List<Object> arguments, List<Object> results) {
+                boolean pass = (Boolean) invokeFunction(node, function, arguments);
+                if (pass)
+                    results.add(arguments.get(0));
+
+            }
+        });
+    }
+
+    /**
+     * Do the actual mapping function. This uses a higher-order function "FunctionInvoker" that is free to execute
+     * something with the arguments it gets and add to the results.
+     *
+     * @param node        The node to render.
+     * @param inputValues A list of all values for the input ports.
+     * @param op          The higher-order function that receives arguments and can manipulate the results.
+     * @return The list of results.
+     */
+    private List<?> renderMapStrategyInternal(Node node, List<ValueOrList> inputValues, FunctionInvoker op) {
+        // If the node has no input ports, or if the minimum list size is zero, return an empty list.
+        if (node.getInputs().isEmpty() || !hasElements(inputValues)) {
             return ImmutableList.of();
         }
 
-        List<Object> results = new LinkedList<Object>();
+        List<Object> results = new ArrayList<Object>();
         Map<ValueOrList, Iterator> iteratorMap = new HashMap<ValueOrList, Iterator>();
         boolean hasListArgument = false;
-        processInputValues:
         while (true) {
-            if (Thread.interrupted()) return results;
+            if (Thread.interrupted()) throw new NodeRenderException(node, "Interrupted.");
             // Collect arguments by going through the input values.
             List<Object> arguments = new ArrayList<Object>();
             for (ValueOrList v : inputValues) {
@@ -215,7 +279,7 @@ public class NodeContext {
                     }
                     Iterator iterator = iteratorMap.get(v);
                     // End when the first list is exhausted.
-                    if (!iterator.hasNext()) break processInputValues;
+                    if (!iterator.hasNext()) return results;
                     arguments.add(iterator.next());
                     hasListArgument = true;
                 } else {
@@ -223,11 +287,19 @@ public class NodeContext {
                 }
             }
             // Invoke the function.
-            results.add(invokeFunction(node, function, arguments));
+            op.call(arguments, results);
             // If none of the arguments are lists, we're done.
             if (!hasListArgument) break;
         }
         return results;
+    }
+
+    private List<Object> inputValuesToArguments(List<ValueOrList> inputValues) {
+        List<Object> arguments = new ArrayList<Object>(inputValues.size());
+        for (ValueOrList v : inputValues) {
+            arguments.add(v.value);
+        }
+        return arguments;
     }
 
     private Object invokeFunction(Node node, Function function, List<?> arguments) throws NodeRenderException {
@@ -328,6 +400,14 @@ public class NodeContext {
         public int hashCode() {
             return Objects.hashCode(node, port);
         }
+    }
+
+    /**
+     * Higher-order function that receives a list of arguments to invoke a function with.
+     * It can add something to the list of results, if it wants.
+     */
+    private interface FunctionInvoker {
+        public void call(List<Object> arguments, List<Object> results);
     }
 
 }

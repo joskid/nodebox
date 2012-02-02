@@ -20,7 +20,7 @@ public class MathFunctions {
 
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
-                "number", "invert", "add", "subtract", "multiply", "divide", "sqrt",
+                "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
                 "sum",
                 "makeNumbers",
                 "range",
@@ -46,6 +46,11 @@ public class MathFunctions {
 
     public static double sqrt(double n) {
         return Math.sqrt(n);
+    }
+
+    public static double log(double n) {
+        checkArgument(n != 0, "Value cannot be zero.");
+        return Math.log(n);
     }
 
     public static double divide(double n1, double n2) {

@@ -29,6 +29,9 @@
         <node description="Change the sign of a number." function="math/invert" name="invert" position="120,10">
             <port name="value" type="float" value="0.0"/>
         </node>
+        <node description="Returns the natural logarithm of a value" function="math/log" name="log" position="410,100">
+            <port name="value" type="float" value="0.0"/>
+        </node>
         <node description="Transform a string to a list of numbers." function="math/makeNumbers" name="make_numbers" position="20,200" strategy="flatten">
             <port name="string" type="string" value="11 22 33"/>
         </node>

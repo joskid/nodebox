@@ -4,10 +4,7 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PPaintContext;
-import nodebox.node.ConnectionError;
-import nodebox.node.InvalidNameException;
-import nodebox.node.Node;
-import nodebox.node.Port;
+import nodebox.node.*;
 import nodebox.ui.SwingUtils;
 import nodebox.ui.Theme;
 
@@ -103,30 +100,43 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
      * The image should be located near the library, and have the same name as the library.
      * <p/>
      * If this node has no image, the prototype is searched to find its image. If no image could be found,
-     * a generic image is retured.
+     * a generic image is returned.
      *
      * @param node the node
      * @return an Image object.
      */
     public static BufferedImage getImageForNode(Node node) {
-        return nodeGeneric;
-//        if (node == null || node.getImage() == null || node.getImage().isEmpty()) return nodeGeneric;
-//        File libraryFile = node.getLibrary().getFile();
-//        if (libraryFile != null) {
-//            File libraryDirectory = libraryFile.getParentFile();
-//            if (libraryDirectory != null) {
-//                File nodeImageFile = new File(libraryDirectory, node.getImage());
-//                if (nodeImageFile.exists()) {
-//                    try {
-//                        return ImageIO.read(nodeImageFile);
-//                    } catch (IOException ignored) {
-//                        // Pass through
-//                    }
-//                }
-//            }
-//        }
-//        // Look for the prototype
-//        return getImageForNode(node.getPrototype());
+        for (NodeLibrary library : Application.getInstance().getRepository().getLibraries()) {
+            BufferedImage img = findNodeImage(library, node);
+            if (img != null) {
+                return img;
+            }
+        }
+        if (node.getPrototype() != null) {
+            return getImageForNode(node.getPrototype());
+        } else {
+            return nodeGeneric;
+        }
+    }
+
+    public static BufferedImage findNodeImage(NodeLibrary library, Node node) {
+        if (node == null || node.getImage() == null || node.getImage().isEmpty()) return null;
+        if (!library.getRoot().hasChild(node)) return null;
+        File libraryFile = library.getFile();
+        if (libraryFile != null) {
+            File libraryDirectory = libraryFile.getParentFile();
+            if (libraryDirectory != null) {
+                File nodeImageFile = new File(libraryDirectory, node.getImage());
+                if (nodeImageFile.exists()) {
+                    try {
+                        return ImageIO.read(nodeImageFile);
+                    } catch (IOException ignored) {
+                        // Pass through
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**

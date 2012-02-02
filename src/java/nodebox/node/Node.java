@@ -324,7 +324,7 @@ public final class Node {
      * @return A new Node.
      */
     public Node withImage(String image) {
-        return newNodeWithAttribute(Attribute.DESCRIPTION, image);
+        return newNodeWithAttribute(Attribute.IMAGE, image);
     }
 
     /**

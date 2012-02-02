@@ -28,14 +28,14 @@ public class NodeLibrary {
     }
 
     public static NodeLibrary create(String libraryName, Node root, FunctionRepository functionRepository) {
-        return new NodeLibrary(libraryName, root, functionRepository);
+        return new NodeLibrary(libraryName, null, root, functionRepository);
     }
 
     public static NodeLibrary load(String libraryName, String xml, NodeRepository nodeRepository) throws LoadException {
         checkNotNull(libraryName, "Library name cannot be null.");
         checkNotNull(xml, "XML string cannot be null.");
         try {
-            return load(libraryName, new StringReader(xml), nodeRepository);
+            return load(libraryName, null, new StringReader(xml), nodeRepository);
         } catch (XMLStreamException e) {
             throw new LoadException("<none>", "Could not read NDBX string", e);
         }
@@ -45,7 +45,7 @@ public class NodeLibrary {
         checkNotNull(f, "File cannot be null.");
         String libraryName = FileUtils.stripExtension(f);
         try {
-            return load(libraryName, new FileReader(f), nodeRepository);
+            return load(libraryName, f, new FileReader(f), nodeRepository);
         } catch (FileNotFoundException e) {
             throw new LoadException(f.getAbsolutePath(), "File not found.");
         } catch (XMLStreamException e) {
@@ -54,20 +54,26 @@ public class NodeLibrary {
     }
 
     private final String name;
+    private final File file;
     private final Node root;
     private final FunctionRepository functionRepository;
 
-    private NodeLibrary(String name, Node root, FunctionRepository functionRepository) {
+    private NodeLibrary(String name, File file, Node root, FunctionRepository functionRepository) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(root, "Root node cannot be null.");
         checkNotNull(functionRepository, "Function repository cannot be null.");
         this.name = name;
         this.root = root;
         this.functionRepository = functionRepository;
+        this.file = file;
     }
 
     public String getName() {
         return name;
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public Node getRoot() {
@@ -93,7 +99,7 @@ public class NodeLibrary {
 
     //// Loading ////
 
-    private static NodeLibrary load(String libraryName, Reader r, NodeRepository nodeRepository) throws XMLStreamException {
+    private static NodeLibrary load(String libraryName, File file, Reader r, NodeRepository nodeRepository) throws XMLStreamException {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(r);
         NodeLibrary nodeLibrary = null;
@@ -102,7 +108,7 @@ public class NodeLibrary {
             if (eventType == XMLStreamConstants.START_ELEMENT) {
                 String tagName = reader.getLocalName();
                 if (tagName.equals("ndbx")) {
-                    nodeLibrary = parseNDBX(libraryName, reader, nodeRepository);
+                    nodeLibrary = parseNDBX(libraryName, file, reader, nodeRepository);
                 } else {
                     throw new XMLStreamException("Only tag ndbx allowed, not " + tagName, reader.getLocation());
                 }
@@ -111,7 +117,7 @@ public class NodeLibrary {
         return nodeLibrary;
     }
 
-    private static NodeLibrary parseNDBX(String libraryName, XMLStreamReader reader, NodeRepository nodeRepository) throws XMLStreamException {
+    private static NodeLibrary parseNDBX(String libraryName, File file, XMLStreamReader reader, NodeRepository nodeRepository) throws XMLStreamException {
         List<FunctionLibrary> functionLibraries = new LinkedList<FunctionLibrary>();
         Node rootNode = Node.ROOT;
 
@@ -134,7 +140,7 @@ public class NodeLibrary {
             }
         }
         FunctionLibrary[] fl = functionLibraries.toArray(new FunctionLibrary[functionLibraries.size()]);
-        return new NodeLibrary(libraryName, rootNode, FunctionRepository.of(fl));
+        return new NodeLibrary(libraryName,file, rootNode, FunctionRepository.of(fl));
     }
 
     private static FunctionLibrary parseLink(XMLStreamReader reader) throws XMLStreamException {
@@ -157,9 +163,10 @@ public class NodeLibrary {
     private static Node parseNode(XMLStreamReader reader, Node parent, NodeRepository nodeRepository) throws XMLStreamException {
         String prototypeId = reader.getAttributeValue(null, "prototype");
         String name = reader.getAttributeValue(null, "name");
+        String description = reader.getAttributeValue(null, "description");
+        String image = reader.getAttributeValue(null, "image");
         String function = reader.getAttributeValue(null, "function");
         String listStrategy = reader.getAttributeValue(null, "strategy");
-        String description = reader.getAttributeValue(null, "description");
         String position = reader.getAttributeValue(null, "position");
         String renderedChildName = reader.getAttributeValue(null, "renderedChild");
         Node prototype = prototypeId == null ? Node.ROOT : lookupNode(prototypeId, parent, nodeRepository);
@@ -170,12 +177,14 @@ public class NodeLibrary {
 
         if (name != null)
             node = node.withName(name);
+        if (description != null)
+            node = node.withDescription(description);
+        if (image != null)
+            node = node.withImage(image);
         if (function != null)
             node = node.withFunction(function);
         if (listStrategy != null)
             node = node.withListStrategy(listStrategy);
-        if (description != null)
-            node = node.withDescription(description);
         if (position != null)
             node = node.withPosition(Point.valueOf(position));
 

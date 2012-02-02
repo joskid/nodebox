@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -65,6 +66,10 @@ public class NodeRepository {
         Node node = library.getRoot().getChild(nodeName);
         checkNotNull(node, "Node %s not found.", identifier);
         return node;
+    }
+    
+    public Collection<NodeLibrary> getLibraries() {
+        return libraryMap.values();
     }
 
     public List<Node> getNodes() {

@@ -21,6 +21,7 @@ public class AddressBar extends JPanel implements MouseListener {
     public static Image addressArrow;
 
     private static ImmutableList<String> ROOT_LIST = ImmutableList.of("root");
+    public static final int ADDRESS_BAR_HEIGHT = 25;
 
     static {
         try {
@@ -35,20 +36,13 @@ public class AddressBar extends JPanel implements MouseListener {
     private int[] positions;
     private int armed = -1;
     private OnSegmentClickListener onSegmentClickListener;
-    private JProgressBar progressBar;
 
     public AddressBar() {
         addMouseListener(this);
-        setMinimumSize(new Dimension(0, 25));
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-        setPreferredSize(new Dimension(Integer.MAX_VALUE, 25));
+        setMinimumSize(new Dimension(0, ADDRESS_BAR_HEIGHT));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, ADDRESS_BAR_HEIGHT));
+        setPreferredSize(new Dimension(Integer.MAX_VALUE, ADDRESS_BAR_HEIGHT));
         setLayout(null);
-        progressBar = new JProgressBar();
-        progressBar.putClientProperty("JProgressBar.style", "circular");
-        progressBar.setIndeterminate(true);
-        progressBar.setBorderPainted(false);
-        progressBar.setVisible(false);
-        add(progressBar);
     }
 
     public ImmutableList<String> getSegments() {
@@ -85,14 +79,6 @@ public class AddressBar extends JPanel implements MouseListener {
      */
     public void setOnSegmentClickListener(OnSegmentClickListener l) {
         onSegmentClickListener = l;
-    }
-
-    public boolean getProgressVisible() {
-        return progressBar.isVisible();
-    }
-
-    public void setProgressVisible(boolean visible) {
-        progressBar.setVisible(visible);
     }
 
     @Override
@@ -164,12 +150,6 @@ public class AddressBar extends JPanel implements MouseListener {
 
     private String pathForIndex(int endIndex) {
         return "/" + Joiner.on("/").join(segments.subList(0, endIndex));
-    }
-
-    @Override
-    public void doLayout() {
-        final int width = getWidth();
-        progressBar.setBounds(width - 23, 3, 20, 20);
     }
 
     /**

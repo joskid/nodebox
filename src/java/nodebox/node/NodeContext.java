@@ -69,6 +69,7 @@ public class NodeContext {
 
         // Process dependencies
         for (Connection c : network.getConnections()) {
+            if (Thread.currentThread().isInterrupted()) throw new NodeRenderException(child, "Interrupted");
             if (c.getInputNode().equals(child.getName())) {
                 Node outputNode = network.getChild(c.getOutputNode());
                 renderChild(network, outputNode);
@@ -206,6 +207,7 @@ public class NodeContext {
         boolean hasListArgument = false;
         processInputValues:
         while (true) {
+            if (Thread.interrupted()) return results;
             // Collect arguments by going through the input values.
             List<Object> arguments = new ArrayList<Object>();
             for (ValueOrList v : inputValues) {

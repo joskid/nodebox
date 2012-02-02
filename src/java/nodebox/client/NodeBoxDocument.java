@@ -21,12 +21,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 /**
  * A NodeBoxDocument manages a NodeLibrary.
@@ -61,6 +62,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final AtomicBoolean isRendering = new AtomicBoolean(false);
     private final AtomicBoolean shouldRender = new AtomicBoolean(false);
     private final ExecutorService renderService;
+    private final AtomicReference<Future> currentRender = new AtomicReference<Future>();
 
     // GUI components
     private final NodeBoxMenuBar menuBar;
@@ -72,6 +74,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final NetworkView networkView;
     private JSplitPane parameterNetworkSplit;
     private JSplitPane topSplit;
+    private JPanel addressPanel;
+    private final ProgressPanel progressPanel;
 
     public static NodeBoxDocument getCurrentDocument() {
         return Application.getInstance().getCurrentDocument();
@@ -99,14 +103,19 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         networkView = networkPane.getNetworkView();
         parameterNetworkSplit = new CustomSplitPane(JSplitPane.VERTICAL_SPLIT, portPane, networkPane);
         topSplit = new CustomSplitPane(JSplitPane.HORIZONTAL_SPLIT, viewerPane, parameterNetworkSplit);
+
         addressBar = new AddressBar();
         addressBar.setOnSegmentClickListener(new AddressBar.OnSegmentClickListener() {
             public void onSegmentClicked(String fullPath) {
                 setActiveNetwork(fullPath);
             }
         });
+        progressPanel = new ProgressPanel(this);
+        addressPanel = new JPanel(new BorderLayout());
+        addressPanel.add(addressBar, BorderLayout.CENTER);
+        addressPanel.add(progressPanel, BorderLayout.EAST);
 
-        rootPanel.add(addressBar, BorderLayout.NORTH);
+        rootPanel.add(addressPanel, BorderLayout.NORTH);
         rootPanel.add(topSplit, BorderLayout.CENTER);
 
         // Animation properties.
@@ -617,9 +626,18 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void startRendering(final NodeContext context) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                addressBar.setProgressVisible(true);
+                progressPanel.setInProgress(true);
             }
         });
+    }
+
+    /**
+     * Ask the document to stop the active rendering.
+     */
+    public void stopRendering() {
+        if (currentRender.get() != null) {
+            currentRender.get().cancel(true);
+        }
     }
 
     /**
@@ -632,9 +650,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void finishedRendering(final NodeContext context, final Node renderedNetwork) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                progressPanel.setInProgress(false);
+            }
+        });
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
                 Iterable<Object> results = context.getResults(renderedChild);
-                addressBar.setProgressVisible(false);
                 viewerPane.setOutputValues(results);
                 networkView.checkErrorAndRepaint();
             }
@@ -652,7 +674,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         return outputValues.values().iterator().next();
     }
 
-    private void render() {
+    private synchronized void render() {
         // If we're already rendering, return.
         if (isRendering.get()) return;
 
@@ -666,7 +688,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
         final NodeLibrary renderLibrary = getNodeLibrary();
         final Node renderNetwork = getActiveNetwork();
-        renderService.submit(new Runnable() {
+        checkState(currentRender.get() == null);
+        currentRender.set(renderService.submit(new Runnable() {
             public void run() {
                 final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
                 startRendering(context);
@@ -680,6 +703,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
                 // We finished rendering so set the renderNetwork flag off.
                 isRendering.set(false);
+                currentRender.set(null);
 
                 finishedRendering(context, renderNetwork);
 
@@ -692,7 +716,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                     });
                 }
             }
-        });
+        }));
     }
 
 //    public void setActiveNodeCode(String source) {

@@ -34,7 +34,7 @@ public class PortPane extends Pane {
     }
 
     public String getPaneName() {
-        return "Parameters";
+        return "Ports";
     }
 
     public PaneHeader getPaneHeader() {

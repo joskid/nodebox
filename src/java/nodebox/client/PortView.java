@@ -158,10 +158,10 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
         }
 
         if (rowIndex == 0) {
-            JLabel noParameters = new JLabel("No parameters");
-            noParameters.setFont(Theme.SMALL_BOLD_FONT);
-            noParameters.setForeground(Theme.TEXT_NORMAL_COLOR);
-            controlPanel.add(noParameters);
+            JLabel noPorts = new JLabel("No ports");
+            noPorts.setFont(Theme.SMALL_BOLD_FONT);
+            noPorts.setForeground(Theme.TEXT_NORMAL_COLOR);
+            controlPanel.add(noPorts);
         }
         JLabel filler = new JLabel();
         GridBagConstraints fillerConstraints = new GridBagConstraints();

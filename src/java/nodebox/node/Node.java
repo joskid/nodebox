@@ -7,6 +7,8 @@ import nodebox.graphics.Point;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -36,6 +38,8 @@ public final class Node {
     public static String WRAP_IN_LIST_STRATEGY = "wrap-in-list";
 
     public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUT_TYPE, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
+
+    private static final Pattern NUMBER_AT_THE_END = Pattern.compile("^(.*?)(\\d*)$");
 
     private final Node prototype;
     private final String name;
@@ -255,6 +259,28 @@ public final class Node {
             return getConnections();
         } else {
             throw new AssertionError("Unknown node attribute " + attribute);
+        }
+    }
+
+    public String uniqueName(String prefix) {
+        Matcher m = NUMBER_AT_THE_END.matcher(prefix);
+        m.find();
+        String namePrefix = m.group(1);
+        String number = m.group(2);
+        int counter;
+        if (number.length() > 0) {
+            counter = Integer.parseInt(number);
+        } else {
+            counter = 1;
+        }
+        while (true) {
+            String suggestedName = namePrefix + counter;
+            if (!hasChild(suggestedName)) {
+                // We don't use rename here, since it assumes the node will be in
+                // this network.
+                return suggestedName;
+            }
+            ++counter;
         }
     }
 

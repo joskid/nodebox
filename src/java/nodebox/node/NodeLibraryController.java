@@ -45,7 +45,9 @@ public class NodeLibraryController {
     }
 
     public Node createNode(String parentPath, Node prototype) {
-        Node newNode = prototype.extend();
+        Node parent = getNode(parentPath);
+        String name = parent.uniqueName(prototype.getName());
+        Node newNode = prototype.extend().withName(name);
         addNode(parentPath, newNode);
         return newNode;
     }

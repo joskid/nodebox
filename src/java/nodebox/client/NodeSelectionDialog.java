@@ -139,7 +139,6 @@ public class NodeSelectionDialog extends JDialog {
         }
     }
 
-    private NodeLibrary library;
     private NodeRepository repository;
     private JTextField searchField;
     private JList nodeList;
@@ -154,7 +153,6 @@ public class NodeSelectionDialog extends JDialog {
         super(owner, "New Node", true);
         getRootPane().putClientProperty("Window.style", "small");
         JPanel panel = new JPanel(new BorderLayout());
-        this.library = library;
         this.repository = repository;
         filteredNodeListModel = new FilteredNodeListModel(library, repository);
         searchField = new JTextField();
@@ -273,10 +271,8 @@ public class NodeSelectionDialog extends JDialog {
         }
     }
 
-    private class NodeNameComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            Node node1 = (Node) o1;
-            Node node2 = (Node) o2;
+    private class NodeNameComparator implements Comparator<Node> {
+        public int compare(Node node1, Node node2) {
             return node1.getName().compareTo(node2.getName());
         }
     }

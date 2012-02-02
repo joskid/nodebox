@@ -80,12 +80,12 @@ public class ConnectionLayer extends PLayer {
     }
 
     public static void paintConnectionPath(Graphics2D g, GeneralPath p) {
-        g.setStroke(new BasicStroke(2));
+        g.setStroke(new BasicStroke(1.5f));
         g.draw(p);
     }
 
     public static GeneralPath connectionPath(Node outputNode, Node inputNode, Port inputPort) {
-        float x1 = (float) (inputNode.getPosition().x + 1); // Compensate for selection border
+        float x1 = (float) (inputNode.getPosition().x + 2); // Compensate for selection border
         float y1 = (float) (inputNode.getPosition().y + NodeView.getVerticalOffsetForPort(inputNode, inputPort) + NodeView.NODE_PORT_HEIGHT / 2);
         return connectionPath(outputNode, x1, y1);
     }
@@ -94,7 +94,7 @@ public class ConnectionLayer extends PLayer {
         GeneralPath p = new GeneralPath();
         // Start position is at the middle right of the node.
         nodebox.graphics.Point pt = outputNode.getPosition();
-        double x0 = pt.x + NodeView.NODE_FULL_SIZE - 1; // Compensate for selection border
+        double x0 = pt.x + NodeView.NODE_FULL_SIZE - 3; // Compensate for selection border
         double y0 = pt.y + NodeView.NODE_FULL_SIZE / 2;
         // End position is at the middle left of the node.
         double dx = Math.abs(y1 - y0) / 2;

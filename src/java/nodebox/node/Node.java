@@ -570,9 +570,27 @@ public final class Node {
     public Node disconnect(Connection connection) {
         checkArgument(getConnections().contains(connection), "Node %s does not have a connection %s", this, connection);
         ImmutableList.Builder<Connection> b = ImmutableList.builder();
-        b.addAll(getConnections());
         for (Connection c : getConnections()) {
-            if (c != connection) {
+            if (c != connection)
+                b.add(c);
+        }
+        return newNodeWithAttribute(Attribute.CONNECTIONS, b.build());
+    }
+
+    /**
+     * Create a new node with all existing connections of the given child node removed.
+     *
+     * @param node The node of which to remove all the connections.
+     * @return A new Node.
+     */
+    public Node disconnect(String node) {
+        checkArgument(hasChild(node), "Node %s does not have a child named %s.", this, node);
+        ImmutableList.Builder<Connection> b = ImmutableList.builder();
+        for (Connection c : getConnections()) {
+            if (c.getInputNode().equals(node) || c.getOutputNode().equals(node)) {
+                // The node is part of this connection,
+                // so don't include it in the new list.
+            } else {
                 b.add(c);
             }
         }

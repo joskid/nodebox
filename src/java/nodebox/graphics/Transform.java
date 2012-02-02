@@ -191,8 +191,10 @@ public class Transform implements Cloneable {
 
         // Convert the transformed points into a new List.
         List<Point> transformed = new ArrayList<Point>(points.size());
+        int pointIndex = 0;
         for (i = 0; i < coords.length; i += 2) {
-            transformed.add(new Point(coords[i], coords[i + 1]));
+            transformed.add(new Point(coords[i], coords[i + 1], points.get(pointIndex).type));
+            pointIndex++;
         }
         return transformed;
     }

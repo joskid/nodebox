@@ -431,18 +431,17 @@ def transform(shape, order, translate, angle, scale):
 def translate(shape, translate):
     """Move the shape."""
     if shape is None: return None
-    return t.translated(translate).map(shape)
+    return Transform.translated(translate).map(shape)
 
 def scale(shape, scale):
     """Scale the given shape."""
     if shape is None: return None
-    return t.scaled(scale.x / 100.0, scale.y / 100.0).map(shape)
+    return Transform.scaled(scale.x / 100.0, scale.y / 100.0).map(shape)
 
 def rotate(shape, angle):
     """Rotate the given shape."""
     if shape is None: return None
-    return t.rotated(angle).map(shape)
-
+    return Transform.rotated(angle).map(shape)
 
 def wiggle_points(shape, offset, seed=0):
     _seed(seed)

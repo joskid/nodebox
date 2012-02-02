@@ -33,9 +33,9 @@ public class PaneHeader extends JPanel {
 
     public PaneHeader(Pane pane, boolean addNameLabel) {
         super(new FlowLayout(FlowLayout.LEADING, 5, 2));
-        setPreferredSize(new Dimension(100, 25));
-        setMinimumSize(new Dimension(100, 25));
-        setMaximumSize(new Dimension(100, 25));
+        setPreferredSize(new Dimension(9999, 25));
+        setMinimumSize(new Dimension(10, 25));
+        setMaximumSize(new Dimension(9999, 25));
         if (addNameLabel) {
             add(new PaneNameLabel(pane.getPaneName()));
             add(new Divider());

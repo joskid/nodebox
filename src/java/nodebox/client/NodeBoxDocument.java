@@ -70,6 +70,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final ViewerPane viewerPane;
     private final DataSheet dataSheet;
     private final PortView portView;
+    private final NetworkPane networkPane;
     private final NetworkView networkView;
     private JSplitPane parameterNetworkSplit;
     private JSplitPane topSplit;
@@ -97,7 +98,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         dataSheet = viewerPane.getDataSheet();
         PortPane portPane = new PortPane(this);
         portView = portPane.getPortView();
-        NetworkPane networkPane = new NetworkPane(this);
+        networkPane = new NetworkPane(this);
         networkView = networkPane.getNetworkView();
         parameterNetworkSplit = new CustomSplitPane(JSplitPane.VERTICAL_SPLIT, portPane, networkPane);
         topSplit = new CustomSplitPane(JSplitPane.HORIZONTAL_SPLIT, viewerPane, parameterNetworkSplit);
@@ -647,21 +648,36 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @param renderedNetwork The network that was rendered.
      */
     public synchronized void finishedRendering(final NodeContext context, final Node renderedNetwork) {
+       finishCurrentRender();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                Node renderedChild = renderedNetwork.getRenderedChild();
+                Iterable<?> results = context.getResults(renderedChild);
+                viewerPane.setOutputValues(results);
+                networkPane.clearError();
+                networkView.checkErrorAndRepaint();
+            }
+        });
+    }
+
+    private synchronized void finishedRenderingWithError(NodeContext context, Node network, final Exception e) {
+        finishCurrentRender();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                networkPane.setError(e);
+            }
+        });
+    }
+
+    private synchronized void finishCurrentRender() {
         currentRender = null;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 progressPanel.setInProgress(false);
             }
         });
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                Node renderedChild = renderedNetwork.getRenderedChild();
-                Iterable<?> results = context.getResults(renderedChild);
-                viewerPane.setOutputValues(results);
-                networkView.checkErrorAndRepaint();
-            }
-        });
     }
+
 
     /**
      * Returns the first output value, or null if the map of output values is empty.
@@ -692,27 +708,34 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         currentRender = renderService.submit(new Runnable() {
             public void run() {
                 final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
+                Exception renderException = null;
                 startRendering(context);
                 try {
                     context.renderNetwork(renderNetwork);
                 } catch (NodeRenderException e) {
                     LOG.log(Level.WARNING, "Error while processing", e);
+                    renderException = e;
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, "Other error while processing", e);
+                    renderException = e;
                 }
 
                 // We finished rendering so set the renderNetwork flag off.
                 isRendering.set(false);
 
-                finishedRendering(context, renderNetwork);
+                if (renderException == null) {
+                    finishedRendering(context, renderNetwork);
 
-                // If, in the meantime, we got a new renderNetwork request, call the renderNetwork method again.
-                if (shouldRender.get()) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            render();
-                        }
-                    });
+                    // If, in the meantime, we got a new renderNetwork request, call the renderNetwork method again.
+                    if (shouldRender.get()) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                render();
+                            }
+                        });
+                    }
+                } else {
+                    finishedRenderingWithError(context, renderNetwork, renderException);
                 }
             }
         });

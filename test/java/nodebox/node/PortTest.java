@@ -31,4 +31,33 @@ public class PortTest {
         assertEquals("", Port.parsedPort("myInt", "string", null).stringValue());
     }
 
+    /**
+     * Test if values are clamped when a bounding range is specified.
+     */
+    @Test
+    public void testFloatBounding() {
+        Port p1 = Port.floatPort("p", 5.0, 0.0, 10.0);
+        Port p2 = p1.withValue(-10.0);
+        assertEquals(0.0, p2.getValue());
+    }
+
+    @Test
+    public void testFloatMin() {
+        Port p1 = Port.floatPort("p", 5.0, 0.0, null);
+        Port p2 = p1.withValue(9999.0);
+        assertEquals(9999.0, p2.getValue());
+        Port p3 = p1.withValue(-10.0);
+        assertEquals(0.0, p3.getValue());
+    }
+
+    /**
+     * Test if values are clamped when a bounding range is specified.
+     */
+    @Test
+    public void testIntBounding() {
+        Port p1 = Port.intPort("p", 5, 0, 10);
+        Port p2 = p1.withValue(-10);
+        assertEquals(0L, p2.getValue());
+    }
+
 }

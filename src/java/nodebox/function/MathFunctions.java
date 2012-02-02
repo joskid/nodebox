@@ -19,7 +19,7 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum",
+                "sum", "average",
                 "makeNumbers",
                 "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect",
@@ -66,6 +66,16 @@ public class MathFunctions {
             sum += d;
         }
         return sum;
+    }
+
+    public static double average(Iterable<Double> numbers) {
+        double sum = 0;
+        double counter = 0;
+        for (Double d : numbers) {
+            sum += d;
+            counter++;
+        }
+        return sum/counter;
     }
 
     public static Iterable<Double> makeNumbers(String s) {

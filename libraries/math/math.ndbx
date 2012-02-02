@@ -10,6 +10,9 @@
             <port name="point1" type="point" value="0.00,0.00"/>
             <port name="point2" type="point" value="100.00,100.00"/>
         </node>
+        <node description="Returns the average of a list of numbers." function="math/average" name="average" position="120,100" strategy="wrap-in-list">
+            <port name="values" type="float" value="0.0"/>
+        </node>
         <node description="Calculate a new point based on the angle and distance from an original point." function="math/coordinates" name="coordinates" position="410,300">
             <port name="point" type="point" value="0.00,0.00"/>
             <port name="distance" type="float" value="100.0"/>

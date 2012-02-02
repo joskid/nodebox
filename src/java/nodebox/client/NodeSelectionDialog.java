@@ -177,7 +177,7 @@ public class NodeSelectionDialog extends JDialog {
         panel.add(nodeScroll, BorderLayout.CENTER);
         setContentPane(panel);
         setSize(500, 400);
-        SwingUtils.centerOnScreen(this);
+        setLocationRelativeTo(owner);
     }
 
     public Node getSelectedNode() {

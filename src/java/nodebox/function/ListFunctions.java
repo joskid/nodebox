@@ -159,6 +159,7 @@ public class ListFunctions {
      * @return A new infinite iterable.
      */
     public static Iterable<?> cycle(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         return Iterables.cycle(iterable);
     }
 

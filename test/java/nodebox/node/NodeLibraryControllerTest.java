@@ -53,6 +53,16 @@ public class NodeLibraryControllerTest {
         assertNotSame("No longer the same since the new parent has an extra child.", parent, library.getNodeForPath("/parent"));
     }
 
+    @Test
+    public void testRemoveNode() {
+        Node child = Node.ROOT.withName("child");
+        controller.addNode("/", child);
+        assertTrue(controller.getNodeLibrary().getRoot().hasChild("child"));
+        controller.removeNode("/", "child");
+        assertFalse(controller.getNodeLibrary().getRoot().hasChild("child"));
+        assertNull(controller.getNodeLibrary().getNodeForPath("/child"));
+    }
+
     public void testSetPortValue() {
         Node numberNode = Node.ROOT.withName("number").withInputAdded(Port.intPort("value", 10));
         controller.addNode("/", numberNode);
@@ -78,6 +88,17 @@ public class NodeLibraryControllerTest {
         createSimpleConnection();
         Connection c = controller.getNodeLibrary().getRoot().getConnections().get(0);
         controller.disconnect("/", c);
+        assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
+    }
+    
+    @Test
+    public void testRemoveNodeWithConnections() {
+        createSimpleConnection();
+        Node invert2Node = Node.ROOT.withName("invert2").withFunction("math/invert").withInputAdded(Port.floatPort("value", 0));
+        controller.addNode("/", invert2Node);
+        controller.connect("/", controller.getNode("/number"), invert2Node, invert2Node.getInput("value"));
+        assertEquals(2, controller.getNodeLibrary().getRoot().getConnections().size());
+        controller.removeNode("/", "number");
         assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
     }
 

@@ -2,6 +2,7 @@ package nodebox.node;
 
 import org.junit.Before;
 import org.junit.Test;
+import static nodebox.util.Assertions.assertResultsEqual;
 
 import static org.junit.Assert.*;
 
@@ -61,15 +62,19 @@ public class NodeLibraryControllerTest {
     }
 
     @Test
-    public void testConnectNodes() {
-        Node number1Node = Node.ROOT.withName("number1").withInputAdded(Port.floatPort("value", 20));
-        Node number2Node = Node.ROOT.withName("number2").withInputAdded(Port.floatPort("value", 5));
+    public void testSimpleConnection() {
+        assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
+        Node numberNode = Node.ROOT.withName("number").withFunction("math/number").withInputAdded(Port.floatPort("value", 20));
         Node invertNode = Node.ROOT.withName("invert").withFunction("math/invert").withInputAdded(Port.floatPort("value", 0));
-        controller.addNode("/", number1Node);
-        controller.addNode("/", number2Node);
+        controller.addNode("/", numberNode);
         controller.addNode("/", invertNode);
-        controller.connect("/", number1Node, invertNode, invertNode.getInput("value"));
-        NodeLibrary library = controller.getNodeLibrary();
+        controller.connect("/", numberNode, invertNode, invertNode.getInput("value"));
+        assertEquals(1, controller.getNodeLibrary().getRoot().getConnections().size());
+        Connection c = controller.getNodeLibrary().getRoot().getConnections().get(0);
+        assertEquals("invert", c.getInputNode());
+        assertEquals("value", c.getInputPort());
+        assertEquals("number", c.getOutputNode());
+        assertResultsEqual(controller.getNodeLibrary().getRoot(), invertNode, -20.0);
     }
 
 }

@@ -154,11 +154,10 @@ public class NodeLibraryTest {
                 .withRenderedChild(reverse)
                 .connect("makeNumbers", "reverse", "list");
         NodeLibrary originalLibrary = NodeLibrary.create("test", net, functions);
-        ImmutableList reversedNumbers = ImmutableList.of(5.0, 4.0, 3.0, 2.0, 1.0);
-        assertResults(reversedNumbers, originalLibrary.getRoot(), functions);
+        assertResultsEqual(originalLibrary.getRoot(), 5.0, 4.0, 3.0, 2.0, 1.0);
         // Now save / load the library and check the output.
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
-        assertResults(reversedNumbers, library.getRoot(), functions);
+        assertResultsEqual(library.getRoot(), 5.0, 4.0, 3.0, 2.0, 1.0);
     }
     
     @Test
@@ -167,11 +166,11 @@ public class NodeLibraryTest {
         Node rangePrototype = mathLibrary.getRoot().getChild("range");
         Node range1 = rangePrototype.extend().withName("range1").withInputValue("end", 5.0);
         ImmutableList rangeList = ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0);
-        assertResults(rangeList, range1, functions);
+        assertResultsEqual(range1, 0.0, 1.0, 2.0, 3.0, 4.0);
         NodeLibrary originalLibrary = NodeLibrary.create("test", range1, functions);
         // Now save / load the library and check the output.
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of(mathLibrary));
-        assertResults(rangeList, library.getRoot(), functions);
+        assertResultsEqual(library.getRoot(), 0.0, 1.0, 2.0, 3.0, 4.0);
     }
 
     /**
@@ -189,12 +188,6 @@ public class NodeLibraryTest {
         assertEquals(10.0, v.getMaximumValue());
                 
 
-    }
-
-    private void assertResults(List<Object> results, Node node, FunctionRepository functionRepository) {
-        NodeContext context = new NodeContext(functionRepository);
-        Iterable<Object> values = context.renderNode(node);
-        assertEquals(results, values);
     }
 
     private void assertSingleResult(Double expected, Node node, FunctionRepository functionRepository) {

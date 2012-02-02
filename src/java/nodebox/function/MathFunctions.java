@@ -1,7 +1,5 @@
 package nodebox.function;
 
-import com.google.common.collect.Iterables;
-import com.google.common.primitives.Doubles;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
@@ -118,6 +116,8 @@ public class MathFunctions {
         }
 
         public Double next() {
+            if (Thread.currentThread().isInterrupted()) throw new RuntimeException("interrupt");
+            //if (Thread.interrupted()) throw new RuntimeException("interrupt");
             if (!hasNext())
                 throw new NoSuchElementException();
             double result = next;

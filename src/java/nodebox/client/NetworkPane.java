@@ -9,12 +9,15 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static nodebox.ui.ExceptionDialog.getRootCause;
+
 public class NetworkPane extends Pane {
 
     private final NodeBoxDocument document;
     private final PaneHeader paneHeader;
     private final JLabel errorLabel;
     private final NetworkView networkView;
+    private Throwable nodeRenderException;
 
     public NetworkPane(NodeBoxDocument document) {
         this.document = document;
@@ -40,7 +43,8 @@ public class NetworkPane extends Pane {
         errorLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("click");
+                ExceptionDialog ed = new ExceptionDialog(null, nodeRenderException, "", false);
+                ed.setVisible(true);
             }
         });
         errorLabel.setVisible(false);
@@ -83,38 +87,17 @@ public class NetworkPane extends Pane {
             sb.append(node.getName());
             sb.append(":</b> ");
         }
-        Throwable cause = getRootCause(e);
-        sb.append(cause.getMessage());
-        sb.append("</html>");
+        sb.append("<u>");
+        nodeRenderException = getRootCause(e);
+        sb.append(nodeRenderException.getMessage());
+        sb.append("</u></html>");
         errorLabel.setText(sb.toString());
         errorLabel.setVisible(true);
-    }
-
-    public Throwable getRootCause(Throwable e) {
-        if (e.getCause() == null) return e;
-        if (e.getCause() == e) return e;
-        return getRootCause(e.getCause());
     }
 
     public void clearError() {
         errorLabel.setText("");
         errorLabel.setVisible(false);
     }
-
-//    public void propertyChange(PropertyChangeEvent evt) {
-//        if (!evt.getPropertyName().equals(NetworkView.SELECT_PROPERTY)) return;
-//        Set<NodeView> selection = (Set<NodeView>) evt.getNewValue();
-//        // If there is no selection, set the active node to null.
-//        if (selection == null || selection.isEmpty()) {
-//            getDocument().setActiveNode((Node) null);
-//        } else {
-//            // If the active node is in the new selection leave the active node as is.
-//            NodeView nv = networkView.getNodeView(getDocument().getActiveNode());
-//            if (selection.contains(nv)) return;
-//            // If there are multiple elements selected, the first one will be the active node.
-//            NodeView firstElement = selection.iterator().next();
-//            getDocument().setActiveNode(firstElement.getNode());
-//        }
-//    }
 
 }

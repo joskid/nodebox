@@ -3,6 +3,8 @@ package nodebox.node;
 import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -77,8 +79,23 @@ public class NodeLibraryController {
         replaceNodeInPath(nodePath, newNode);
     }
 
-    public void renameNode(String nodePath, String newName) {
-        throw new UnsupportedOperationException();
+    public void renameNode(String parentPath, String nodePath, String newName) {
+        List<Connection> connections = getNode(parentPath).getConnections();
+        String oldName = getNode(nodePath).getName();
+
+        Node newNode = getNode(nodePath).withName(newName);
+        removeNode(parentPath, oldName);
+        addNode(parentPath, newNode);
+
+        for (Connection c : connections) {
+            if (c.getInputNode().equals(oldName)) {
+                Node newParent = getNode(parentPath).connect(c.getOutputNode(), newNode.getName(), c.getInputPort());
+                replaceNodeInPath(parentPath, newParent);
+            } else if (c.getOutputNode().equals(oldName)){
+                Node newParent = getNode(parentPath).connect(newNode.getName(), c.getInputNode(), c.getInputPort());
+                replaceNodeInPath(parentPath, newParent);
+            }
+        }
     }
 
     public void setPortValue(String nodePath, String portName, Object value) {

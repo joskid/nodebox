@@ -23,7 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,7 +73,6 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private final NetworkView networkView;
     private JSplitPane parameterNetworkSplit;
     private JSplitPane topSplit;
-    private JPanel addressPanel;
     private final ProgressPanel progressPanel;
 
     public static NodeBoxDocument getCurrentDocument() {
@@ -111,7 +109,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             }
         });
         progressPanel = new ProgressPanel(this);
-        addressPanel = new JPanel(new BorderLayout());
+        JPanel addressPanel = new JPanel(new BorderLayout());
         addressPanel.add(addressBar, BorderLayout.CENTER);
         addressPanel.add(progressPanel, BorderLayout.EAST);
 
@@ -637,7 +635,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * Ask the document to stop the active rendering.
      */
     public synchronized void stopRendering() {
-        if (currentRender!= null) {
+        if (currentRender != null) {
             currentRender.cancel(true);
         }
     }

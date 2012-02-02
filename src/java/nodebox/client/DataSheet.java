@@ -127,24 +127,29 @@ public class DataSheet extends JPanel implements OutputView {
         }
 
         public int getColumnCount() {
-            return dataTemplate.size();
+            return dataTemplate.size() + 1;
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
             checkArgument(rowIndex < outputValues.size(), "The row index %s is larger than the number of values.", rowIndex);
-            checkArgument(columnIndex < dataTemplate.size(), "The column index %s is larger than the number of columns.", columnIndex);
+            checkArgument(columnIndex < dataTemplate.size() + 1, "The column index %s is larger than the number of columns.", columnIndex);
 
             List o = seq(outputValues.get(rowIndex));
             if (columnIndex > o.size()) {
                 return "<not found>";
+            } else if (columnIndex == 0) {
+                return rowIndex;
             } else {
-                return o.get(columnIndex);
+                return o.get(columnIndex - 1);
             }
         }
 
         @Override
         public String getColumnName(int columnIndex) {
-            return "Data";
+            if (columnIndex == 0)
+                return "Index";
+            else
+                return "Data";
         }
     }
 

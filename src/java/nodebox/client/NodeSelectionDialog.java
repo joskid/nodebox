@@ -3,6 +3,7 @@ package nodebox.client;
 import nodebox.node.Node;
 import nodebox.node.NodeLibrary;
 import nodebox.node.NodeRepository;
+import nodebox.ui.SwingUtils;
 import nodebox.ui.Theme;
 import nodebox.util.StringUtils;
 
@@ -176,7 +177,7 @@ public class NodeSelectionDialog extends JDialog {
         panel.add(nodeScroll, BorderLayout.CENTER);
         setContentPane(panel);
         setSize(500, 400);
-        //SwingUtils.centerOnScreen(this);
+        SwingUtils.centerOnScreen(this);
     }
 
     public Node getSelectedNode() {

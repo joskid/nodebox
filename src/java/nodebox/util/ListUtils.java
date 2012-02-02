@@ -16,9 +16,10 @@ public final class ListUtils {
     public static Class listClass(List objects) {
         if (objects == null || objects.isEmpty()) return Object.class;
 
-        Class c = null;
+        Class c = Object.class;
         for (int i = 0; i < objects.size(); i++) {
             Object o = objects.get(i);
+            if (o == null) return Object.class;
             if (i == 0) {
                 c = o.getClass();
             } else {

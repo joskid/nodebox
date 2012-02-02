@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 
 import java.awt.geom.Point2D;
 import java.util.Iterator;
+import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -95,7 +96,7 @@ public final class Point implements Iterable<Double> {
 
     @Override
     public String toString() {
-        return String.format("%.2f,%.2f", x, y);
+        return String.format(Locale.US, "%.2f,%.2f", x, y);
     }
 
     public Point2D toPoint2D() {

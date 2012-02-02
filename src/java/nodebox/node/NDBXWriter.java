@@ -165,7 +165,7 @@ public class NDBXWriter {
         // Write position
         if (shouldWriteAttribute(node, Node.Attribute.POSITION)) {
             Point position = node.getPosition();
-            el.setAttribute("position", String.format("%.0f,%.0f", position.x, position.y));
+            el.setAttribute("position", String.valueOf(position));
         }
 
         // Write rendered child
@@ -253,7 +253,7 @@ public class NDBXWriter {
         Element el = doc.createElement("port");
         el.setAttribute("name", port.getName());
         el.setAttribute("type", port.getType());
-        if (port.isStandardType()) // TODO && direction == Port.Direction.INPUT
+        if (port.isStandardType())
             el.setAttribute("value", port.stringValue());
         if (port.getMinimumValue() != null)
         el.setAttribute("min", String.valueOf(port.getMinimumValue()));

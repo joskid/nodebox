@@ -11,8 +11,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class NodeLibraryTest {
@@ -159,7 +161,7 @@ public class NodeLibraryTest {
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
         assertResultsEqual(library.getRoot(), 5.0, 4.0, 3.0, 2.0, 1.0);
     }
-    
+
     @Test
     public void testPrototypeOverridePersistence() {
         NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
@@ -177,16 +179,44 @@ public class NodeLibraryTest {
      */
     @Test
     public void testMinMaxPersistence() {
-
         Node originalRoot = Node.ROOT.withName("root").withInputAdded(Port.floatPort("v", 5.0, 0.0, 10.0));
-
         NodeLibrary originalLibrary = NodeLibrary.create("test", originalRoot);
         NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
         Port v = library.getRoot().getInput("v");
         assertEquals(0.0, v.getMinimumValue());
         assertEquals(10.0, v.getMaximumValue());
-                
+    }
 
+    /**
+     * Test if file writing is independent from the locale.
+     * <p/>
+     * We use String.format in writing points, which is locale-dependent.
+     * Having the "wrong" locale would mean that the returned point was invalid.
+     */
+    @Test
+    public void testLocale() {
+        Locale savedLocale = Locale.getDefault();
+        // The german locale uses a comma to separate the decimals, which could make points fail.
+        Locale.setDefault(Locale.GERMAN);
+        try {
+            // We use points for the position and for the input port.
+            Node originalRoot = Node.ROOT
+                    .withName("root")
+                    .withPosition(new Point(12, 34))
+                    .withInputAdded(Port.pointPort("point", new Point(12, 34)));
+            NodeLibrary originalLibrary = NodeLibrary.create("test", originalRoot);
+            NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+            Node root = library.getRoot();
+            assertPointEquals(root.getPosition(), 12.0, 34.0);
+            assertPointEquals(root.getInput("point").pointValue(), 12.0, 34.0);
+        } finally {
+            Locale.setDefault(savedLocale);
+        }
+    }
+
+    private void assertPointEquals(Point point, double x, double y) {
+        assertEquals(x, point.getX());
+        assertEquals(y, point.getY());
     }
 
     private void assertSingleResult(Double expected, Node node, FunctionRepository functionRepository) {

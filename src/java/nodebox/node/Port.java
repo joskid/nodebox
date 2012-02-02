@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
 
+import java.util.Locale;
+
 import static com.google.common.base.Preconditions.*;
 
 public final class Port {

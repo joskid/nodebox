@@ -43,9 +43,7 @@ public class NodeContext {
      */
     public void renderNetwork(Node network) throws NodeRenderException {
         checkNotNull(network);
-        if (network.getRenderedChild() == null) {
-            throw new NodeRenderException(network, "No child node to render.");
-        } else {
+        if (network.getRenderedChild() != null) {
             renderChild(network, network.getRenderedChild());
         }
     }

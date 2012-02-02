@@ -1,5 +1,6 @@
 package nodebox.function;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
@@ -126,11 +127,15 @@ public class MathFunctions {
     }
 
     public static Iterable<Double> range(final double start, final double end, final double step) {
-        return new Iterable<Double>() {
-            public Iterator<Double> iterator() {
-                return new RangeIterator(start, end, step);
-            }
-        };
+        if (step == 0 || start == end || (start < end && step < 0) || (start > end && step > 0))
+            return ImmutableList.of();
+        else {
+            return new Iterable<Double>() {
+                public Iterator<Double> iterator() {
+                    return new RangeIterator(start, end, step);
+                }
+            };
+        }
     }
 
     private static final class RangeIterator implements Iterator<Double> {
@@ -159,7 +164,10 @@ public class MathFunctions {
         }
 
         public boolean hasNext() {
-            return next < end;
+            if (step > 0)
+                return next < end;
+            else
+                return next > end;
         }
 
         public Double next() {

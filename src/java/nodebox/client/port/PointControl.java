@@ -4,6 +4,7 @@ import nodebox.graphics.Point;
 import nodebox.node.Port;
 import nodebox.ui.DraggableNumber;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -19,14 +20,16 @@ public class PointControl extends AbstractPortControl implements ChangeListener,
 
     public PointControl(Port port) {
         super(port);
-        setLayout(new FlowLayout(FlowLayout.LEADING, 5, 0));
+        setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
         xNumber = new DraggableNumber();
         xNumber.addChangeListener(this);
         yNumber = new DraggableNumber();
         yNumber.addChangeListener(this);
         add(xNumber);
+        add(Box.createHorizontalStrut(5));
         add(yNumber);
         setValueForControl(port.getValue());
+        setPreferredSize(xNumber.getPreferredSize());
     }
 
     @Override

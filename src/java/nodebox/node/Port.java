@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.*;
 
 public final class Port {
@@ -221,7 +223,7 @@ public final class Port {
         return !menuItems.isEmpty();
     }
 
-    public ImmutableList<MenuItem> getMenuItems() {
+    public List<MenuItem> getMenuItems() {
         return menuItems;
     }
 
@@ -371,7 +373,11 @@ public final class Port {
         } else if (getType().equals(TYPE_FLOAT)) {
             return Widget.FLOAT;
         } else if (getType().equals(TYPE_STRING)) {
-            return Widget.STRING;
+            if (hasMenu()) {
+                return Widget.MENU;
+            } else {
+                return Widget.STRING;
+            }
         } else if (getType().equals(TYPE_BOOLEAN)) {
             return Widget.TOGGLE;
         } else if (getType().equals(TYPE_POINT)) {
@@ -395,7 +401,7 @@ public final class Port {
     public Port withValue(Object value) {
         checkState(isStandardType(), "You can only change the value of a standard type.");
         checkArgument(correctValueForType(value), "Value '%s' is not correct for %s port.", value, getType());
-        return new Port(getName(), getType(), clampValue(convertValue(getType(), value)), minimumValue, maximumValue);
+        return new Port(getName(), getType(), clampValue(convertValue(getType(), value)), minimumValue, maximumValue, menuItems);
     }
 
     /**

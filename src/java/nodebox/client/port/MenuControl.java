@@ -1,12 +1,15 @@
 package nodebox.client.port;
 
+import nodebox.node.MenuItem;
 import nodebox.node.Port;
+import nodebox.ui.Theme;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class MenuControl extends AbstractPortControl implements ActionListener {
 
@@ -48,7 +51,7 @@ public class MenuControl extends AbstractPortControl implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        Parameter.MenuItem item = (Parameter.MenuItem) menuBox.getSelectedItem();
+        MenuItem item = (MenuItem) menuBox.getSelectedItem();
         String value = item.getKey();
         if (!port.getValue().equals(value)) {
             setPortValue(item.getKey());
@@ -57,15 +60,15 @@ public class MenuControl extends AbstractPortControl implements ActionListener {
 
     private class MenuDataModel implements ComboBoxModel {
 
-        java.util.List<Parameter.MenuItem> menuItems;
-        Parameter.MenuItem selectedItem;
+        List<MenuItem> menuItems;
+        MenuItem selectedItem;
 
-        public MenuDataModel(Parameter parameter) {
-            menuItems = parameter.getMenuItems();
+        public MenuDataModel(Port port) {
+            menuItems = port.getMenuItems();
         }
 
-        public Parameter.MenuItem getMenuItem(String key) {
-            for (Parameter.MenuItem item : menuItems) {
+        public MenuItem getMenuItem(String key) {
+            for (MenuItem item : menuItems) {
                 if (item.getKey().equals(key))
                     return item;
             }
@@ -73,7 +76,7 @@ public class MenuControl extends AbstractPortControl implements ActionListener {
         }
 
         public void setSelectedItem(Object anItem) {
-            selectedItem = (Parameter.MenuItem) anItem;
+            selectedItem = (MenuItem) anItem;
         }
 
         public Object getSelectedItem() {
@@ -103,11 +106,12 @@ public class MenuControl extends AbstractPortControl implements ActionListener {
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (label == null) return null;
-            Parameter.MenuItem item = (Parameter.MenuItem) value;
+            MenuItem item = (MenuItem) value;
             if (item == null) return label;
             label.setText(item.getLabel());
             label.setFont(Theme.SMALL_BOLD_FONT);
             return label;
         }
     }
+
 }

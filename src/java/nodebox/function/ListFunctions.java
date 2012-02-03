@@ -1,6 +1,7 @@
 package nodebox.function;
 
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -38,6 +39,7 @@ public class ListFunctions {
      * @return A new list with only the first item.
      */
     public static List<?> first(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         Iterator iterator = iterable.iterator();
         if (iterator.hasNext()) {
             return ImmutableList.of(iterator.next());
@@ -52,6 +54,7 @@ public class ListFunctions {
      * @return A new list with only the second item.
      */
     public static List<?> second(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         Iterator iterator = iterable.iterator();
         if (iterator.hasNext()) {
             iterator.next();
@@ -69,6 +72,7 @@ public class ListFunctions {
      * @return A new list with the first item skipped.
      */
     public static Iterable<?> rest(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         return Iterables.skip(iterable, 1);
     }
 
@@ -80,11 +84,17 @@ public class ListFunctions {
      * @return A new list with only the last item.
      */
     public static List<?> last(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         try {
             return ImmutableList.of(Iterables.getLast(iterable));
         } catch (NoSuchElementException e) {
             return ImmutableList.of();
         }
+    }
+
+    public static Iterable<?> combine(Iterable list1, Iterable list2, Iterable list3) {
+        Iterable<Iterable> nonNullLists = Iterables.filter(Lists.newArrayList(list1, list2, list3), Predicates.notNull());
+        return Iterables.concat(nonNullLists);
     }
 
     /**
@@ -118,6 +128,7 @@ public class ListFunctions {
      * @return A new list with the items reversed.
      */
     public static List<?> reverse(Iterable<?> iterable) {
+        if (iterable == null) return ImmutableList.of();
         return Lists.reverse(ImmutableList.copyOf(iterable));
     }
 
@@ -130,6 +141,7 @@ public class ListFunctions {
      * @return A new, sorted list.
      */
     public static List<? extends Comparable> sort(Iterable<? extends Comparable> iterable) {
+        if (iterable == null) return ImmutableList.of();
         try {
             return Ordering.natural().sortedCopy(iterable);
         } catch (ClassCastException e) {
@@ -148,6 +160,7 @@ public class ListFunctions {
      * @return A new iterable with items in random order.
      */
     public static List<?> shuffle(Iterable<?> iterable, long seed) {
+        if (iterable == null) return ImmutableList.of();
         List<?> l = Lists.newArrayList(iterable);
         Collections.shuffle(l, new Random(seed));
         return l;

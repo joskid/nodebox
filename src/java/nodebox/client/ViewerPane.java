@@ -1,5 +1,6 @@
 package nodebox.client;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import nodebox.handle.Handle;
@@ -14,7 +15,6 @@ public class ViewerPane extends Pane {
 
     private final static String VIEWER_CARD = "viewer";
     private final static String DATA_SHEET_CARD = "data-sheet";
-
 
     private final NodeBoxDocument document;
     private final PaneHeader paneHeader;
@@ -83,8 +83,10 @@ public class ViewerPane extends Pane {
         if (objects == null) {
             this.outputValuesLimit = ImmutableList.of();
         } else {
-            // We have to limit the input since it could be infinitely large.
-            this.outputValuesLimit = ImmutableList.copyOf(Iterables.limit(objects, viewerObjectLimit));
+            // We have to limit the input since it could be infinitely large
+            Iterable<?> nonNulls = Iterables.filter(objects, Predicates.notNull());
+            Iterable<?> limit = Iterables.limit(nonNulls, viewerObjectLimit);
+            this.outputValuesLimit = ImmutableList.copyOf(limit);
         }
         currentView.setOutputValues(this.outputValuesLimit);
     }

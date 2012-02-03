@@ -193,12 +193,19 @@ public class NodeContext {
         // If the node has no input ports, execute the node once for its side effects.
         if (node.getInputs().isEmpty()) {
             Object returnValue = invokeFunction(node, function, ImmutableList.of());
-            return ImmutableList.of(returnValue);
+            if (returnValue != null) {
+                return ImmutableList.of(returnValue);
+            } else {
+                return ImmutableList.of();
+            }
         }
 
         return renderMapStrategyInternal(node, inputValues, new FunctionInvoker() {
             public void call(List<Object> arguments, List<Object> results) {
-                results.add(invokeFunction(node, function, arguments));
+                Object returnValue = invokeFunction(node, function, arguments);
+                if (returnValue != null) {
+                    results.add(returnValue);
+                }
             }
         });
     }

@@ -10,7 +10,7 @@ public class TestFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("test", TestFunctions.class, "allTypes");
+        LIBRARY = JavaLibrary.ofClass("test", TestFunctions.class, "allTypes", "makeNull");
     }
 
     public static String allTypes(int i, float f, String s, Point pt) {
@@ -20,6 +20,15 @@ public class TestFunctions {
                 .append(s).append(", ")
                 .append(pt);
         return b.toString();
+    }
+
+    /**
+     * Whatever the input, returns null.
+     * @param ignored The input, which is ignored
+     * @return null.
+     */
+    public static Double makeNull(Double ignored) {
+        return null;
     }
 
 }

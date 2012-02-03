@@ -240,6 +240,22 @@ public class NodeContextTest {
         assertResultsEqual(net, filterEven, 2.0);
     }
 
+    /**
+     * Returned lists should not contain nulls.
+     */
+    @Test
+    public void testListWithNulls() {
+        Node makeNull = Node.ROOT
+                .withName("makeNull")
+                .withFunction("test/makeNull")
+                .withInputAdded(Port.floatPort("value", 0.0));
+        Node net = Node.ROOT
+                .withChildAdded(threeNumbers)
+                .withChildAdded(makeNull)
+                .connect("threeNumbers", "makeNull", "value");
+        assertResultsEqual(net, makeNull);
+    }
+
     // TODO Check list-aware node with no inputs.
     // TODO Check list-aware node with no outputs.
     // TODO Check list-aware node with single output.

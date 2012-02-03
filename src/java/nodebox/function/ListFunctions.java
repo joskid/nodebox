@@ -27,7 +27,7 @@ public class ListFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class,
                 "first", "second", "rest", "last",
-                "combine",
+                "combine", "subList",
                 "reverse", "sort", "shuffle", "cycle");
     }
 
@@ -105,9 +105,10 @@ public class ListFunctions {
      * @param size       The amount of items.
      * @return A new list containing a slice of the original.
      */
-    public static Iterable<?> subList(Iterable<?> iterable, int startIndex, int size) {
-        Iterable<?> skipped = Iterables.skip(iterable, startIndex);
-        return Iterables.limit(skipped, size);
+    public static Iterable<?> subList(Iterable<?> iterable, long startIndex, long size) {
+        if (iterable == null) return ImmutableList.of();
+        Iterable<?> skipped = Iterables.skip(iterable, (int) startIndex);
+        return Iterables.limit(skipped, (int) size);
     }
 
     /**

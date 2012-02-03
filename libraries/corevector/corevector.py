@@ -44,13 +44,12 @@ def color(shape, fill, stroke, strokeWidth):
     """Change the color of the input shape."""
     if shape is None: return None
     new_shape = shape.clone()
-    for path in new_shape.paths:
-        path.fillColor = fill
-        if strokeWidth > 0:
-            path.strokeColor = stroke
-            path.strokeWidth = strokeWidth
-        else:
-            path.strokeColor = None
+    new_shape.fillColor = fill
+    if strokeWidth > 0:
+        new_shape.strokeColor = stroke
+        new_shape.strokeWidth = strokeWidth
+    else:
+        new_shape.strokeColor = None
     return new_shape
 
 def compound(shape1, shape2, function="united", invert_difference=False):

@@ -2,6 +2,7 @@ package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
 import nodebox.function.*;
+import nodebox.graphics.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -12,6 +13,7 @@ import nodebox.util.FileUtils;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
+import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -85,9 +87,18 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             MathFunctions.LIBRARY,
             ColorFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
+    
+    private static NodeLibrary createNewLibrary() {
+        Node root = Node.ROOT.withName("root");
+        Node rectPrototype = NodeRepository.DEFAULT.getNode("corevector.rect");
+        String name = root.uniqueName(rectPrototype.getName());
+        Node rect1 = rectPrototype.extend().withName(name).withPosition(new nodebox.graphics.Point(20, 20));
+        root = root.withChildAdded(rect1).withRenderedChild(rect1);
+        return NodeLibrary.create("untitled", root, THE_FUNCTION_REPOSITORY);
+    }
 
     public NodeBoxDocument() {
-        this(NodeLibrary.create("untitled", Node.ROOT.withName("root"), THE_FUNCTION_REPOSITORY));
+        this(createNewLibrary());
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {
@@ -145,6 +156,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
 
     public NodeLibrary getNodeLibrary() {
         return controller.getNodeLibrary();
+    }
+
+    public NodeRepository getRepository() {
+        return NodeRepository.DEFAULT;
     }
 
     /**

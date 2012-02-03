@@ -6,10 +6,11 @@ from java.awt.geom import Arc2D
 from nodebox.graphics import Geometry, Path, Contour, Color, Transform, Text, Point, Rect
 from nodebox.util.Geometry import coordinates, angle, distance
 
-def align(shape, x, y, halign="center", valign="middle"):
+def align(shape, position, halign="center", valign="middle"):
     """Align a shape in relation to the origin."""
     if shape is None: return None
     new_shape = shape.clone()
+    x, y = position.x, position.y
     if halign == "left":
         dx = x - new_shape.bounds.x
     elif halign == "right":

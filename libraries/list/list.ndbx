@@ -19,7 +19,7 @@
             <port name="list2" type="list" />
             <port name="list3" type="list" />
         </node>
-        <node description="Take a slice of the original list." function="list/subList" name="subList" position="20,100" outputType="list" strategy="as-is">
+        <node description="Take a slice of the original list." function="list/subList" name="subList" position="20,100" outputType="list" strategy="as-is" image="subList.png">
             <port name="list" type="list" />
             <port name="startIndex" type="int" value="0" min="0" />
             <port name="size" type="int" value="10" min="0" />

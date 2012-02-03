@@ -32,13 +32,13 @@ public class NetworkPane extends Pane {
 
         errorLabel = new JLabel("Error");
         errorLabel.setAlignmentX(JComponent.LEFT_ALIGNMENT);
-        errorLabel.setBorder(null);
+        errorLabel.setBorder(Borders.topBottom(1, new Color(235, 164, 69), 1, new Color(187, 125, 37)));
         errorLabel.setOpaque(true);
         errorLabel.setFont(Theme.SMALL_FONT);
         errorLabel.setPreferredSize(new Dimension(9999, 25));
         errorLabel.setMinimumSize(new Dimension(100, 25));
         errorLabel.setMaximumSize(new Dimension(9999, 25));
-        errorLabel.setBackground(new Color(146, 22, 22));
+        errorLabel.setBackground(new Color(226, 136, 10));
         errorLabel.setForeground(Color.WHITE);
         errorLabel.addMouseListener(new MouseAdapter() {
             @Override

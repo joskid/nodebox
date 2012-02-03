@@ -1,12 +1,11 @@
 package nodebox.node;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
-
-import java.util.Locale;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -50,13 +49,13 @@ public final class Port {
     private final Object value;
     private final Double minimumValue;
     private final Double maximumValue;
+    private final ImmutableList<MenuItem> menuItems;
 
     public static Port intPort(String name, long value) {
         return intPort(name, value, null, null);
     }
 
     public static Port intPort(String name, long value, Integer minimumValue, Integer maximumValue) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
         return new Port(name, TYPE_INT, value, minimumValue != null ? minimumValue.doubleValue() : null, maximumValue != null ? maximumValue.doubleValue() : null);
     }
@@ -66,39 +65,38 @@ public final class Port {
     }
 
     public static Port floatPort(String name, double value, Double minimumValue, Double maximumValue) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
         return new Port(name, TYPE_FLOAT, value, minimumValue, maximumValue);
     }
 
     public static Port booleanPort(String name, boolean value) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_BOOLEAN, value, null, null);
+        return new Port(name, TYPE_BOOLEAN, value);
     }
 
     public static Port stringPort(String name, String value) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_STRING, value, null, null);
+        return new Port(name, TYPE_STRING, value);
+    }
+
+    public static Port stringPort(String name, String value, Iterable<MenuItem> menuItems) {
+        checkNotNull(value, "Value cannot be null.");
+        return new Port(name, TYPE_STRING, value, menuItems);
     }
 
     public static Port pointPort(String name, Point value) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_POINT, value, null, null);
+        return new Port(name, TYPE_POINT, value);
     }
 
     public static Port colorPort(String name, Color value) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(value, "Value cannot be null.");
-        return new Port(name, TYPE_COLOR, value, null, null);
+        return new Port(name, TYPE_COLOR, value);
     }
 
     public static Port customPort(String name, String type) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
-        return new Port(name, type, null, null, null);
+        return new Port(name, type, null);
     }
 
     /**
@@ -109,10 +107,9 @@ public final class Port {
      * @return A new Port.
      */
     public static Port portForType(String name, String type) {
-        checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
         // If the type is not found in the default values, get() returns null, which is what we need for custom types.
-        return new Port(name, type, DEFAULT_VALUES.get(type), null, null);
+        return new Port(name, type, DEFAULT_VALUES.get(type), null, null, ImmutableList.<MenuItem>of());
     }
 
     /**
@@ -121,12 +118,11 @@ public final class Port {
      * @param name        The port name.
      * @param type        The port type.
      * @param stringValue The port value as a string, e.g. "32.5".
-     *
      * @return A new Port.
      */
 
     public static Port parsedPort(String name, String type, String stringValue) {
-        return parsedPort(name, type, stringValue, null, null);
+        return parsedPort(name, type, stringValue, null, null, ImmutableList.<MenuItem>of());
     }
 
     /**
@@ -135,12 +131,12 @@ public final class Port {
      * @param name        The port name.
      * @param type        The port type.
      * @param valueString The port value as a string, e.g. "32.5".
-     * @param minString The minimum value as a string.
-     * @param maxString The maximum value as a string.
-*                    
+     * @param minString   The minimum value as a string.
+     * @param maxString   The maximum value as a string.
+     * @param menuItems   The list of menu items.
      * @return A new Port.
      */
-    public static Port parsedPort(String name, String type, String valueString, String minString, String maxString) {
+    public static Port parsedPort(String name, String type, String valueString, String minString, String maxString, ImmutableList<MenuItem> menuItems) {
         checkNotNull(name, "Name cannot be null.");
         checkNotNull(type, "Type cannot be null.");
         if (STANDARD_TYPES.contains(type)) {
@@ -171,18 +167,34 @@ public final class Port {
                 minimumValue = Double.valueOf(minString);
             if (maxString != null)
                 maximumValue = Double.valueOf(maxString);
-            return new Port(name, type, value, minimumValue, maximumValue);
+            return new Port(name, type, value, minimumValue, maximumValue, menuItems);
         } else {
             return Port.customPort(name, type);
         }
     }
 
+    private Port(String name, String type, Object value) {
+        this(name, type, value, null, null, ImmutableList.<MenuItem>of());
+    }
+
     private Port(String name, String type, Object value, Double minimumValue, Double maximumValue) {
+        this(name, type, value, minimumValue, maximumValue, ImmutableList.<MenuItem>of());
+    }
+
+    private Port(String name, String type, Object value, Iterable<MenuItem> menuItems) {
+        this(name, type, value, null, null, menuItems);
+    }
+
+    private Port(String name, String type, Object value, Double minimumValue, Double maximumValue, Iterable<MenuItem> menuItems) {
+        checkNotNull(name, "Name cannot be null.");
+        checkNotNull(type, "Type cannot be null.");
+        checkNotNull(menuItems, "Menu items cannot be null.");
         this.name = name;
         this.type = type;
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
         this.value = clampValue(value);
+        this.menuItems = ImmutableList.copyOf(menuItems);
     }
 
     public String getName() {
@@ -203,6 +215,14 @@ public final class Port {
 
     public Double getMaximumValue() {
         return maximumValue;
+    }
+
+    public boolean hasMenu() {
+        return !menuItems.isEmpty();
+    }
+
+    public ImmutableList<MenuItem> getMenuItems() {
+        return menuItems;
     }
 
     /**
@@ -419,7 +439,7 @@ public final class Port {
         } else if (maximumValue != null && v > maximumValue) {
             return maximumValue;
         } else {
-        return v;
+            return v;
         }
     }
 

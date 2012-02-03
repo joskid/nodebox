@@ -213,6 +213,16 @@ public class NodeLibraryTest {
             Locale.setDefault(savedLocale);
         }
     }
+    
+    @Test
+    public void testReadMenus() {
+        NodeLibrary menuLibrary = NodeLibrary.load(new File("test/files/menus.ndbx"),NodeRepository.DEFAULT);
+        Port thePort = menuLibrary.getRoot().getInput("thePort");
+        assertTrue(thePort.hasMenu());
+        assertEquals(2, thePort.getMenuItems().size());
+        assertEquals(new MenuItem("a", "Alpha"), thePort.getMenuItems().get(0));
+        assertEquals(new MenuItem("b", "Beta"), thePort.getMenuItems().get(1));
+    }
 
     private void assertPointEquals(Point point, double x, double y) {
         assertEquals(x, point.getX());

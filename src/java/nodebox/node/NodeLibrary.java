@@ -2,6 +2,7 @@ package nodebox.node;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionLibrary;
 import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
@@ -140,7 +141,7 @@ public class NodeLibrary {
             }
         }
         FunctionLibrary[] fl = functionLibraries.toArray(new FunctionLibrary[functionLibraries.size()]);
-        return new NodeLibrary(libraryName,file, rootNode, FunctionRepository.of(fl));
+        return new NodeLibrary(libraryName, file, rootNode, FunctionRepository.of(fl));
     }
 
     private static FunctionLibrary parseLink(XMLStreamReader reader) throws XMLStreamException {
@@ -245,7 +246,32 @@ public class NodeLibrary {
         String value = reader.getAttributeValue(null, "value");
         String min = reader.getAttributeValue(null, "min");
         String max = reader.getAttributeValue(null, "max");
-        return Port.parsedPort(name, type, value, min, max);
+        ImmutableList.Builder<MenuItem> b = ImmutableList.builder();
+
+        while (true) {
+            int eventType = reader.next();
+            if (eventType == XMLStreamConstants.START_ELEMENT) {
+                String tagName = reader.getLocalName();
+                if (tagName.equals("menu")) {
+                    b.add(parseMenuItem(reader));
+                } else {
+                    throw new XMLStreamException("Unknown tag " + tagName, reader.getLocation());
+                }
+            } else if (eventType == XMLStreamConstants.END_ELEMENT) {
+                String tagName = reader.getLocalName();
+                if (tagName.equals("port"))
+                    break;
+            }
+        }
+        return Port.parsedPort(name, type, value, min, max, b.build());
+    }
+
+    private static MenuItem parseMenuItem(XMLStreamReader reader) throws XMLStreamException {
+        String key = reader.getAttributeValue(null, "key");
+        String label = reader.getAttributeValue(null, "label");
+        if (key == null)
+            throw new XMLStreamException("Menu item key cannot be null.", reader.getLocation());
+        return new MenuItem(key, label != null ? label : key);
     }
 
     private static Connection parseConnection(XMLStreamReader reader) throws XMLStreamException {

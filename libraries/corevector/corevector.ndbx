@@ -15,8 +15,18 @@
         <node function="corevector/align" name="align" image="align.png" outputType="geometry" position="90,580"
               prototype="filter" description="Align a shape in relation to the origin.">
             <port type="point" name="position" value="0,0"/>
-            <port type="string" name="halign" value="left" label="Horizontal Align"/>
-            <port type="string" name="valign" value="bottom" label="Vertical Align"/>
+            <port type="string" name="halign" value="left" label="Horizontal Align">
+                <menu key="none" label="No Change"/>
+                <menu key="left" label="Left"/>
+                <menu key="center" label="Center"/>
+                <menu key="right" label="Right"/>
+            </port>
+            <port type="string" name="valign" value="bottom" label="Vertical Align">
+                <menu key="none" label="No Change"/>
+                <menu key="top" label="Top"/>
+                <menu key="middle" label="Middle"/>
+                <menu key="bottom" label="Bottom"/>
+            </port>
         </node>
 
         <node function="corevector/arc" name="arc" image="arc.png" outputType="geometry" position="90,260"

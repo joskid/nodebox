@@ -93,7 +93,7 @@ public class ListFunctions {
     }
 
     public static Iterable<?> combine(Iterable list1, Iterable list2, Iterable list3) {
-        Iterable<Iterable> nonNullLists = Iterables.filter(Lists.newArrayList(list1, list2, list3), Predicates.notNull());
+        Iterable<Iterable<?>> nonNullLists = Iterables.filter(Lists.<Iterable<?>>newArrayList(list1, list2, list3), Predicates.notNull());
         return Iterables.concat(nonNullLists);
     }
 

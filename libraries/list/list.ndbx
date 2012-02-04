@@ -34,6 +34,11 @@
             <port name="list" type="list" />
             <port name="seed" type="int" value="0" />
         </node>
+        <node description="Pick a specified number of items from the list in random order." function="list/pick" name="pick" position="20,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+            <port name="amount" type="int" value="5" />
+            <port name="seed" type="int" value="0" />
+        </node>
         <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="20,100" outputType="list" strategy="as-is">
             <port name="list" type="list" />
         </node>

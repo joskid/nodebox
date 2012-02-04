@@ -29,7 +29,7 @@ public class ListFunctions {
         LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class,
                 "first", "second", "rest", "last",
                 "combine", "subList",
-                "reverse", "sort", "shuffle", "cycle");
+                "reverse", "sort", "shuffle", "pick", "cycle");
     }
 
     /**
@@ -164,6 +164,24 @@ public class ListFunctions {
         List<?> l = Lists.newArrayList(iterable);
         Collections.shuffle(l, new Random(seed));
         return l;
+    }
+
+    /**
+     * Pick a number of items from the list.
+     * <p/>
+     * Shuffling is stable: using the same seed will always return items in the same sort order.
+     *
+     * @param iterable The items to pick from.
+     * @param amount   The amount of items.
+     * @param seed     The random seed.
+     * @return A new iterable with specified amount of items in random order.
+     */
+    public static List<?> pick(Iterable<?> iterable, long amount, long seed) {
+        if (iterable == null || amount <= 0) return ImmutableList.of();
+        List<?> l = Lists.newArrayList(iterable);
+        Collections.shuffle(l, new Random(seed));
+        if (amount >= l.size()) return l;
+        return l.subList(0, (int) amount);
     }
 
     /**

@@ -100,6 +100,28 @@ public class MathFunctions {
         return sum / counter;
     }
 
+    public static double max(Iterable<Double> numbers){
+        double tempmax = 0;
+        for (Double d : numbers){
+            if(d>tempmax){
+                tempmax = d;
+            }
+        }
+        return tempmax;
+
+    }
+
+    public static double min(Iterable<Double> numbers){
+        double tempmin = 100000000;
+        for (Double d : numbers){
+            if(d<tempmin){
+                tempmin = d;
+            }
+        }
+        return tempmin;
+
+    }
+
     public static boolean compare(String comparator, double n1, double n2){
              if (comparator.equals("<")){
                  return n1 < n2;
@@ -116,14 +138,6 @@ public class MathFunctions {
                  throw new IllegalArgumentException("unknown comparison operation "+comparator);
              }
 
-    }
-
-    public static double max(double n1,double n2){
-        return Math.max(n1,n2);
-    }
-
-    public static double min(double n1,double n2){
-        return Math.min(n1,n2);
     }
 
     public static Iterable<Double> makeNumbers(String s) {

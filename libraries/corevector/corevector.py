@@ -484,11 +484,8 @@ def wiggle(shape, scope, offset, seed=0):
     if fn is None: return None
     return fn(shape, offset, seed)
 
-def makePoint(x, y):
+def make_point(x, y):
     return Point(x, y)
-
-def makeColor(r, g, b, a, range):
-    return Color(r / range, g / range, b / range, a / range)
 
 #### Helper Functions ####
 

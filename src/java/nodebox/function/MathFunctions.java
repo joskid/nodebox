@@ -129,6 +129,12 @@ public class MathFunctions {
              else if (comparator.equals(">")){
                  return n1 > n2;
              }
+             else if(comparator.equals("<=")){
+                 return n1 <= n2;
+             }
+             else if(comparator.equals(">=")){
+                 return n1 >= n2;
+             }
              else if (comparator.equals("==")){
                  return n1 == n2;
              }

@@ -20,6 +20,8 @@
             <port type="string" name="comparator" value="&lt;" label="symbol">
                 <menu key="&lt;" label="smaller than"/>
                 <menu key="&gt;" label="greater than"/>
+                <menu key="&lt;=" label="smaller or even than"/>
+                <menu key="&gt;=" label="greater or even than"/>
                 <menu key="==" label="equals"/>
                 <menu key="!=" label="not equals"/>
             </port>

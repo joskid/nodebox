@@ -309,24 +309,32 @@ def rounded_rect(position, width, height, roundness):
     p.roundedRect(position.x, position.y, width, height, roundness.x, roundness.y)
     return p
 
-def reflect(shape, position, angle, keep_original):
+def reflect(shape, position, _angle, keep_original):
     """Mirrors and copies the geometry across an invisible axis."""
     if shape is None: return None
-    g = Geometry()
-    shape = shape.clone()
+    
+    new_shape = shape.cloneAndClear()
+    for contour in shape.contours:
+        c = Contour()
+        for point in contour.points:  
+            d = distance(point.x, point.y, position.x, position.y)
+            a = angle(point.x, point.y, position.x, position.y)
+            x, y = coordinates(position.x, position.y, d * cos(radians(a - _angle)), 180 + _angle)
+            d = distance(point.x, point.y, x, y)
+            a = angle(point.x, point.y, x, y)
+            px, py = coordinates(point.x, point.y, d * 2, a)
+            c.addPoint(Point(px, py, point.type))
+        if contour.closed:
+            c.close()
+        new_shape.add(c)
+        
     if keep_original:
-        g.extend(shape)
+        g = Geometry()
+        g.add(shape)
+        g.add(new_shape)
+        return g
         
-    for point in shape.points:
-        d = distance(point.x, point.y, position.x, position.y)
-        a = angle(point.x, point.y, position.x, position.y)
-        x, y = coordinates(position.x, position.y, d * cos(radians(a - position.angle)), 180 + position.angle)
-        d = distance(point.x, point.y, x, y)
-        a = angle(point.x, point.y, x, y)
-        point.x, point.y = coordinates(point.x, point.y, d * 2, a)
-        
-    g.extend(shape)
-    return g
+    return new_shape
 
 def resample_by_length(shape, length):
     if shape is None: return None

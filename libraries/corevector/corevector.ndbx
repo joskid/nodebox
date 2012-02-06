@@ -240,7 +240,7 @@
             <port type="boolean" name="perContour" value="false" label="Per Contour"/>
         </node>
 
-        <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="geometry" position="410,420"
+        <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="list" position="410,420"
               prototype="filter" description="Generate points within the boundaries of a shape." strategy="flatten">
             <port bounding="hard" type="int" name="amount" value="20" min="0.0"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>

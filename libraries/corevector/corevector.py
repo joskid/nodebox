@@ -226,6 +226,10 @@ def grid(rows, columns, width, height, position):
             points.append(Point(x, y))
     return points
 
+def to_points(shape):
+    if shape is None: return None
+    return shape.points
+
 def group(shapes):
     g = Geometry()
     [g.extend(shape) for shape in shapes]

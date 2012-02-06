@@ -136,7 +136,7 @@
               description="A network of geometry nodes.">
         </node>
 
-        <node function="corevector/grid" name="grid" image="grid.png" outputType="geometry" position="170,90"
+        <node function="corevector/grid" name="grid" image="grid.png" outputType="list" position="170,90"
               prototype="generator" description="Create a grid of points." strategy="flatten">
             <port type="int" name="rows" value="10"/>
             <port type="int" name="columns" value="10"/>
@@ -330,6 +330,11 @@
               position="100,520" prototype="filter"
               description="Change the size of the shape by scaling it.">
             <port type="point" name="scale" value="100,100" label="Scale"/>
+        </node>
+        
+        <node function="corevector/to_points" name = "to_points" image="topoints.png" outputType="list"
+              position="100,540" prototype="filter"
+              description="Return the points of a given shape." strategy="flatten">
         </node>
 
         <node function="corevector/wiggle" name="wiggle" image="wiggle.png" outputType="geometry" position="170,500"

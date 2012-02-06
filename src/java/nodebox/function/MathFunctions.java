@@ -20,7 +20,7 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum", "average", "smallerThan", "biggerThan", "equals", "notEquals", "min","max",
+                "sum", "average", "compare", "min","max",
                 "even", "odd",
                 "makeNumbers",
                 "range",
@@ -100,20 +100,22 @@ public class MathFunctions {
         return sum / counter;
     }
 
-    public static boolean smallerThan(double n1, double n2) {
-        return n1 < n2;
-    }
+    public static boolean compare(String comparator, double n1, double n2){
+             if (comparator.equals("<")){
+                 return n1 < n2;
+             }
+             else if (comparator.equals(">")){
+                 return n1 > n2;
+             }
+             else if (comparator.equals("==")){
+                 return n1 == n2;
+             }
+             else if(comparator.equals("!=")){
+                 return n1 != n2;
+             } else {
+                 throw new IllegalArgumentException("unknown comparison operation "+comparator);
+             }
 
-    public static boolean biggerThan(double n1, double n2) {
-        return n1 > n2;
-    }
-
-    public static boolean equals(double n1, double n2) {
-        return n1 == n2;
-    }
-
-    public static boolean notEquals(double n1, double n2) {
-        return n1 != n2;
     }
 
     public static double max(double n1,double n2){

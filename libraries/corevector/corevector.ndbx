@@ -120,7 +120,7 @@
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="300.0"/>
             <port type="float" name="height" value="300.0"/>
-            <port type="true" name="keep_proportions" value="true"/>
+            <port type="boolean" name="keep_proportions" value="true"/>
         </node>
 
         <node function="corevector/freehand" name="freehand" image="freehand.png" outputType="geometry"

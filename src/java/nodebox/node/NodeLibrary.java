@@ -197,9 +197,9 @@ public class NodeLibrary {
                     String portName = reader.getAttributeValue(null, "name");
                     // Remove the port if it is already on the prototype.
                     if (node.hasInput(portName)) {
-                        node = node.withInputChanged(portName, parsePort(reader));
+                        node = node.withInputChanged(portName, parsePort(reader, node.getInput(portName)));
                     } else {
-                        node = node.withInputAdded(parsePort(reader));
+                        node = node.withInputAdded(parsePort(reader, null));
                     }
                 } else if (tagName.equals("node")) {
                     node = node.withChildAdded(parseNode(reader, node, nodeRepository));
@@ -240,12 +240,28 @@ public class NodeLibrary {
         }
     }
 
-    private static Port parsePort(XMLStreamReader reader) throws XMLStreamException {
+    private static Port parsePort(XMLStreamReader reader, Port prototype) throws XMLStreamException {
+        // Name and type are always required.
         String name = reader.getAttributeValue(null, "name");
         String type = reader.getAttributeValue(null, "type");
+        Port port;
+        if (prototype == null) {
+            port = Port.portForType(name, type);
+        } else {
+            port = prototype;
+        }
+
+        // Value, min, max are optional and could come from the prototype.
         String value = reader.getAttributeValue(null, "value");
+        if (value != null)
+            port = port.withParsedAttribute(Port.Attribute.VALUE, value);
         String min = reader.getAttributeValue(null, "min");
+        if (min != null)
+            port = port.withParsedAttribute(Port.Attribute.MINIMUM_VALUE, min);
         String max = reader.getAttributeValue(null, "max");
+        if (max != null)
+            port = port.withParsedAttribute(Port.Attribute.MAXIMUM_VALUE, max);
+
         ImmutableList.Builder<MenuItem> b = ImmutableList.builder();
 
         while (true) {
@@ -263,7 +279,10 @@ public class NodeLibrary {
                     break;
             }
         }
-        return Port.parsedPort(name, type, value, min, max, b.build());
+        ImmutableList<MenuItem> items = b.build();
+        if (!items.isEmpty())
+            port = port.withMenuItems(items);
+        return port;
     }
 
     private static MenuItem parseMenuItem(XMLStreamReader reader) throws XMLStreamException {

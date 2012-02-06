@@ -223,6 +223,43 @@ public class NodeLibraryTest {
         assertEquals(new MenuItem("a", "Alpha"), thePort.getMenuItems().get(0));
         assertEquals(new MenuItem("b", "Beta"), thePort.getMenuItems().get(1));
     }
+    
+    @Test
+    public void testMenuSerialization() {
+        Node originalRoot = makeLetterMenuNode();
+        NodeLibrary originalLibrary = NodeLibrary.create("test", originalRoot);
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        Port letterPort = library.getRoot().getInput("letter");
+        assertTrue(letterPort.hasMenu());
+        assertEquals(2, letterPort.getMenuItems().size());
+        assertEquals(new MenuItem("a", "Alpha"), letterPort.getMenuItems().get(0));
+        assertEquals(new MenuItem("b", "Beta"), letterPort.getMenuItems().get(1));
+    }
+
+    /**
+     * Test if a port using a menu prototype is correctly serialized.
+     */
+    @Test
+    public void testMenuPrototypeSerialization() {
+        Node letterPrototype = makeLetterMenuNode();
+        Node letterNode = letterPrototype.extend().withName("my_letter").withInputValue("letter", "b");
+        Node originalRoot = Node.ROOT
+                .withChildAdded(letterPrototype)
+                .withChildAdded(letterNode);
+        NodeLibrary originalLibrary = NodeLibrary.create("test", originalRoot);
+        NodeLibrary library = NodeLibrary.load("test", originalLibrary.toXml(), NodeRepository.of());
+        Port letterPort = library.getRoot().getChild("my_letter").getInput("letter");
+        assertTrue(letterPort.hasMenu());
+        assertEquals(2, letterPort.getMenuItems().size());
+        assertEquals("b", letterPort.getValue());
+    }
+    
+    public Node makeLetterMenuNode() {
+        MenuItem alpha = new MenuItem("a", "Alpha");
+        MenuItem beta = new MenuItem("b", "Beta");
+        return Node.ROOT.withName("letter")
+                .withInputAdded(Port.stringPort("letter", "a", ImmutableList.of(alpha, beta)));
+    }
 
     private void assertPointEquals(Point point, double x, double y) {
         assertEquals(x, point.getX());

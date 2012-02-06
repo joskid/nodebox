@@ -20,6 +20,8 @@ public final class Port {
     public static final String TYPE_POINT = "point";
     public static final String TYPE_COLOR = "color";
 
+    public enum Attribute {NAME, TYPE, VALUE, MINIMUM_VALUE, MAXIMUM_VALUE, MENU_ITEMS}
+
     /**
      * The UI control for this port. This defines how the port is represented in the user interface.
      */
@@ -470,6 +472,72 @@ public final class Port {
             // The value of a custom type should always be null.
             return value == null;
         }
+    }
+
+    public Object getAttributeValue(Attribute attribute) {
+        if (attribute == Attribute.NAME) {
+            return getName();
+        } else if (attribute == Attribute.TYPE) {
+            return getType();
+        } else if (attribute == Attribute.MINIMUM_VALUE) {
+            return getMinimumValue();
+        } else if (attribute == Attribute.MAXIMUM_VALUE) {
+            return getMaximumValue();
+        } else if (attribute == Attribute.MENU_ITEMS) {
+            return getMenuItems();
+        } else {
+            throw new AssertionError("Unknown port attribute " + attribute);
+        }
+    }
+
+    private static Object parseValue(String type, String valueString) {
+        if (type.equals("int")) {
+            return Long.valueOf(valueString);
+        } else if (type.equals("float")) {
+            return Double.valueOf(valueString);
+        } else if (type.equals("string")) {
+            return valueString;
+        } else if (type.equals("boolean")) {
+            return Boolean.valueOf(valueString);
+        } else if (type.equals("point")) {
+            return Point.valueOf(valueString);
+        } else if (type.equals("color")) {
+            return Color.valueOf(valueString);
+        } else {
+            throw new AssertionError("Unknown type " + type);
+        }
+    }
+
+    public Port withMenuItems(Iterable<MenuItem> items) {
+        checkNotNull(items);
+        checkArgument(type.equals(Port.TYPE_STRING), "You can only use menu items on string ports, not %s", this);
+        return new Port(name, type, value, minimumValue, maximumValue, items);
+    }
+
+    public Port withParsedAttribute(Attribute attribute, String valueString) {
+        checkNotNull(valueString);
+
+        String name = this.name;
+        String type = this.type;
+        Object value = this.value;
+        Double minimumValue = this.minimumValue;
+        Double maximumValue = this.maximumValue;
+
+        switch (attribute) {
+            case VALUE:
+                checkArgument(STANDARD_TYPES.contains(type), "Port %s: you can only set the value for one of the standard types, not %s (value=%s)", name, type, valueString);
+                value = parseValue(type, valueString);
+                break;
+            case MINIMUM_VALUE:
+                minimumValue = Double.valueOf(valueString);
+                break;
+            case MAXIMUM_VALUE:
+                maximumValue = Double.valueOf(valueString);
+                break;
+            default:
+                throw new AssertionError("You cannot use withParsedAttribute with attribute " + attribute);
+        }
+        return new Port(name, type, value, minimumValue, maximumValue, menuItems);
     }
 
     //// Object overrides ////

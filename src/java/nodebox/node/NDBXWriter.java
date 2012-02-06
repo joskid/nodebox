@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import com.google.common.base.Objects;
 import nodebox.function.CoreFunctions;
 import nodebox.function.FunctionLibrary;
 import nodebox.function.FunctionRepository;
@@ -19,10 +20,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -242,6 +240,27 @@ public class NDBXWriter {
         children.remove(child);
     }
 
+    /**
+     * Check if the given attribute should be written.
+     * <p/>
+     * The attribute should be written if  it's value is different from the prototype value.
+     *
+     * @param node      The node.
+     * @param port      The port.
+     * @param attribute The name of the attribute.
+     * @return true if the attribute should be written.
+     */
+    private static boolean shouldWriteAttribute(Node node, Port port, Port.Attribute attribute) {
+        checkArgument(node != Node.ROOT, "You cannot write out the _root node.");
+        Port prototypePort = node.getPrototype().getInput(port.getName());
+        // If there is no prototype port, we should always write the attribute.
+        if (prototypePort == null) return true;
+        Object prototypeValue = prototypePort.getAttributeValue(attribute);
+        Object value = port.getAttributeValue(attribute);
+        // Objects.equal does the correct null-comparison for min / max values.
+        return !Objects.equal(prototypeValue, value);
+    }
+
     private static void writePort(Document doc, Element parent, Node node, Port port, Port.Direction direction) {
         // We only write out the ports that have changed with regards to the prototype.
         Node protoNode = node.getPrototype();
@@ -255,11 +274,24 @@ public class NDBXWriter {
         el.setAttribute("type", port.getType());
         if (port.isStandardType())
             el.setAttribute("value", port.stringValue());
-        if (port.getMinimumValue() != null)
-        el.setAttribute("min", String.valueOf(port.getMinimumValue()));
-        if (port.getMaximumValue() != null)
-            el.setAttribute("max", String.valueOf(port.getMaximumValue()));
+        if (shouldWriteAttribute(node, port, Port.Attribute.MINIMUM_VALUE))
+            if (port.getMinimumValue() != null)
+                el.setAttribute("min", String.format(Locale.US, "%s", port.getMinimumValue()));
+        if (shouldWriteAttribute(node, port, Port.Attribute.MAXIMUM_VALUE))
+            if (port.getMaximumValue() != null)
+                el.setAttribute("max", String.format(Locale.US, "%s", port.getMaximumValue()));
+        if (shouldWriteAttribute(node, port, Port.Attribute.MENU_ITEMS))
+            writeMenuItems(doc, el, port.getMenuItems());
         parent.appendChild(el);
+    }
+
+    private static void writeMenuItems(Document doc, Element parent, List<MenuItem> menuItems) {
+        for (MenuItem item : menuItems) {
+            Element el = doc.createElement("menu");
+            el.setAttribute("key", item.getKey());
+            el.setAttribute("label", item.getLabel());
+            parent.appendChild(el);
+        }
     }
 
     private static void writeConnection(Document doc, Element parent, Connection conn) {

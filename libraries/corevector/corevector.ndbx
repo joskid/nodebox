@@ -58,8 +58,8 @@
             <port type="int" name="invert_difference" value="0"/>
         </node>
 
-        <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580"
-              prototype="filter" description="Connects all points in a path.">
+        <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580" prototype="generator" description="Connects all points in a path." strategy="wrap-in-list">
+            <port type="list" name="points"/>
             <port type="boolean" name="closed" value="true"/>
         </node>
 

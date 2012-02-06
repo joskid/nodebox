@@ -163,6 +163,7 @@ public class NodeContext {
      * <p/>
      * Wrap-in-list nodes receive a list and return a single value.
      * The NodeContext wraps this value into a list with one element.
+     * If the single value is null, an empty list is returned.
      * <p/>
      * Example of wrap-in-list nodes are "sum", "avg".
      *
@@ -174,7 +175,11 @@ public class NodeContext {
     private Iterable<?> renderWrapInListStrategy(Node node, Function function, List<ValueOrList> inputValues) {
         List<Object> arguments = inputValuesToArguments(inputValues);
         Object returnValue = invokeFunction(node, function, arguments);
-        return ImmutableList.of(returnValue);
+        if (returnValue != null) {
+            return ImmutableList.of(returnValue);
+        } else {
+            return ImmutableList.of();
+        }
     }
 
     /**

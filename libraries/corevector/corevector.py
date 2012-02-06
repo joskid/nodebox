@@ -72,14 +72,15 @@ def compound(shape1, shape2, function="united", invert_difference=False):
         return shape1.intersected(shape2)
     return None
 
-def connect(shape, closed=True):
+def connect(points, closed=True):
     """Connects all points in a path."""
-    if shape is None: return None
-    if shape.pointCount < 2: return None
-    start = shape.points[0]
+    if not points: return None
+    if len(points) < 2: return None
+    points = list(points)
+    start = points[0]
     p = Path()
     p.moveto(start.x, start.y)
-    for point in shape.points[1:]:
+    for point in points[1:]:
         p.lineto(point.x, point.y)
     if closed:
         p.close()

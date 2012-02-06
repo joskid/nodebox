@@ -55,7 +55,7 @@
                 <menu key="subtracted" label="Difference"/>
                 <menu key="intersected" label="Intersection"/>
             </port>
-            <port type="int" name="invert_difference" value="0"/>
+            <port type="boolean" name="invert_difference" value="false"/>
         </node>
 
         <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580" prototype="generator" description="Connects all points in a path." strategy="wrap-in-list">
@@ -154,7 +154,7 @@
               position="250,90"
               prototype="generator" description="Import geometry from a SVG file.">
             <port type="string" name="file" value=""/>
-            <port type="int" name="centered" value="0" label="Center on Canvas"/>
+            <port type="boolean" name="centered" value="false" label="Center on Canvas"/>
             <port type="point" name="position" value="0,0"/>
         </node>
 
@@ -172,7 +172,7 @@
             <port type="float" name="distance" value="120.0"/>
         </node>
 
-        <node function="corevector/makePoint" name="Make Point" image="filter.png" outputType="geometry"
+        <node function="corevector/make_point" name="Make Point" image="filter.png" outputType="geometry"
               position="170,510"
               prototype="generator" description="Creates a point based on two numbers.">
             <port type="float" name="x" value="0.0" label="x"/>
@@ -193,7 +193,7 @@
             <port type="point" name="position" value="0,0"/>
             <port bounding="hard" type="float" name="radius" value="100.0" min="0.0"/>
             <port bounding="hard" type="int" name="sides" value="3" min="3.0"/>
-            <port type="int" name="align" value="0"/>
+            <port type="boolean" name="align" value="false"/>
         </node>
 
         <node function="corevector/rect" name="rect" image="rect.png" outputType="geometry" position="330,90"
@@ -224,7 +224,7 @@
             <port type="string" name="method" value="length"/>
             <port bounding="hard" type="float" name="length" value="10.0" min="1.0"/>
             <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
-            <port type="int" name="perContour" value="0" label="Per Contour"/>
+            <port type="boolean" name="perContour" value="false" label="Per Contour"/>
         </node>
 
         <node function="corevector/resample_by_length" name="resample_by_length" image="resample.png"
@@ -237,7 +237,7 @@
               outputType="geometry"
               position="330,420" prototype="filter" description="Distribute points along a shape.">
             <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
-            <port type="int" name="perContour" value="0" label="Per Contour"/>
+            <port type="boolean" name="perContour" value="false" label="Per Contour"/>
         </node>
 
         <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="geometry" position="410,420"

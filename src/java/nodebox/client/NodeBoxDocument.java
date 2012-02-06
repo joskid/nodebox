@@ -1158,7 +1158,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     public void deleteSelection() {
-        removeNodes(networkView.getSelectedNodes());
+        java.util.List<Node> selectedNodes = networkView.getSelectedNodes();
+        if (!selectedNodes.isEmpty())
+            removeNodes(networkView.getSelectedNodes());
+        else if (networkView.hasSelectedConnection())
+            networkView.deleteSelectedConnection();
     }
 
     /**

@@ -9,26 +9,28 @@ from nodebox.util.Geometry import coordinates, angle, distance
 def align(shape, position, halign="center", valign="middle"):
     """Align a shape in relation to the origin."""
     if shape is None: return None
-    new_shape = shape.clone()
     x, y = position.x, position.y
+    bounds = shape.bounds
     if halign == "left":
-        dx = x - new_shape.bounds.x
+        dx = x - bounds.x
     elif halign == "right":
-        dx = x - new_shape.bounds.x - new_shape.bounds.width
+        dx = x - bounds.x - bounds.width
     elif halign == "center":
-        dx = x - new_shape.bounds.x - new_shape.bounds.width / 2
+        dx = x - bounds.x - bounds.width / 2
     else:
         dx = 0
     if valign == "top":
-        dy = y - new_shape.bounds.y
+        dy = y - bounds.y
     elif valign == "bottom":
-        dy = y - new_shape.bounds.y - new_shape.bounds.height
+        dy = y - bounds.y - bounds.height
     elif valign == "middle":
-        dy = y - new_shape.bounds.y - new_shape.bounds.height / 2
+        dy = y - bounds.y - bounds.height / 2
     else:
         dy = 0
-    new_shape.translate(dx, dy)
-    return new_shape
+        
+    t = Transform()
+    t.translate(dx, dy)
+    return t.map(shape)
 
 def arc(position, width, height, start_angle, degrees, arc_type):
     """Create an arc."""
@@ -60,23 +62,14 @@ def compound(shape1, shape2, function="united", invert_difference=False):
     # The invert turns the operation around.
     if invert_difference:
         shape1, shape2 = shape2, shape1
-    
-    # We're not changing the original geometry so there is no need to clone.
-    # Unite all the paths from geometry A.
-    compound1 = reduce(lambda p1, p2: p1.united(p2), shape1.paths, None)
-    # Unite all the paths from geometry B.
-    compound2 = reduce(lambda p1, p2: p1.united(p2), shape2.paths, None)
 
-    # Final check to see if the two compound paths contain data.
-    if compound1 is None or compound2 is None: return None
     # Combine the two compound paths using the given function.
     if function == "united":
-        return compound1.united(compound2)
+        return shape1.united(shape2)
     elif f == "subtracted":
-        return compound1.subtracted(compound2)
+        return shape1.subtracted(shape2)
     elif f == "intersected":
-        return compound1.intersected(compound2)
-    else:
+        return shape1.intersected(shape2)
         return None
 
 def connect(shape, closed=True):

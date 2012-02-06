@@ -50,7 +50,11 @@
               position="90,340" prototype="generator" description="Add, subtract or intersect geometry.">
             <port type="geometry" name="shape1"/>
             <port type="geometry" name="shape2"/>
-            <port type="string" name="function" value="united"/>
+            <port type="string" name="function" value="united" label="Union">
+                <menu key="united" label="Union"/>
+                <menu key="subtracted" label="Difference"/>
+                <menu key="intersected" label="Intersection"/>
+            </port>
             <port type="int" name="invert_difference" value="0"/>
         </node>
 

@@ -66,11 +66,11 @@ def compound(shape1, shape2, function="united", invert_difference=False):
     # Combine the two compound paths using the given function.
     if function == "united":
         return shape1.united(shape2)
-    elif f == "subtracted":
+    elif function == "subtracted":
         return shape1.subtracted(shape2)
-    elif f == "intersected":
+    elif function == "intersected":
         return shape1.intersected(shape2)
-        return None
+    return None
 
 def connect(shape, closed=True):
     """Connects all points in a path."""

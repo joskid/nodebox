@@ -143,7 +143,7 @@ public class ListFunctions {
     public static List<? extends Comparable> sort(Iterable<? extends Comparable> iterable) {
         if (iterable == null) return ImmutableList.of();
         try {
-            return Ordering.natural().sortedCopy(iterable);
+            return ImmutableList.copyOf(Ordering.natural().sortedCopy(iterable));
         } catch (ClassCastException e) {
             // This error occurs when elements of different types are in the list.
             throw new IllegalArgumentException("To sort a list, all elements in the list need to be of the same type.");
@@ -163,7 +163,7 @@ public class ListFunctions {
         if (iterable == null) return ImmutableList.of();
         List<?> l = Lists.newArrayList(iterable);
         Collections.shuffle(l, new Random(seed));
-        return l;
+        return ImmutableList.copyOf(l);
     }
 
     /**
@@ -180,8 +180,8 @@ public class ListFunctions {
         if (iterable == null || amount <= 0) return ImmutableList.of();
         List<?> l = Lists.newArrayList(iterable);
         Collections.shuffle(l, new Random(seed));
-        if (amount >= l.size()) return l;
-        return l.subList(0, (int) amount);
+        if (amount >= l.size()) return ImmutableList.copyOf(l);
+        return ImmutableList.copyOf(l.subList(0, (int) amount));
     }
 
     /**

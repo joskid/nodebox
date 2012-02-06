@@ -20,7 +20,7 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum", "average", "smallerThan", "biggerThan", "equals", "notEquals",
+                "sum", "average", "smallerThan", "biggerThan", "equals", "notEquals", "min","max",
                 "even", "odd",
                 "makeNumbers",
                 "range",
@@ -114,6 +114,14 @@ public class MathFunctions {
 
     public static boolean notEquals(double n1, double n2) {
         return n1 != n2;
+    }
+
+    public static double max(double n1,double n2){
+        return Math.max(n1,n2);
+    }
+
+    public static double min(double n1,double n2){
+        return Math.min(n1,n2);
     }
 
     public static Iterable<Double> makeNumbers(String s) {

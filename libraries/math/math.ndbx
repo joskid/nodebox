@@ -49,7 +49,15 @@
         <node description="Transform a string to a list of numbers." function="math/makeNumbers" name="make_numbers" position="20,200" strategy="flatten">
             <port name="string" type="string" value="11 22 33"/>
         </node>
+        <node description="Returns the greater of two values" function="math/max" name="max" position="120,100">
+            <port name="value1" type="float" value="0.0"/>
+            <port name="value2" type="float" value="0.0"/>
+        </node>
         <node description="Multiply two numbers." function="math/multiply" name="multiply" position="220,100">
+            <port name="value1" type="float" value="0.0"/>
+            <port name="value2" type="float" value="0.0"/>
+        </node>
+        <node description="Returns the smaller of two values" function="math/min" name="min" position="120,100">
             <port name="value1" type="float" value="0.0"/>
             <port name="value2" type="float" value="0.0"/>
         </node>

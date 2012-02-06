@@ -71,6 +71,7 @@ public class NodeLibraryControllerTest {
         assertNull(controller.getNodeLibrary().getNodeForPath("/child"));
     }
 
+    @Test
     public void testSetPortValue() {
         Node numberNode = Node.ROOT.withName("number").withInputAdded(Port.intPort("value", 10));
         controller.addNode("/", numberNode);
@@ -139,6 +140,21 @@ public class NodeLibraryControllerTest {
         assertEquals(2, controller.getNodeLibrary().getRoot().getConnections().size());
         controller.removeNode("/", "number");
         assertEquals(0, controller.getNodeLibrary().getRoot().getConnections().size());
+    }
+    
+    @Test
+    public void testRemoveNodeWithRendered() {
+        Node alpha = Node.ROOT.withName("alpha");
+        controller.addNode("/", alpha);
+        controller.setRenderedChild("/", "alpha");
+        Node beta = Node.ROOT.withName("beta");
+        controller.addNode("/", beta);
+        assertEquals("alpha", controller.getNodeLibrary().getRoot().getRenderedChildName());
+        controller.removeNode("/", "beta");
+        assertEquals("alpha", controller.getNodeLibrary().getRoot().getRenderedChildName());
+        controller.removeNode("/", "alpha");
+        assertEquals("", controller.getNodeLibrary().getRoot().getRenderedChildName());
+        assertNull(controller.getNodeLibrary().getRoot().getRenderedChild());
     }
 
     private void createSimpleConnection() {

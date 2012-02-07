@@ -341,6 +341,11 @@
         <node function="corevector/wiggle" name="wiggle" image="wiggle.png" outputType="geometry" position="170,500"
               prototype="filter" description="Shift points by a random amount.">
             <port type="string" name="scope" value="points"/>
+            <port type="string" name="scope" value="points">
+                <menu key="points" label="Points"/>
+                <menu key="contours" label="Contours"/>
+                <menu key="paths" label="Paths"/>
+            </port>
             <port type="point" name="offset" value="10,10" label="Offset"/>
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
@@ -352,12 +357,11 @@
             <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
         </node>
 
-        <node name="wiggle_paths" position="170,510"
+        <node function="corevector/wiggle_paths" name="wiggle_paths" position="170,510"
               prototype="wiggle_points" description="Shift paths by a random amount."/>
 
-        <node name="wiggle_contours" position="170,510"
-              prototype="wiggle_points" description="Shift contours by a random amount."/>
-
+        <node function="corevector/wiggle_contours" name="wiggle_contours" position="170,510"
+              prototype="wiggle_points" description="Shift paths by a random amount."/>
 
     </node>
 </ndbx>

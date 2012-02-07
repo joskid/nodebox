@@ -460,38 +460,101 @@ def rotate(shape, angle):
     if shape is None: return None
     return Transform.rotated(angle).map(shape)
 
-def wiggle_points(shape, offset, seed=0):
-    _seed(seed)
-    new_shape = shape.clone()
-    for point in new_shape.points:
+def _with_seed(fn):
+    def decorated_function(*args, **kwargs):
+        seed = args[-1]
+        _seed(seed)
+        new_args = args[:-1]
+        return fn(*new_args, **kwargs)
+    return decorated_function
+
+def _map_points(fn):
+    def _function(shape, *args, **kwargs):
+        if isinstance(shape, list):
+            return fn(shape, *args, **kwargs)
+        elif isinstance(shape, Point):
+            return fn([shape], *args, **kwargs)[0]
+        elif isinstance(shape, Contour):
+            new_points = fn(shape.points, *args, **kwargs)
+            return Contour(new_points, shape.closed)
+        elif isinstance(shape, Path):
+            path = shape.cloneAndClear()
+            for contour in shape.contours:
+                path.add(_function(contour, *args, **kwargs))
+            return path
+        elif isinstance(shape, Geometry):
+            g = Geometry()
+            for p in shape.paths:
+                g.add(_function(p, *args, **kwargs))
+            return g
+    return _function
+    
+def _map_contours(fn):
+    def _function(shape, *args, **kwargs):
+        if isinstance(shape, list):
+            return fn(shape, *args, **kwargs)
+        elif isinstance(shape, Contour):
+            return fn([shape], *args, **kwargs)[0]
+        elif isinstance(shape, Path):
+            path = shape.cloneAndClear()
+            for contour in fn(shape.contours, *args, **kwargs):
+                path.add(contour)
+            return path
+        elif isinstance(shape, Geometry):
+            g = Geometry()
+            for p in shape.paths:
+                g.add(_function(p, *args, **kwargs))
+            return g
+    return _function
+
+def _map_paths(fn):
+    def _function(shape, *args, **kwargs):
+        if isinstance(shape, list):
+            return fn(shape, *args, **kwargs)
+        elif isinstance(shape, Path):
+            return fn([shape], *args, **kwargs)[0]
+        elif isinstance(shape, Geometry):
+            g = Geometry()
+            for path in fn(shape.paths, *args, **kwargs):
+                g.add(path)
+            return g
+    return _function
+
+# todo: improve seed argument detection 
+@_with_seed
+@_map_points
+def wiggle_points(points, offset):
+    new_points = []
+    for point in points:
         dx = (uniform(0, 1) - 0.5) * offset.x * 2
         dy = (uniform(0, 1) - 0.5) * offset.y * 2
-        point.x += dx
-        point.y += dy
-    return new_shape
+        new_points.append(Point(point.x + dx, point.y + dy, point.type))
+    return new_points
     
-def wiggle_paths(shape, offset, seed=0):
-    _seed(seed)
-    new_shape = Geometry()
-    for path in shape.paths:
+@_with_seed
+@_map_paths
+def wiggle_paths(paths, offset):
+    new_paths = []
+    for path in paths:
         dx = (uniform(0, 1) - 0.5) * offset.x * 2
         dy = (uniform(0, 1) - 0.5) * offset.y * 2
         t = Transform()
         t.translate(dx, dy)
-        new_shape.add(t.map(path))
-    return new_shape
+        new_paths.append(t.map(path))
+    return new_paths
 
-def wiggle_contours(shape, offset, seed=0):
-    _seed(seed)
-    new_shape = shape.clone()
-    for path in new_shape.paths:
-        for contour in path.contours:
-            dx = (uniform(0, 1) - 0.5) * offset.x * 2
-            dy = (uniform(0, 1) - 0.5) * offset.y * 2
-            for point in contour.points:
-                point.x += dx
-                point.y += dy
-    return new_shape
+@_with_seed
+@_map_contours
+def wiggle_contours(contours, offset):
+    new_contours = []
+    for contour in contours:
+        new_points = []
+        dx = (uniform(0, 1) - 0.5) * offset.x * 2
+        dy = (uniform(0, 1) - 0.5) * offset.y * 2
+        for point in contour.points:
+            new_points.append(Point(point.x + dx, point.y + dy, point.type))
+        new_contours.append(Contour(new_points, contour.closed))
+    return new_contours
     
 def wiggle(shape, scope, offset, seed=0):
     """Shift points by a random amount."""

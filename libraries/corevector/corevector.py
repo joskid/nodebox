@@ -232,7 +232,13 @@ def to_points(shape):
 
 def group(shapes):
     g = Geometry()
-    [g.extend(shape) for shape in shapes]
+    for shape in shapes:
+        if isinstance(shape, Geometry):
+            g.extend(shape)
+        elif isinstance(shape, Path):
+            g.add(shape)
+        else:
+            raise "Unable to group %ss. I can only group paths or geometry objects."  % shape
     return g
 
 def import_svg(file_name, centered=False, position=Point.ZERO):

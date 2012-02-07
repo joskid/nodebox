@@ -28,7 +28,7 @@ public class ListFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class,
                 "first", "second", "rest", "last",
-                "combine", "subList",
+                "combine", "subList", "shift",
                 "reverse", "sort", "shuffle", "pick", "cycle");
     }
 
@@ -119,6 +119,15 @@ public class ListFunctions {
         if (iterable == null) return ImmutableList.of();
         Iterable<?> skipped = Iterables.skip(iterable, (int) startIndex);
         return Iterables.limit(skipped, (int) size);
+    }
+    
+    public static Iterable<?> shift(Iterable<?> iterable, long amount) {
+        if (iterable == null) return ImmutableList.of();
+        int a = (int) amount % Iterables.size(iterable);
+        if (a == 0) return iterable;
+        Iterable<?> tail = Iterables.skip(iterable, a);
+        Iterable<?> head = Iterables.limit(iterable, a);
+        return Iterables.concat(tail, head);
     }
 
     /**

@@ -42,5 +42,9 @@
         <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="20,100" outputType="list" strategy="as-is">
             <port name="list" type="list" />
         </node>
+        <node description="Shift the elements of a list a number of times." function="list/shift" name="shift" position="40,100" outputType="list" strategy="as-is">
+            <port name="list" type="list" />
+            <port name="amount" type="int" value="1" />
+        </node>
     </node>
 </ndbx>

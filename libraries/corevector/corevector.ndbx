@@ -72,11 +72,6 @@
             <port type="point" name="scale" value="0,0" label="Scale"/>
         </node>
 
-        <node function="corevector/curve" name="curve" image="curve.png" outputType="geometry" position="330,170"
-              prototype="generator" description="Create an arbitrary curve or path">
-            <port type="string" name="path" value=""/>
-        </node>
-
         <node function="corevector/datastamp" name="datastamp" image="csv.png" outputType="geometry" position="250,670"
               prototype="filter" description="Generate new geometry for each row in a CSV file.">
             <port type="string" name="file" value=""/>
@@ -107,11 +102,6 @@
             <port type="string" name="vertical" value="none"/>
         </node>
 
-        <node function="corevector/edit" name="edit" image="edit.png" outputType="geometry" position="330,340"
-              prototype="filter" description="Edit points non-destructively.">
-            <port type="string" name="pointDeltas" value="" label="Point Deltas"/>
-        </node>
-
         <node function="corevector/ellipse" name="ellipse" image="ellipse.png" outputType="geometry" position="90,90"
               prototype="generator" description="Create ellipses and circles.">
             <port type="point" name="position" value="0,0"/>
@@ -125,11 +115,6 @@
             <port type="float" name="width" value="300.0"/>
             <port type="float" name="height" value="300.0"/>
             <port type="boolean" name="keep_proportions" value="true"/>
-        </node>
-
-        <node function="corevector/freehand" name="freehand" image="freehand.png" outputType="geometry"
-              position="410,170" prototype="generator" description="Freehand drawing.">
-            <port type="string" name="path" value=""/>
         </node>
 
         <node name="geonet" image="geonet.png" outputType="geometry" position="10,10"

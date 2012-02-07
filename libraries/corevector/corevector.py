@@ -430,7 +430,7 @@ def textpath(text, font_name="Verdana", font_size=24, align="CENTER", position=P
         pass
     return t.path
     
-def transform(shape, order, translate, angle, scale):
+def transform(shape, order, translate, rotate, scale):
     """Transforms the location, rotation and scale of a shape."""
     if shape is None: return None
     t = Transform()
@@ -439,7 +439,7 @@ def transform(shape, order, translate, angle, scale):
         if op == 't':
             t.translate(translate.x, translate.y)
         elif op == 'r':
-            t.rotate(angle)
+            t.rotate(rotate)
         elif op == 's':
             t.scale(scale.x / 100, scale.y / 100)
     # Transform.map clones and transforms the geometry.

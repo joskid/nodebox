@@ -295,7 +295,12 @@
             <port type="string" name="text" value="hello"/>
             <port type="string" name="font_name" value="Verdana"/>
             <port type="float" name="font_size" value="24.0"/>
-            <port type="string" name="align" value="CENTER"/>
+            <port type="string" name="align" value="CENTER">
+                <menu key="LEFT" label="Left"/>
+                <menu key="CENTER" label="Center"/>
+                <menu key="RIGHT" label="Right"/>
+                <menu key="JUSTIFY" label="Justify"/>
+            </port>
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="0.0"/>
             <port type="float" name="height" value="0.0"/>

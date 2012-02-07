@@ -158,7 +158,7 @@ public class MathFunctions {
     }
 
     public static Iterable<Double> randomNumbers(long amount, double rmin, double rmax, long seed) {
-        //new Random(seed);
+        new Random(seed);
         ArrayList<Double> numbers = new ArrayList<Double>();
         for (int i=0;i<amount;i++){
          double temp = rmin+(Math.random()*rmax);

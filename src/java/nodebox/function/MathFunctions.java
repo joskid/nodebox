@@ -7,6 +7,7 @@ import nodebox.util.Geometry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -156,7 +157,8 @@ public class MathFunctions {
         return numbers;
     }
 
-    public static Iterable<Double> randomNumbers(double amount, double rmin, double rmax) {
+    public static Iterable<Double> randomNumbers(long amount, double rmin, double rmax, long seed) {
+        new Random(seed);
         ArrayList<Double> numbers = new ArrayList<Double>();
         for (int i=0;i<amount;i++){
          double temp = rmin+(Math.random()*rmax);

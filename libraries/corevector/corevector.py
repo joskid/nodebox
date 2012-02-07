@@ -91,6 +91,8 @@ def connect(points, closed=True):
 def copy(shape, copies, transform_order='tsr', translate=Point.ZERO, rotate=0, scale=Point.ZERO):
     """Create multiple copies of a shape."""
     if shape is None: return None
+    if isinstance(shape, Path):
+        shape = shape.asGeometry()
     g = Geometry()
     tx = ty = r = 0.0
     sx = sy = 1.0
@@ -104,8 +106,7 @@ def copy(shape, copies, transform_order='tsr', translate=Point.ZERO, rotate=0, s
                 t.rotate(r)
             elif op == 's':
                 t.scale(sx, sy)
-        new_shape = t.map(shape)
-        g.extend(new_shape)
+        g.extend(t.map(shape))
         tx += translate.x
         ty += translate.y
         r += rotate

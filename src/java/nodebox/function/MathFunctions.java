@@ -161,7 +161,7 @@ public class MathFunctions {
         new Random(seed);
         ArrayList<Double> numbers = new ArrayList<Double>();
         for (int i=0;i<amount;i++){
-         double temp = rmin+(Math.random()*rmax);
+         double temp = rmin + (Math.random() * (rmax-rmin));
             numbers.add(temp);
         }
          return numbers;

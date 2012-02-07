@@ -548,16 +548,15 @@ def wiggle_paths(paths, offset):
 def wiggle_contours(contours, offset):
     new_contours = []
     for contour in contours:
-        new_points = []
         dx = (uniform(0, 1) - 0.5) * offset.x * 2
         dy = (uniform(0, 1) - 0.5) * offset.y * 2
-        for point in contour.points:
-            new_points.append(Point(point.x + dx, point.y + dy, point.type))
-        new_contours.append(Contour(new_points, contour.closed))
+        t = Transform()
+        t.translate(dx, dy)
+        new_contours.append(Contour(t.map(contour.points), contour.closed))
     return new_contours
     
 def wiggle(shape, scope, offset, seed=0):
-    """Shift points by a random amount."""
+    """Shift points/contours/paths by a random amount."""
     if shape is None: return None
     functions = { "points": wiggle_points, 
                   "contours": wiggle_contours, 

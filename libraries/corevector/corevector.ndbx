@@ -239,7 +239,7 @@
         <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="list" position="410,420"
               prototype="filter" description="Generate points within the boundaries of a shape." strategy="flatten">
             <port bounding="hard" type="int" name="amount" value="20" min="0.0"/>
-            <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
+            <port type="int" name="seed" value="0"/>
         </node>
 
         <node function="corevector/shape_on_path" name="shape_on_path" image="shape_on_path.png" outputType="geometry"
@@ -347,14 +347,14 @@
                 <menu key="paths" label="Paths"/>
             </port>
             <port type="point" name="offset" value="10,10" label="Offset"/>
-            <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
+            <port type="int" name="seed" value="0"/>
         </node>
 
         <node function="corevector/wiggle_points" name="wiggle_points" image="wiggle.png" outputType="geometry"
               position="170,510"
               prototype="filter" description="Shift points by a random amount.">
             <port type="point" name="offset" value="10,10" label="Offset"/>
-            <port bounding="hard" type="int" name="seed" value="0" min="0.0"/>
+            <port type="int" name="seed" value="0"/>
         </node>
 
         <node function="corevector/wiggle_paths" name="wiggle_paths" position="170,510"

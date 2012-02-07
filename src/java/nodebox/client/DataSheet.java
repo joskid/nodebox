@@ -1,6 +1,8 @@
 package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import nodebox.util.IOrderedFields;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -10,6 +12,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -18,13 +21,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class DataSheet extends JPanel implements OutputView {
 
-    private final NodeBoxDocument document;
     private final DataTableModel tableModel;
     private final JTable table;
 
     public DataSheet(NodeBoxDocument document) {
         super(new BorderLayout());
-        this.document = document;
         table = new DataTable();
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         table.addColumn(new TableColumn(0));
@@ -93,7 +94,7 @@ public class DataSheet extends JPanel implements OutputView {
     private final class DataTableModel extends AbstractTableModel {
 
         private List<Object> outputValues = ImmutableList.of();
-        private List dataTemplate = ImmutableList.of();
+        private List<String> keys = ImmutableList.of();
 
         public List<Object> getOutputValues() {
             return outputValues;
@@ -106,19 +107,38 @@ public class DataSheet extends JPanel implements OutputView {
                 this.outputValues = outputValues;
             }
             if (this.outputValues.size() == 0) {
-                dataTemplate = ImmutableList.of();
+                keys = ImmutableList.of();
             } else {
-                dataTemplate = seq(this.outputValues.get(0));
+                keys = getColumnNames(this.outputValues.get(0));
             }
             fireTableChanged(new TableModelEvent(this, TableModelEvent.ALL_COLUMNS));
         }
 
-        private List seq(Object o) {
-            // Inspect the first object.
-            if (o instanceof Iterable) {
-                return ImmutableList.copyOf((Iterable<? extends Object>) o);
+        /**
+         * Inspect the object and return a list of column names.
+         * <p/>
+         * If the object is already a map, return the keys.
+         * <p/>
+         * If the object is something else, return it as a {"Data": o.toString()}
+         *
+         * @param o The object to inspect
+         * @return a Map.
+         */
+        private List<String> getColumnNames(Object o) {
+            if (o instanceof IOrderedFields) {
+                return ImmutableList.copyOf(((IOrderedFields)o).getOrderedFields());
+            } else if (o instanceof Map) {
+                return ImmutableList.copyOf(((Map) o).keySet());
             } else {
-                return ImmutableList.of(o);
+                return ImmutableList.of("Data");
+            }
+        }
+
+        private Map inspect(Object o) {
+            if (o instanceof Map) {
+                return (Map) o;
+            } else {
+                return ImmutableMap.of("Data", o);
             }
         }
 
@@ -127,29 +147,31 @@ public class DataSheet extends JPanel implements OutputView {
         }
 
         public int getColumnCount() {
-            return dataTemplate.size() + 1;
+            return keys.size() + 1;
         }
 
         public Object getValueAt(int rowIndex, int columnIndex) {
             checkArgument(rowIndex < outputValues.size(), "The row index %s is larger than the number of values.", rowIndex);
-            checkArgument(columnIndex < dataTemplate.size() + 1, "The column index %s is larger than the number of columns.", columnIndex);
+            checkArgument(columnIndex < keys.size() + 1, "The column index %s is larger than the number of columns.", columnIndex);
 
-            List o = seq(outputValues.get(rowIndex));
+            Map o = inspect(outputValues.get(rowIndex));
             if (columnIndex > o.size()) {
                 return "<not found>";
             } else if (columnIndex == 0) {
                 return rowIndex;
             } else {
-                return o.get(columnIndex - 1);
+                String key = keys.get(columnIndex - 1);
+                return o.get(key);
             }
         }
 
         @Override
         public String getColumnName(int columnIndex) {
-            if (columnIndex == 0)
+            if (columnIndex == 0) {
                 return "Index";
-            else
-                return "Data";
+            } else {
+                return keys.get(columnIndex - 1);
+            }
         }
     }
 

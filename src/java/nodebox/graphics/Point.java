@@ -6,10 +6,11 @@ import com.google.common.collect.ImmutableList;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public final class Point implements Iterable<Double> {
+public final class Point extends AbstractRecord {
 
     public final static Point ZERO = new Point(0, 0);
 
@@ -35,6 +36,7 @@ public final class Point implements Iterable<Double> {
     }
 
     public Point(double x, double y, int type) {
+        super("x", "y", "type");
         this.x = x;
         this.y = y;
         this.type = type;
@@ -101,10 +103,6 @@ public final class Point implements Iterable<Double> {
 
     public Point2D toPoint2D() {
         return new Point2D.Double(x, y);
-    }
-
-    public Iterator<Double> iterator() {
-        return ImmutableList.<Double>of(x, y).iterator();
     }
 
 }

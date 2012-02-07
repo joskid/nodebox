@@ -67,6 +67,14 @@
               prototype="filter" description="Create multiple copies of a shape.">
             <port bounding="hard" type="int" name="copies" value="1" min="1.0"/>
             <port type="string" name="order" value="tsr"/>
+            <port type="string" name="order" value="tsr" label="Trans Scale Rot">
+                <menu key="srt" label="Scale Rot Trans"/>
+                <menu key="str" label="Scale Trans Rot"/>
+                <menu key="rst" label="Rot Scale Trans"/>
+                <menu key="rtr" label="Rot Trans Scale"/>
+                <menu key="tsr" label="Trans Scale Rot"/>
+                <menu key="trs" label="Trans Rot Scale"/>
+            </port>
             <port type="point" name="translate" value="0,0" label="Translate"/>
             <port type="float" name="rotate" value="0.0" label="Rotate"/>
             <port type="point" name="scale" value="0,0" label="Scale"/>

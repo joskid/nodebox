@@ -380,11 +380,16 @@ def snap(shape, distance, strength, position=Point.ZERO):
         return (v * (1.0-strength)) + (strength * round(v / distance) * distance)
 
     if shape is None: return None
-    new_shape = shape.clone()
+    new_shape = shape.cloneAndClear()
     strength /= 100.0
-    for pt in new_shape.points:
-       pt.x = snap(pt.x+position.x, position.x, distance, strength) - position.x
-       pt.y = snap(pt.y + position.y, position.y, distance, strength)  - position.y
+    for contour in shape.contours:
+        c = Contour()
+        for pt in contour.points:
+            x = _snap(pt.x + position.x, position.x, distance, strength) - position.x
+            y = _snap(pt.y + position.y, position.y, distance, strength) - position.y
+            c.addPoint(Point(x, y, pt.type))
+        c.closed = contour.closed
+        new_shape.add(c)
     return new_shape
 
 # TODO sort

@@ -214,7 +214,10 @@
 
         <node function="corevector/resample" name="resample" image="resample.png" outputType="geometry"
               position="330,420" prototype="filter" description="Distribute points along a shape.">
-            <port type="string" name="method" value="length"/>
+            <port type="string" name="method" value="length" label="By length">
+                <menu key="length" label="By length"/>
+                <menu key="amount" label="By amount"/>
+            </port>
             <port bounding="hard" type="float" name="length" value="10.0" min="1.0"/>
             <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
             <port type="boolean" name="perContour" value="false" label="Per Contour"/>

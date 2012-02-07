@@ -22,7 +22,7 @@ public class MathFunctions {
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
                 "sum", "average", "compare", "min","max",
                 "even", "odd",
-                "makeNumbers",
+                "makeNumbers", "randomNumbers",
                 "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect", "sin", "cos",
                 "slowNumber");
@@ -154,6 +154,15 @@ public class MathFunctions {
             }
         }
         return numbers;
+    }
+
+    public static Iterable<Double> randomNumbers(double amount, double rmin, double rmax) {
+        ArrayList<Double> numbers = new ArrayList<Double>();
+        for (int i=0;i<amount;i++){
+         double temp = rmin+(Math.random()*rmax);
+            numbers.add(temp);
+        }
+         return numbers;
     }
 
     public static Iterable<Double> range(final double start, final double end, final double step) {

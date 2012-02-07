@@ -76,6 +76,12 @@
         <node description="Convert degrees to radians." function="math/radians" name="radians" position="20,300">
             <port name="degrees" type="float" value="0.0"/>
         </node>
+        <node description="Create a list of random numbers." function="math/randomNumbers" name="random_numbers"
+              position="20,200" strategy="flatten">
+            <port name="amount" type="float" value="20.0"/>
+            <port name="min" type="float" value="0.0"/>
+            <port name="max" type="float" value="100.0"/>
+        </node>
         <node description="Generate a range of numbers." function="math/range" name="range" position="120,200"
               strategy="flatten">
             <port name="start" type="float" value="0.0"/>

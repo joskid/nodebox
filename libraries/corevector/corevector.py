@@ -177,7 +177,7 @@ def ellipse(position, width, height):
     p.ellipse(position.x, position.y, width, height)
     return p
 
-def fit(shape, position, width, height, keepProportions):
+def fit(shape, position, width, height, keep_proportions):
     """Fit a shape within bounds."""
     if shape is None: return None
 
@@ -190,7 +190,7 @@ def fit(shape, position, width, height, keepProportions):
 
     t = Transform()
     t.translate(position.x, position.y)
-    if keepProportions:
+    if keep_proportions:
         # Don't scale widths or heights that are equal to zero.
         w = pw and width / pw or float("inf")
         h = ph and height / ph or float("inf")
@@ -270,7 +270,7 @@ def line(point1, point2):
     p.strokeWidth = 1
     return p
 
-def line_angle(position, distance, angle):
+def line_angle(position, angle, distance):
     p = Path()
     x1, y1 = coordinates(position.x, position.y, distance, angle)
     p.line(position.x, position.y, x1, y1)
@@ -353,7 +353,6 @@ def resample_by_amount(shape, points, per_contour=False):
 def resample(shape, method, length, points, per_contour=False):
     if method == 'length':
         return resample_by_length(shape, length)
-        return shape.resampleByLength(length)
     else:
         return resample_by_amount(shape, points, per_contour)
 

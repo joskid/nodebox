@@ -115,5 +115,9 @@
               strategy="wrap-in-list">
             <port name="values" type="float" value="0.0"/>
         </node>
+        <node description="Return a value as an integer" function="math/toInteger" name="to_integer"
+              position="410,100">
+            <port name="value" type="float" value="0.0"/>
+        </node>
     </node>
 </ndbx>

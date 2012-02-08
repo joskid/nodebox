@@ -16,7 +16,7 @@
             <port name="values" type="float" value="0.0"/>
         </node>
         <node description="Select between two values by comparing them." function="math/compare" name="compare"
-              position="120,100" strategy="filter">
+              position="120,100">
             <port type="string" name="comparator" value="&lt;" label="symbol">
                 <menu key="&lt;" label="smaller than"/>
                 <menu key="&gt;" label="greater than"/>

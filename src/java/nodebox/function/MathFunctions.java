@@ -123,24 +123,31 @@ public class MathFunctions {
 
     }
 
-    public static boolean compare(String comparator, double n1, double n2){
+
+    public static double compare(String comparator, double n1, double n2){
              if (comparator.equals("<")){
-                 return n1 < n2;
+                 if(n1 < n2){return n1;
+                 }else{ return n2;}
              }
              else if (comparator.equals(">")){
-                 return n1 > n2;
+                 if(n1 > n2){return n1;
+                 }else{ return n2;}
              }
              else if(comparator.equals("<=")){
-                 return n1 <= n2;
+                 if(n1 <= n2){return n1;
+                 }else{ return n2;}
              }
              else if(comparator.equals(">=")){
-                 return n1 >= n2;
+                 if(n1 >= n2){return n1;
+                 }else{ return n2;}
              }
              else if (comparator.equals("==")){
-                 return n1 == n2;
+                 if(n1 == n2){return n1;
+                 }else{ return n2;}
              }
              else if(comparator.equals("!=")){
-                 return n1 != n2;
+                 if(n1 != n2){return n1;
+                 }else{ return n2;}
              } else {
                  throw new IllegalArgumentException("unknown comparison operation "+comparator);
              }

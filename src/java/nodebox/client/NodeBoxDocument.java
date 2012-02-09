@@ -329,6 +329,8 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void connect(Node outputNode, Node inputNode, Port inputPort) {
         addEdit("Connect");
         controller.connect(activeNetworkPath, outputNode, inputNode, inputPort);
+
+        portView.updateAll();
         requestRender();
     }
 
@@ -341,6 +343,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         addEdit("Disconnect");
         controller.disconnect(activeNetworkPath, connection);
 
+        portView.updateAll();
         networkView.updateConnections();
         requestRender();
     }

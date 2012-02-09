@@ -1,6 +1,7 @@
 package nodebox.client;
 
 import nodebox.client.port.*;
+import nodebox.node.Connection;
 import nodebox.node.Node;
 import nodebox.node.Port;
 import nodebox.ui.Pane;
@@ -126,6 +127,16 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
             }
     }
 
+    private boolean isConnected(Port p) {
+        Node network = getDocument().getActiveNetwork();
+        Node node = getDocument().getActiveNode();
+        for (Connection c : network.getConnections()) {
+            if (c.getInputNode().equals(node.getName()) && c.getInputPort().equals(p.getName()))
+                return true;
+        }
+        return false;
+    }
+
     private void rebuildInterface() {
         controlPanel.removeAll();
         controlMap.clear();
@@ -138,7 +149,12 @@ public class PortView extends JComponent implements PaneView, PortControl.OnValu
             if (p.isCustomType()) continue;
             Class widgetClass = CONTROL_MAP.get(p.getWidget());
             JComponent control;
-            if (widgetClass != null) {
+            if (isConnected(p)) {
+                control = new JLabel("<connected>");
+                control.setMinimumSize(new Dimension(10, 35));
+                control.setFont(Theme.SMALL_FONT);
+                control.setForeground(Theme.TEXT_DISABLED_COLOR);
+            } else if (widgetClass != null) {
                 control = (JComponent) constructControl(widgetClass, p);
                 ((PortControl) control).setValueChangeListener(this);
                 controlMap.put(p, (PortControl) control);

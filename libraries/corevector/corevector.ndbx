@@ -339,6 +339,10 @@
               description="Return the points of a given shape." strategy="flatten">
         </node>
 
+        <node function="corevector/ungroup" name="ungroup" image="ungroup.png" outputType="list" position="90,420"
+              prototype="filter" description="Decompose shape into multiple geometries." strategy="flatten">
+        </node>
+
         <node function="corevector/wiggle" name="wiggle" image="wiggle.png" outputType="geometry" position="170,500"
               prototype="filter" description="Shift points by a random amount.">
             <port type="string" name="scope" value="points"/>

@@ -318,6 +318,7 @@ def to_points(shape):
     return shape.points
 
 def group(shapes):
+    if not shapes: return None
     g = Geometry()
     for shape in shapes:
         if isinstance(shape, Geometry):
@@ -327,6 +328,11 @@ def group(shapes):
         else:
             raise "Unable to group %ss. I can only group paths or geometry objects."  % shape
     return g
+
+def ungroup(shape):
+    if shape is None: return None
+    if not isinstance(shape, Geometry): return shape
+    return shape.paths
 
 def import_svg(file_name, centered=False, position=Point.ZERO):
     """Import geometry from a SVG file."""

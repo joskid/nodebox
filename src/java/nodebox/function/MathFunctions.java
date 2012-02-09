@@ -1,6 +1,8 @@
 package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.primitives.Doubles;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
@@ -99,27 +101,20 @@ public class MathFunctions {
     }
 
     public static double max(Iterable<Double> numbers) {
-        double tempmax = 0;
+        double max = Iterables.getFirst(numbers, 0.0);
         for (Double d : numbers) {
-            if (d > tempmax) {
-                tempmax = d;
-            }
+            max = Math.max(max, d);
         }
-        return tempmax;
-
+        return max;
     }
 
     public static double min(Iterable<Double> numbers) {
-        double tempmin = 100000000;
+        double min = Iterables.getFirst(numbers, 0.0);
         for (Double d : numbers) {
-            if (d < tempmin) {
-                tempmin = d;
-            }
+            min = Math.min(min, d);
         }
-        return tempmin;
-
+        return min;
     }
-
 
     public static double compare(String comparator, double n1, double n2) {
         if (comparator.equals("<")) {

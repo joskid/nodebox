@@ -70,6 +70,27 @@ public class MathFunctionsTest {
     }
 
     @Test
+    public void testSum() {
+        assertEquals(0.0, MathFunctions.sum(ImmutableList.<Double>of()), 0.001);
+        assertEquals(6.0, MathFunctions.sum(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-6.0, MathFunctions.sum(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+
+    @Test
+    public void testMax() {
+        assertEquals(0.0, MathFunctions.max(ImmutableList.<Double>of()), 0.001);
+        assertEquals(3.0, MathFunctions.max(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-1.0, MathFunctions.max(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+
+    @Test
+    public void testMin() {
+        assertEquals(0.0, MathFunctions.min(ImmutableList.<Double>of()), 0.001);
+        assertEquals(1.0, MathFunctions.min(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-3.0, MathFunctions.min(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+
+    @Test
     public void testSample() {
         Assertions.assertResultsEqual(sample(0, 1, 2));
         Assertions.assertResultsEqual(sample(1, 100, 200), 150.0);

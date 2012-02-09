@@ -6,6 +6,19 @@ from java.awt.geom import Arc2D
 from nodebox.graphics import Geometry, Path, Contour, Color, Transform, Text, Point, Rect
 from nodebox.util.Geometry import coordinates, angle, distance
 
+def generator():
+    """Serve as a template for future functions that generate geometry"""
+    p = Path()
+    p.rect(0, 0, 100, 100)
+    return p
+
+def filter(shape):
+    """Serve as a template for future functions that filter geometry"""
+    if shape is None: return None
+    t = Transform()
+    t.rotate(45)
+    return t.map(shape)
+
 def align(shape, position, halign="center", valign="middle"):
     """Align a shape in relation to the origin."""
     if shape is None: return None
@@ -55,6 +68,27 @@ def color(shape, fill, stroke, strokeWidth):
         new_shape.strokeColor = None
     return new_shape
 
+def _flatten(geo):
+    compound = Path()
+    first = True
+    for path in geo.paths:
+        if first:
+             compound = path
+             first = False
+        else:
+             compound = compound.united(path)
+    return compound
+
+def _flatten_to_paths(fn):
+    def _function(shape1, shape2, *args, **kwargs):
+        if isinstance(shape1, Geometry):
+            shape1 = _flatten(shape1)
+        if isinstance(shape2, Geometry):
+            shape2 = _flatten(shape2)
+        return fn(shape1, shape2, *args, **kwargs)
+    return _function
+
+@_flatten_to_paths
 def compound(shape1, shape2, function="united", invert_difference=False):
     """Add, subtract or intersect geometry."""
     if shape1 is None: return None
@@ -72,8 +106,32 @@ def compound(shape1, shape2, function="united", invert_difference=False):
         return shape1.intersected(shape2)
     return None
 
+def _map_list_to_points(fn):
+    from java.util import ArrayList
+    
+    def _function(_list, *args, **kwargs):
+        if isinstance(_list, (Path, Geometry, Contour)):
+            return fn(_list.points, *args, **kwargs)
+        elif isinstance(_list, (list, tuple, ArrayList)):
+            if len(_list) == 0: return None
+            first = _list[0]
+            if isinstance(first, Point):
+                return fn(_list, *args, **kwargs)
+            elif isinstance(first, (Path, Geometry, Contour)):
+                if len(_list) == 1:
+                    return fn(first.points, *args, **kwargs)
+                else:
+                    g = Geometry()
+                    for el in _list:
+                        g.add(fn(el.points, *args, **kwargs))
+                    return g
+        return None
+    return _function
+
+@_map_list_to_points
 def connect(points, closed=True):
     """Connects all points in a path."""
+    
     if not points: return None
     if len(points) < 2: return None
     points = list(points)

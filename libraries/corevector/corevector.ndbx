@@ -80,12 +80,6 @@
             <port type="point" name="scale" value="0,0" label="Scale"/>
         </node>
 
-        <node function="corevector/datastamp" name="datastamp" image="csv.png" outputType="geometry" position="250,670"
-              prototype="filter" description="Generate new geometry for each row in a CSV file.">
-            <port type="string" name="file" value=""/>
-            <port type="string" name="tableName" value="data" label="Table Name"/>
-        </node>
-
         <node function="corevector/delete_bounding" name="delete_bounding" image="delete_bounding.png"
               outputType="geometry" position="180,590"
               prototype="filter" description="Delete points or paths that lie within the bounding path.">

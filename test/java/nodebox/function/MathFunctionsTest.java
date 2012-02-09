@@ -1,13 +1,18 @@
 package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.NodeRenderException;
 import nodebox.node.Port;
+import nodebox.util.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static nodebox.function.MathFunctions.sample;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -62,6 +67,50 @@ public class MathFunctionsTest {
                 .withInputAdded(Port.floatPort("b", 3))
                 .withInputAdded(Port.floatPort("a", 10));
         assertEquals(ImmutableList.of(-7.0), context.renderNode(subtract2));
+    }
+
+    @Test
+    public void testSum() {
+        assertEquals(0.0, MathFunctions.sum(ImmutableList.<Double>of()), 0.001);
+        assertEquals(6.0, MathFunctions.sum(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-6.0, MathFunctions.sum(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+
+    @Test
+    public void testMax() {
+        assertEquals(0.0, MathFunctions.max(ImmutableList.<Double>of()), 0.001);
+        assertEquals(3.0, MathFunctions.max(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-1.0, MathFunctions.max(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+
+    @Test
+    public void testMin() {
+        assertEquals(0.0, MathFunctions.min(ImmutableList.<Double>of()), 0.001);
+        assertEquals(1.0, MathFunctions.min(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
+        assertEquals(-3.0, MathFunctions.min(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
+    }
+    
+    @Test
+    public void testRandomNumbers() {
+        List<Double> numbers = MathFunctions.randomNumbers(3, -10.0, 10.0, 42);
+        assertEquals(4.55127, numbers.get(0), 0.001);
+        assertEquals(3.66447, numbers.get(1), 0.001);
+        assertEquals(-3.82561, numbers.get(2), 0.001);
+    }
+
+    @Test
+    public void testSample() {
+        Assertions.assertResultsEqual(sample(0, 1, 2));
+        Assertions.assertResultsEqual(sample(1, 100, 200), 150.0);
+        Assertions.assertResultsEqual(sample(2, 100, 200), 100.0, 200.0);
+        Assertions.assertResultsEqual(sample(3, 100, 200), 100.0, 150.0, 200.0);
+        Assertions.assertResultsEqual(sample(4, 100, 250), 100.0, 150.0, 200.0, 250.0);
+        Assertions.assertResultsEqual(sample(3, 200, 100), 100.0, 150.0, 200.0);
+        Assertions.assertResultsEqual(sample(3, 1, 1), 1.0, 1.0, 1.0);
+        List<Double> values = sample(1000, 0, 100);
+        double lastValue = values.get(values.size()-1);
+        assertEquals("The last value needs to be exactly 100.", 100.0, lastValue, 0.0);
+        assertTrue("The last value needs to be exactly 100.", lastValue <= 100.0);
     }
 
 }

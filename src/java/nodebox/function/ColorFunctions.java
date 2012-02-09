@@ -7,7 +7,12 @@ public final class ColorFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("color", ColorFunctions.class, "rgb", "hsb");
+        LIBRARY = JavaLibrary.ofClass("color", ColorFunctions.class, "gray", "rgb", "hsb");
+    }
+
+    public static Color gray(double gray, double alpha, double range) {
+        range = Math.max(range, 1);
+        return new Color(gray / range, gray / range, gray / range, alpha / range);
     }
 
     public static Color rgb(double red, double green, double blue, double alpha, double range) {
@@ -19,4 +24,5 @@ public final class ColorFunctions {
         range = Math.max(range, 1);
         return new Color(hue / range, saturation / range, brightness / range, alpha / range, Color.Mode.HSB);
     }
+
 }

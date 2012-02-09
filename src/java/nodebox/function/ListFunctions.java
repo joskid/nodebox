@@ -27,9 +27,23 @@ public class ListFunctions {
 
     static {
         LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class,
+                "count",
                 "first", "second", "rest", "last",
                 "combine", "subList", "shift",
                 "reverse", "sort", "shuffle", "pick", "cycle");
+    }
+
+    /**
+     * Count the number of items in the list.
+     * <p/>
+     * If the list is infinite, this function will keep on running forever.
+     *
+     * @param iterable The list items.
+     * @return The total amount of items in the list.
+     */
+    public static long count(Iterable<?> iterable) {
+        if (iterable == null) return 0;
+        return Iterables.size(iterable);
     }
 
     /**
@@ -120,10 +134,19 @@ public class ListFunctions {
         Iterable<?> skipped = Iterables.skip(iterable, (int) startIndex);
         return Iterables.limit(skipped, (int) size);
     }
-    
+
+    /**
+     * Take the beginning elements from the beginning of the list and append them to the end of the list.
+     *
+     * @param iterable The list items.
+     * @param amount   The amount of items to shift.
+     * @return A new list with the items shifted.
+     */
     public static Iterable<?> shift(Iterable<?> iterable, long amount) {
         if (iterable == null) return ImmutableList.of();
-        int a = (int) amount % Iterables.size(iterable);
+        int listSize = Iterables.size(iterable);
+        if (listSize == 0) return ImmutableList.of();
+        int a = (int) amount % listSize;
         if (a == 0) return iterable;
         Iterable<?> tail = Iterables.skip(iterable, a);
         Iterable<?> head = Iterables.limit(iterable, a);

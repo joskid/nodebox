@@ -7,6 +7,13 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 public class ListFunctionsTest {
+    
+    @Test
+    public void testCount() {
+        assertEquals(0, ListFunctions.count(null));
+        assertEquals(0, ListFunctions.count(ImmutableList.of()));
+        assertEquals(3, ListFunctions.count(ImmutableList.of(1, 2, 3)));
+    }
 
     @Test
     public void testFirst() {
@@ -54,6 +61,17 @@ public class ListFunctionsTest {
         assertElements(ListFunctions.subList(ImmutableList.of(), 100, 100));
         assertElements(ListFunctions.subList(ImmutableList.of(1, 2, 3, 4), 1, 2), 2, 3);
         assertElements(ListFunctions.subList(ImmutableList.of(1, 2, 3, 4), 100, 2));
+    }
+    
+    @Test
+    public void testShift() {
+        assertElements(ListFunctions.shift(ImmutableList.of(), 0));
+        assertElements(ListFunctions.shift(ImmutableList.of(), 10));
+        assertElements(ListFunctions.shift(ImmutableList.of(1), 10), 1);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 1), 2, 3, 1);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 2), 3, 1, 2);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 3), 1, 2, 3);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 4), 2, 3, 1);
     }
 
     @Test

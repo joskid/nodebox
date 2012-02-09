@@ -1,13 +1,11 @@
 package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -21,10 +19,10 @@ public class MathFunctions {
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
                 "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
-                "sum", "average", "compare", "min","max",
+                "sum", "average", "compare", "min", "max",
                 "even", "odd",
                 "makeNumbers", "randomNumbers", "toInteger",
-                "range",
+                "sample", "range",
                 "radians", "degrees", "angle", "distance", "coordinates", "reflect", "sin", "cos",
                 "slowNumber");
     }
@@ -101,56 +99,62 @@ public class MathFunctions {
         return sum / counter;
     }
 
-    public static double max(Iterable<Double> numbers){
-        double tempmax = 0;
-        for (Double d : numbers){
-            if(d>tempmax){
-                tempmax = d;
-            }
+    public static double max(Iterable<Double> numbers) {
+        double max = Iterables.getFirst(numbers, 0.0);
+        for (Double d : numbers) {
+            max = Math.max(max, d);
         }
-        return tempmax;
-
+        return max;
     }
 
-    public static double min(Iterable<Double> numbers){
-        double tempmin = 100000000;
-        for (Double d : numbers){
-            if(d<tempmin){
-                tempmin = d;
-            }
+    public static double min(Iterable<Double> numbers) {
+        double min = Iterables.getFirst(numbers, 0.0);
+        for (Double d : numbers) {
+            min = Math.min(min, d);
         }
-        return tempmin;
-
+        return min;
     }
 
-
-    public static double compare(String comparator, double n1, double n2){
-             if (comparator.equals("<")){
-                 if(n1 < n2){return n1;
-                 }else{ return n2;}
-             }
-             else if (comparator.equals(">")){
-                 if(n1 > n2){return n1;
-                 }else{ return n2;}
-             }
-             else if(comparator.equals("<=")){
-                 if(n1 <= n2){return n1;
-                 }else{ return n2;}
-             }
-             else if(comparator.equals(">=")){
-                 if(n1 >= n2){return n1;
-                 }else{ return n2;}
-             }
-             else if (comparator.equals("==")){
-                 if(n1 == n2){return n1;
-                 }else{ return n2;}
-             }
-             else if(comparator.equals("!=")){
-                 if(n1 != n2){return n1;
-                 }else{ return n2;}
-             } else {
-                 throw new IllegalArgumentException("unknown comparison operation "+comparator);
-             }
+    public static double compare(String comparator, double n1, double n2) {
+        if (comparator.equals("<")) {
+            if (n1 < n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else if (comparator.equals(">")) {
+            if (n1 > n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else if (comparator.equals("<=")) {
+            if (n1 <= n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else if (comparator.equals(">=")) {
+            if (n1 >= n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else if (comparator.equals("==")) {
+            if (n1 == n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else if (comparator.equals("!=")) {
+            if (n1 != n2) {
+                return n1;
+            } else {
+                return n2;
+            }
+        } else {
+            throw new IllegalArgumentException("unknown comparison operation " + comparator);
+        }
 
     }
 
@@ -164,18 +168,35 @@ public class MathFunctions {
         return numbers;
     }
 
-    public static Iterable<Double> randomNumbers(long amount, double rmin, double rmax, long seed) {
-        new Random(seed);
-        ArrayList<Double> numbers = new ArrayList<Double>();
-        for (int i=0;i<amount;i++){
-         double temp = rmin + (Math.random() * (rmax-rmin));
-            numbers.add(temp);
+    public static List<Double> randomNumbers(long amount, double min, double max, long seed) {
+        Random r = new Random(seed);
+        ImmutableList.Builder<Double> numbers = ImmutableList.builder();
+        for (int i = 0; i < amount; i++) {
+            double v = min + (r.nextDouble() * (max - min));
+            numbers.add(v);
         }
-         return numbers;
+        return numbers.build();
     }
 
-    public static long toInteger(double a){
-        return (long)a;
+    public static long toInteger(double a) {
+        return (long) a;
+    }
+
+    public static List<Double> sample(final long amount, final double start, final double end) {
+        if (amount == 0) return ImmutableList.of();
+        final double v1 = start < end ? start : end;
+        final double v2 = start < end ? end : start;
+        if (amount == 1) return ImmutableList.of(v1 + (v2 - v1) / 2);
+
+        // The step is the range divided by amount - 1, because we also want the end value.
+        // If I wouldn't use amount - 1, we fall one value short of the end.
+        // E.g. if amount = 3 between 0-100, I want 0.0, 50.0, 100.0.
+        final double step = (v2 - v1) / (amount - 1);
+        ImmutableList.Builder<Double> b = ImmutableList.builder();
+        for (long i = 0; i < amount; i++) {
+            b.add(v1 + step * i);
+        }
+        return b.build();
     }
 
     public static Iterable<Double> range(final double start, final double end, final double step) {
@@ -195,18 +216,6 @@ public class MathFunctions {
         private final double end;
         private final double step;
         private double next;
-
-        private RangeIterator() {
-            this(0, Double.POSITIVE_INFINITY, 1);
-        }
-
-        private RangeIterator(double end) {
-            this(0, end, 1);
-        }
-
-        private RangeIterator(double start, double end) {
-            this(start, end, 1);
-        }
 
         private RangeIterator(double start, double end, double step) {
             this.start = start;

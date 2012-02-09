@@ -11,7 +11,7 @@
             <port name="point1" type="point" value="0.00,0.00"/>
             <port name="point2" type="point" value="100.00,100.00"/>
         </node>
-        <node description="Returns the average of a list of numbers." function="math/average" name="average"
+        <node description="Calculate the average of a list of numbers." function="math/average" name="average"
               position="120,100" strategy="wrap-in-list">
             <port name="values" type="float" value="0.0"/>
         </node>
@@ -34,7 +34,7 @@
             <port name="distance" type="float" value="100.0"/>
             <port name="angle" type="float" value="0.0"/>
         </node>
-        <node description="Returns the trigonometric cosine of an angle" function="math/cos" name="cos"
+        <node description="Calculate the trigonometric cosine of an angle" function="math/cos" name="cos"
               position="410,100">
             <port name="value" type="float" value="0.0"/>
         </node>
@@ -53,7 +53,8 @@
         <node description="Change the sign of a number." function="math/invert" name="invert" position="120,10">
             <port name="value" type="float" value="0.0"/>
         </node>
-        <node description="Returns the natural logarithm of a value" function="math/log" name="log" position="410,100">
+        <node description="Calculate the natural logarithm of a value" function="math/log" name="log"
+              position="410,100">
             <port name="value" type="float" value="0.0"/>
         </node>
         <node description="Transform a string to a list of numbers." function="math/makeNumbers" name="make_numbers"
@@ -104,7 +105,7 @@
             <port name="distance" type="float" value="100.0"/>
             <port name="angle" type="float" value="0.0"/>
         </node>
-        <node description="Returns the trigonometric sine of an angle" function="math/sin" name="sin"
+        <node description="Calculate the trigonometric sine of an angle" function="math/sin" name="sin"
               position="410,100">
             <port name="value" type="float" value="0.0"/>
         </node>
@@ -123,7 +124,7 @@
               strategy="wrap-in-list">
             <port name="values" type="float" value="0.0"/>
         </node>
-        <node description="Return a value as an integer" function="math/toInteger" name="to_integer"
+        <node description="Calculate a value as an integer" function="math/toInteger" name="to_integer"
               position="410,100">
             <port name="value" type="float" value="0.0"/>
         </node>

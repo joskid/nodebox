@@ -2,14 +2,12 @@ package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.primitives.Doubles;
 import nodebox.graphics.Point;
 import nodebox.util.Geometry;
 
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Basic math function library.

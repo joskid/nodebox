@@ -7,6 +7,13 @@ import org.junit.Test;
 import static junit.framework.Assert.assertEquals;
 
 public class ListFunctionsTest {
+    
+    @Test
+    public void testCount() {
+        assertEquals(0, ListFunctions.count(null));
+        assertEquals(0, ListFunctions.count(ImmutableList.of()));
+        assertEquals(3, ListFunctions.count(ImmutableList.of(1, 2, 3)));
+    }
 
     @Test
     public void testFirst() {

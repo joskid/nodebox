@@ -9,6 +9,7 @@ import nodebox.util.Geometry;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Basic math function library.
@@ -169,14 +170,14 @@ public class MathFunctions {
         return numbers;
     }
 
-    public static Iterable<Double> randomNumbers(long amount, double rmin, double rmax, long seed) {
-        new Random(seed);
-        ArrayList<Double> numbers = new ArrayList<Double>();
+    public static List<Double> randomNumbers(long amount, double min, double max, long seed) {
+        Random r = new Random(seed);
+        ImmutableList.Builder<Double> numbers = ImmutableList.builder();
         for (int i = 0; i < amount; i++) {
-            double temp = rmin + (Math.random() * (rmax - rmin));
-            numbers.add(temp);
+            double v = min + (r.nextDouble() * (max - min));
+            numbers.add(v);
         }
-        return numbers;
+        return numbers.build();
     }
 
     public static long toInteger(double a) {

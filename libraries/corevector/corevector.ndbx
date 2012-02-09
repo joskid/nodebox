@@ -315,7 +315,14 @@
         <node function="corevector/transform" name="transform" image="transform.png" outputType="geometry"
               position="90,500" prototype="filter"
               description="Transforms the location, rotation and scale of a shape.">
-            <port type="string" name="order" value="trs"/>
+            <port type="string" name="order" value="tsr" label="Trans Scale Rot">
+                <menu key="srt" label="Scale Rot Trans"/>
+                <menu key="str" label="Scale Trans Rot"/>
+                <menu key="rst" label="Rot Scale Trans"/>
+                <menu key="rtr" label="Rot Trans Scale"/>
+                <menu key="tsr" label="Trans Scale Rot"/>
+                <menu key="trs" label="Trans Rot Scale"/>
+            </port>
             <port type="point" name="translate" value="0,0" label="Translate"/>
             <port type="float" name="angle" value="0.0" label="Rotation"/>
             <port type="point" name="scale" value="100,100" label="Scale"/>

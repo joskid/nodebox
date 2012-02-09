@@ -441,9 +441,11 @@ def resample_by_length(shape, length):
     return shape.resampleByLength(length)
 
 def resample_by_amount(shape, points, per_contour=False):
+    if shape is None: return None
     return shape.resampleByAmount(points, per_contour)
 
 def resample(shape, method, length, points, per_contour=False):
+    if shape is None: return None
     if method == 'length':
         return resample_by_length(shape, length)
     else:

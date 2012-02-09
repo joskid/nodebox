@@ -58,7 +58,8 @@
             <port type="boolean" name="invert_difference" value="false"/>
         </node>
 
-        <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580" prototype="generator" description="Connects all points in a path." strategy="wrap-in-list">
+        <node function="corevector/connect" name="connect" image="connect.png" outputType="geometry" position="410,580"
+              prototype="generator" description="Connects all points in a path." strategy="wrap-in-list">
             <port type="list" name="points"/>
             <port type="boolean" name="closed" value="true"/>
         </node>
@@ -157,7 +158,7 @@
             <port type="point" name="point2" value="100,100"/>
         </node>
 
-        <node function="corevector/line_angle" name="line-angle" image="line-angle.png" outputType="geometry"
+        <node function="corevector/line_angle" name="line_angle" image="line-angle.png" outputType="geometry"
               position="180,180"
               prototype="generator" description="Draw a line between a point and angle and distance.">
             <port type="point" name="position" value="0,0"/>
@@ -165,7 +166,7 @@
             <port type="float" name="distance" value="120.0"/>
         </node>
 
-        <node function="corevector/make_point" name="Make Point" image="filter.png" outputType="geometry"
+        <node function="corevector/make_point" name="make_point" image="filter.png" outputType="geometry"
               position="170,510"
               prototype="generator" description="Creates a point based on two numbers.">
             <port type="float" name="x" value="0.0" label="x"/>
@@ -332,8 +333,8 @@
               description="Change the size of the shape by scaling it.">
             <port type="point" name="scale" value="100,100" label="Scale"/>
         </node>
-        
-        <node function="corevector/to_points" name = "to_points" image="topoints.png" outputType="list"
+
+        <node function="corevector/to_points" name="to_points" image="topoints.png" outputType="list"
               position="100,540" prototype="filter"
               description="Return the points of a given shape." strategy="flatten">
         </node>

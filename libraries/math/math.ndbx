@@ -60,14 +60,16 @@
               position="20,200" strategy="flatten">
             <port name="string" type="string" value="11 22 33"/>
         </node>
-        <node description="Select the maximum value of a list of numbers." function="math/max" name="max" position="120,100" strategy="wrap-in-list">
+        <node description="Select the maximum value of a list of numbers." function="math/max" name="max"
+              position="120,100" strategy="wrap-in-list">
             <port name="values" type="float" value="0.0"/>
         </node>
         <node description="Multiply two numbers." function="math/multiply" name="multiply" position="220,100">
             <port name="value1" type="float" value="0.0"/>
             <port name="value2" type="float" value="0.0"/>
         </node>
-        <node description="Select the minumum value of a list of numbers." function="math/min" name="min" position="120,100" strategy="wrap-in-list">
+        <node description="Select the minimum value of a list of numbers." function="math/min" name="min"
+              position="120,100" strategy="wrap-in-list">
             <port name="values" type="float" value="0.0"/>
         </node>
         <node description="Set a number." function="math/number" name="number" position="20,10">

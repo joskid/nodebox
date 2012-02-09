@@ -40,6 +40,8 @@ public final class Node {
 
     public enum Attribute {PROTOTYPE, NAME, DESCRIPTION, IMAGE, FUNCTION, LIST_STRATEGY, POSITION, INPUTS, OUTPUT_TYPE, CHILDREN, RENDERED_CHILD_NAME, CONNECTIONS}
 
+    private static final Pattern NODE_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]{0,29}$");
+    private static final Pattern DOUBLE_UNDERSCORE_PATTERN = Pattern.compile("^__.*$");
     private static final Pattern NUMBER_AT_THE_END = Pattern.compile("^(.*?)(\\d*)$");
 
     private final Node prototype;
@@ -292,6 +294,24 @@ public final class Node {
     }
 
     /**
+     * Checks if the given name would be valid for this node.
+     *
+     * @param name the name to check.
+     * @throws InvalidNameException if the name was invalid.
+     */
+    public static void validateName(String name) throws InvalidNameException {
+        Matcher m1 = NODE_NAME_PATTERN.matcher(name);
+        Matcher m2 = DOUBLE_UNDERSCORE_PATTERN.matcher(name);
+        //Matcher m3 = RESERVED_WORD_PATTERN.matcher(name);
+        if (!m1.matches()) {
+            throw new InvalidNameException(null, name, "Names can only contain lowercase letters, numbers, and the underscore. Names cannot be longer than 29 characters.");
+        }
+        if (m2.matches()) {
+            throw new InvalidNameException(null, name, "Names starting with double underscore are reserved for internal use.");
+        }
+    }
+
+    /**
      * Create a new node with the given name.
      * <p/>
      * If you call this on ROOT, extend() is called implicitly.
@@ -300,6 +320,7 @@ public final class Node {
      * @return A new Node.
      */
     public Node withName(String name) {
+        validateName(name);
         return newNodeWithAttribute(Attribute.NAME, name);
     }
 

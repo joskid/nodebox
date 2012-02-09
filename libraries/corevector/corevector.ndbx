@@ -36,7 +36,11 @@
             <port type="float" name="height" value="100.0"/>
             <port type="float" name="start_angle" value="0.0"/>
             <port type="float" name="degrees" value="45.0"/>
-            <port type="string" name="type" value="pie"/>
+            <port type="string" name="type" value="pie">
+                <menu key="pie" label="Pie"/>
+                <menu key="chord" label="Chord"/>
+                <menu key="open" label="Open"/>
+            </port>
         </node>
 
         <node function="corevector/color" name="color" image="color.png" outputType="geometry" position="250,340"

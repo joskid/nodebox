@@ -184,7 +184,11 @@ def _map_geo_to_paths(fn):
         elif isinstance(shape, Geometry):
             g = Geometry()
             for path in shape.paths:
-                g.add(fn(path, *args, **kwargs))
+                result = fn(path, *args, **kwargs)
+                if isinstance(result, Path):
+                    g.add(result)
+                elif isinstance(result, Geometry):
+                    g.extend(result)
             return g
         return None
     return _function
@@ -398,6 +402,7 @@ def rounded_rect(position, width, height, roundness):
     p.roundedRect(position.x, position.y, width, height, roundness.x, roundness.y)
     return p
 
+@_map_geo_to_paths
 def reflect(shape, position, _angle, keep_original):
     """Mirrors and copies the geometry across an invisible axis."""
     if shape is None: return None

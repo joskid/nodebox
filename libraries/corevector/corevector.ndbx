@@ -245,9 +245,10 @@
 
         <node function="corevector/shape_on_path" name="shape_on_path" image="shape_on_path.png" outputType="geometry"
               position="90,670" prototype="filter" description="Copies shapes on a path.">
+            <port type="geometry" name="template"/>
             <port type="int" name="amount" value="20"/>
             <port type="float" name="dist" value="20.0" label="Distribution"/>
-            <port type="float" name="start" value="0.0"/>
+            <port bounding="hard" type="float" name="start" value="0.0" min="0.0" max="100.0"/>
             <port type="boolean" name="keep_geometry" value="true"/>
         </node>
 

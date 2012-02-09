@@ -467,7 +467,36 @@ def scatter(shape, amount, seed):
             tries -= 1
     return points
 
-# TODO shape_on_path
+def shape_on_path(shape, template, amount, dist, start, keep_geometry):
+    if shape is None: return None
+    if template is None: return None
+    
+    if isinstance(shape, Path):
+        shape = shape.asGeometry()
+    if isinstance(template, Path):
+        template = template.asGeometry()
+        
+    g = Geometry()
+
+    if keep_geometry:
+        g.extend(template.clone())
+           
+    first = True  
+    for i in range(amount):
+        if first:
+            t = start / 100
+            first = False
+        else:
+            t += dist / 500.0
+        pt1 = template.pointAt(t)
+        pt2 = template.pointAt(t + 0.00001)
+        a = angle(pt2.x, pt2.y, pt1.x, pt1.y)
+        tp = Transform()
+        tp.translate(pt1.x, pt1.y)
+        tp.rotate(a - 180)
+        new_shape = tp.map(shape)
+        g.extend(new_shape)
+    return g
 
 def snap(shape, distance, strength, position=Point.ZERO):
     """Snap geometry to a grid."""

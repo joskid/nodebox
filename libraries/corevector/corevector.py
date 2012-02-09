@@ -107,12 +107,12 @@ def compound(shape1, shape2, function="united", invert_difference=False):
     return None
 
 def _map_list_to_points(fn):
-    from java.util import ArrayList
+    from java.lang import Iterable
     
     def _function(_list, *args, **kwargs):
         if isinstance(_list, (Path, Geometry, Contour)):
             return fn(_list.points, *args, **kwargs)
-        elif isinstance(_list, (list, tuple, ArrayList)):
+        elif isinstance(_list, (list, tuple, Iterable)):
             if len(_list) == 0: return None
             first = _list[0]
             if isinstance(first, Point):

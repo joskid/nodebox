@@ -177,36 +177,60 @@ def curve(path_data):
     if not path_data: return None
     return svg.path_from_string(path_data)
 
+def _map_geo_to_paths(fn):
+    def _function(shape, *args, **kwargs):
+        if isinstance(shape, Path):
+            return fn(shape, *args, **kwargs)
+        elif isinstance(shape, Geometry):
+            g = Geometry()
+            for path in shape.paths:
+                g.add(fn(path, *args, **kwargs))
+            return g
+        return None
+    return _function
+
+def _map_paths_to_geo(fn):
+    def _function(shape, *args, **kwargs):
+        if isinstance(shape, Path):
+            shape = shape.asGeometry()
+        if isinstance(shape, Geometry):
+            return fn(shape, *args, **kwargs)
+        return None
+    return _function
+
+@_map_geo_to_paths
+def delete_points(path, bounding, delete_selected=True):
+    if path is None or bounding is None: return None
+    new_path = Path(path, False) # cloneContours = False
+    for old_contour in path.contours:
+        new_contour = Contour()
+        for point in old_contour.points:
+            if bounding.contains(point) == delete_selected:
+                new_contour.addPoint(Point(point.x, point.y, point.type))
+        new_contour.closed = old_contour.closed
+        new_path.add(new_contour)
+    return new_path
+
+@_map_paths_to_geo
+def delete_paths(geo, bounding, delete_selected=True):
+    if geo is None or bounding is None: return None
+    new_geo = Geometry()
+    for old_path in geo.paths:
+        selected = False
+        # Paths are eagerly selected: 
+        # Even if only one point is inside of the bounding volume 
+        # the path is selected.
+        for point in old_path.points:
+            if bounding.contains(point):
+                selected = True
+        if selected is delete_selected:
+            new_geo.add(old_path.clone())
+    return new_geo
+    
 def delete_bounding(shape, bounding, scope="points", delete_selected=True):
-    """Delete points or paths that lie within the bounding path."""
-    if shape is None: return None
-    # We're going to reconstruct the entire geometry, 
-    # leaving out the points we don't need.
-    if scope == "points":
-        new_geo = Geometry()
-        for old_path in shape.paths:
-            new_path = Path(old_path, False) # cloneContours = False
-            for old_contour in old_path.contours:
-                new_contour = Contour()
-                for point in old_contour.points:
-                    if bounding.contains(point) == delete_selected:
-                        new_contour.addPoint(point.x, point.y)
-                new_path.add(new_contour)
-            new_geo.add(new_path)    
-        return new_geo
-    elif scope == "paths":
-        new_geo = Geometry()
-        for old_path in shape.paths:
-            selected = False
-            # Paths are eagerly selected: 
-            # Even if only one point is inside of the bounding volume 
-            # the path is selected.
-            for point in old_path.points:
-                if bounding.contains(point):
-                    selected = True
-            if selected is delete_selected:
-                new_geo.add(old_path.clone())
-        return new_geo
+    if shape is None or bounding is None: return None
+    if scope == "points": return delete_points(shape, bounding, delete_selected)
+    if scope == "paths": return delete_paths(shape, bounding, delete_selected)
 
 def delete(shape, position, width, height, scope="points", delete_selected=True):
     """Delete points or paths that lie within the given bounds."""

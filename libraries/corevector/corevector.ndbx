@@ -84,7 +84,10 @@
               outputType="geometry" position="180,590"
               prototype="filter" description="Delete points or paths that lie within the bounding path.">
             <port type="geometry" name="bounding"/>
-            <port type="string" name="scope" value="points"/>
+            <port type="string" name="scope" value="points">
+                <menu key="points" label="Points"/>
+                <menu key="paths" label="Paths"/>
+            </port>
             <port type="boolean" name="delete_selected" value="true"/>
         </node>
 
@@ -93,7 +96,10 @@
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="100.0"/>
             <port type="float" name="height" value="100.0"/>
-            <port type="string" name="scope" value="points"/>
+            <port type="string" name="scope" value="points">
+                <menu key="points" label="Points"/>
+                <menu key="paths" label="Paths"/>
+            </port>
             <port type="boolean" name="delete_selected" value="true"/>
         </node>
 

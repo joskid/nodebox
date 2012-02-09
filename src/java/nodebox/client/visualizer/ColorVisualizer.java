@@ -31,7 +31,7 @@ public final class ColorVisualizer implements Visualizer {
     }
 
     public Point2D getOffset(List objects, Dimension2D size) {
-        return new Point2D.Double(size.getWidth() / 2, size.getHeight() / 2);
+        return new Point2D.Double(10, 10);
     }
 
     @SuppressWarnings("unchecked")

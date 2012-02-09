@@ -135,9 +135,18 @@ public class ListFunctions {
         return Iterables.limit(skipped, (int) size);
     }
 
+    /**
+     * Take the beginning elements from the beginning of the list and append them to the end of the list.
+     *
+     * @param iterable The list items.
+     * @param amount   The amount of items to shift.
+     * @return A new list with the items shifted.
+     */
     public static Iterable<?> shift(Iterable<?> iterable, long amount) {
         if (iterable == null) return ImmutableList.of();
-        int a = (int) amount % Iterables.size(iterable);
+        int listSize = Iterables.size(iterable);
+        if (listSize == 0) return ImmutableList.of();
+        int a = (int) amount % listSize;
         if (a == 0) return iterable;
         Iterable<?> tail = Iterables.skip(iterable, a);
         Iterable<?> head = Iterables.limit(iterable, a);

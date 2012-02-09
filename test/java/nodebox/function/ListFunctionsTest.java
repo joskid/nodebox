@@ -62,6 +62,17 @@ public class ListFunctionsTest {
         assertElements(ListFunctions.subList(ImmutableList.of(1, 2, 3, 4), 1, 2), 2, 3);
         assertElements(ListFunctions.subList(ImmutableList.of(1, 2, 3, 4), 100, 2));
     }
+    
+    @Test
+    public void testShift() {
+        assertElements(ListFunctions.shift(ImmutableList.of(), 0));
+        assertElements(ListFunctions.shift(ImmutableList.of(), 10));
+        assertElements(ListFunctions.shift(ImmutableList.of(1), 10), 1);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 1), 2, 3, 1);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 2), 3, 1, 2);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 3), 1, 2, 3);
+        assertElements(ListFunctions.shift(ImmutableList.of(1, 2, 3), 4), 2, 3, 1);
+    }
 
     @Test
     public void testReverse() {

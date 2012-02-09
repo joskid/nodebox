@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static junit.framework.Assert.*;
+import static org.junit.Assert.fail;
 
 public class NodeTest {
 
@@ -47,6 +48,27 @@ public class NodeTest {
         Node gamma = alpha.extend().withName("gamma");
         assertSame("Use extend() to change the prototype.",
                 gamma.getPrototype(), alpha);
+    }
+
+    @Test
+    public void testNodeNaming() {
+        Node n = Node.ROOT;
+        assertInvalidName(n, "1234", "names cannot start with a digit.");
+
+        assertInvalidName(n, "__reserved", "names cannot start with double underscores");
+        assertInvalidName(n, "what!", "Only lowercase, numbers and underscore are allowed");
+        assertInvalidName(n, "$-#34", "Only lowercase, numbers and underscore are allowed");
+        assertInvalidName(n, "", "names cannot be empty");
+        assertInvalidName(n, "very_very_very_very_very_very_long_name", "names cannot be longer than 30 characters");
+
+        assertValidName(n, "radius");
+        assertValidName(n, "_test");
+        assertValidName(n, "_");
+        assertValidName(n, "_1234");
+        assertValidName(n, "a1234");
+        assertValidName(n, "node1");
+        assertValidName(n, "UPPERCASE");
+        assertValidName(n, "uPpercase");
     }
 
     @Test
@@ -104,6 +126,25 @@ public class NodeTest {
             portNames.add(p.getName());
         }
         return portNames;
+    }
+
+    //// Helper functions ////
+
+    private void assertInvalidName(Node n, String newName, String reason) {
+        try {
+            n.withName(newName);
+            fail("the following condition was not met: " + reason);
+        } catch (InvalidNameException ignored) {
+        }
+    }
+
+    private void assertValidName(Node n, String newName) {
+        try {
+            Node newNode = n.withName(newName);
+            assertEquals(newName, newNode.getName());
+        } catch (InvalidNameException e) {
+            fail("The name \"" + newName + "\" should have been accepted.");
+        }
     }
 
 }

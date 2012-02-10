@@ -1,9 +1,12 @@
 package nodebox.node;
 
+import com.google.common.collect.ImmutableList;
 import nodebox.function.FunctionRepository;
 import nodebox.graphics.Point;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -73,6 +76,43 @@ public class NodeLibraryController {
         Node newParent = getNode(parentPath).withChildAdded(node);
         replaceNodeInPath(parentPath, newParent);
         return node;
+    }
+
+    public List<Node> pasteNodes(String parentPath, Iterable<Node> nodes) {
+        Node parent = getNode(parentPath);
+
+        Map<String, String> newNames = new HashMap<String, String>();
+
+
+        ImmutableList.Builder<Node> b = new ImmutableList.Builder<Node>();
+        for (Node node : nodes) {
+            Node newNode = node.withPosition(node.getPosition().moved(20, 80));
+            newNode = addNode(parentPath, newNode);
+            b.add(newNode);
+            newNames.put(node.getName(), newNode.getName());
+        }
+
+        parent = getNode(parentPath);
+        for (Connection c : parent.getConnections()) {
+            boolean makeConnection = false;
+            String outputNodeName = c.getOutputNode();
+            String inputNodeName = c.getInputNode();
+            if (newNames.containsKey(outputNodeName)) {
+                outputNodeName = newNames.get(outputNodeName);
+            }
+            if (newNames.containsKey(inputNodeName)) {
+                inputNodeName = newNames.get(inputNodeName);
+                makeConnection = true;
+            }
+            if (makeConnection) {
+                Node outputNode = parent.getChild(outputNodeName);
+                Node inputNode = parent.getChild(inputNodeName);
+                Port inputPort = inputNode.getInput(c.getInputPort());
+                connect("/", outputNode, inputNode, inputPort);
+            }
+        }
+
+        return b.build();
     }
 
     public void removeNode(String parentPath, String nodeName) {

@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -1153,13 +1154,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     public void paste() {
         addEdit("Paste node");
         if (nodeClipboard == null) return;
-
-        java.util.List<Node> newNodes = new ArrayList<Node>(nodeClipboard.nodes.size());
-        for (Node node : nodeClipboard.nodes) {
-            Node newNode = node.withPosition(node.getPosition().moved(20, 80));
-            newNode = controller.addNode(activeNetworkPath, newNode);
-            newNodes.add(newNode);
-        }
+        List<Node> newNodes = controller.pasteNodes(activeNetworkPath, nodeClipboard.nodes);
 
         networkView.updateAll();
         networkView.select(newNodes);

@@ -1,5 +1,6 @@
 package nodebox.node;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import static nodebox.util.Assertions.assertResultsEqual;
@@ -65,6 +66,65 @@ public class NodeLibraryControllerTest {
         assertTrue(controller.getNodeLibrary().getRoot().hasChild("gamma"));
         controller.addNode("/", gamma);
         assertTrue(controller.getNodeLibrary().getRoot().hasChild("gamma1"));
+    }
+
+    /**
+     * Test that pasting nodes with connections works.
+     */
+    @Test
+    public void testPasteNodes() {
+        createTestNetwork();
+        // Now paste them
+        controller.pasteNodes("/", ImmutableList.of(controller.getNode("/alpha"), controller.getNode("/beta")));
+        Node root = controller.getNodeLibrary().getRoot();
+        assertTrue(root.hasChild("alpha1"));
+        assertTrue(root.hasChild("beta1"));
+        assertTrue(root.isConnected("alpha1"));
+        assertTrue(root.isConnected("beta1"));
+    }
+
+
+    /**
+     * Test pasting a node with its output connected.
+     * The output should not be replaced.
+     */
+    @Test
+    public void testPasteOutputNode() {
+        createTestNetwork();
+        // Now paste them
+        controller.pasteNodes("/", ImmutableList.of(controller.getNode("/alpha")));
+        Node root = controller.getNodeLibrary().getRoot();
+        assertTrue(root.hasChild("alpha1"));
+        assertTrue(root.isConnected("alpha"));
+        assertTrue(root.isConnected("beta"));
+        assertFalse(root.isConnected("alpha1"));
+    }
+
+    /**
+     * Test pasting a node with its output connected.
+     * A new connection is made.
+     */
+    @Test
+    public void testPasteInputNode() {
+        createTestNetwork();
+        // Now paste them
+        controller.pasteNodes("/", ImmutableList.of(controller.getNode("/beta")));
+        Node root = controller.getNodeLibrary().getRoot();
+        assertTrue(root.hasChild("beta1"));
+        assertTrue(root.isConnected("alpha"));
+        assertTrue(root.isConnected("beta"));
+        assertTrue(root.isConnected("beta1"));
+    }
+
+    private void createTestNetwork() {
+        Node alpha = Node.ROOT.withName("alpha");
+        Node beta = Node.ROOT.withName("beta").withInputAdded(Port.floatPort("number", 0.0));
+        controller.addNode("/", alpha);
+        controller.addNode("/", beta);
+        controller.connect("/", alpha, beta, beta.getInput("number"));
+        Node root = controller.getNodeLibrary().getRoot();
+        assertTrue(root.isConnected("alpha"));
+        assertTrue(root.isConnected("beta"));
     }
     
     @Test

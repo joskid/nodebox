@@ -1065,6 +1065,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         });
     }
 
+    public void setObjectLimit(int limit) {
+        viewerPane.setObjectLimit(limit);
+    }
+
     private abstract class ExportDelegate {
         protected InterruptibleProgressDialog progressDialog;
 

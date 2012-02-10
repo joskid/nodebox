@@ -23,10 +23,11 @@ public class ViewerPane extends Pane {
     private final NButton handlesCheck, pointsCheck, pointNumbersCheck, originCheck;
     private final JPanel contentPanel;
     private OutputView currentView;
-    private List<Object> outputValuesLimit;
+    private Iterable<?> outputValues;
+    private List<Object> limitedOutputValues;
     private final PaneTab viewerToggle;
     private final PaneTab dataSheetToggle;
-    private final int viewerObjectLimit = 1000;
+    private int objectLimit = 1000;
 
     public ViewerPane(final NodeBoxDocument document) {
         this.document = document;
@@ -79,16 +80,21 @@ public class ViewerPane extends Pane {
     }
 
     public void setOutputValues(Iterable<?> objects) {
+        this.outputValues = objects;
+        limitOutputValues(outputValues, objectLimit);
+    }
+
+    private void limitOutputValues(Iterable<?> objects, int objectLimit) {
         // Set the limit
         if (objects == null) {
-            this.outputValuesLimit = ImmutableList.of();
+            this.limitedOutputValues = ImmutableList.of();
         } else {
             // We have to limit the input since it could be infinitely large
             Iterable<?> nonNulls = Iterables.filter(objects, Predicates.notNull());
-            Iterable<?> limit = Iterables.limit(nonNulls, viewerObjectLimit);
-            this.outputValuesLimit = ImmutableList.copyOf(limit);
+            Iterable<?> limit = Iterables.limit(nonNulls, objectLimit);
+            this.limitedOutputValues = ImmutableList.copyOf(limit);
         }
-        currentView.setOutputValues(this.outputValuesLimit);
+        currentView.setOutputValues(this.limitedOutputValues);
     }
 
     public void toggleOrigin() {
@@ -119,6 +125,11 @@ public class ViewerPane extends Pane {
         return viewer.getHandle();
     }
 
+    public void setObjectLimit(int limit) {
+        objectLimit = limit;
+        limitOutputValues(outputValues, limit);
+    }
+
     private class SwitchCardAction extends AbstractAction {
 
         private final String viewName;
@@ -136,7 +147,7 @@ public class ViewerPane extends Pane {
             viewerToggle.setSelected(view == viewer);
             dataSheetToggle.setSelected(view == dataSheet);
             currentView = view;
-            currentView.setOutputValues(outputValuesLimit);
+            currentView.setOutputValues(limitedOutputValues);
         }
 
     }

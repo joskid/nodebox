@@ -18,7 +18,6 @@
  */
 package nodebox.client;
 
-import nodebox.node.NodeLibrary;
 import nodebox.node.NodeRepository;
 import nodebox.ui.*;
 import nodebox.versioncheck.Host;
@@ -258,7 +257,9 @@ public class Application implements Host {
     }
 
     public void showPreferences() {
-        Toolkit.getDefaultToolkit().beep();
+        PreferencePanel preferencePanel= new PreferencePanel(this, getCurrentDocument());
+        preferencePanel.setLocationRelativeTo(getCurrentDocument());
+        preferencePanel.setVisible(true);
     }
 
     public void readFromFile(String path) {
@@ -375,5 +376,11 @@ public class Application implements Host {
                 app.run();
             }
         });
+    }
+
+    public void setObjectLimit(int limit) {
+        for (NodeBoxDocument doc : getDocuments()) {
+            doc.setObjectLimit(limit);
+        }
     }
 }

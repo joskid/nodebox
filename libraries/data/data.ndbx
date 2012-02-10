@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ndbx formatVersion="1.0" type="file">
+    <link href="java:nodebox.function.DataFunctions" rel="functions"/>
+    <node name="root" renderedChild="lookup">
+        <node description="Look up a value." function="data/lookup" name="lookup" position="20,100">
+            <port name="list" type="list" />
+            <port name="key" type="string" value="x" />
+        </node>
+        <node description="Create a list of strings." function="data/makeStrings" name="make_strings" position="20,100" outputType="string" strategy="flatten">
+            <port name="string" type="string" value="Alpha;Beta;Gamma" />
+            <port name="separator" type="string" value=";" />
+        </node>
+        <node description="Import a CSV file." function="data/importCSV" name="import_csv" position="20,100" outputType="string" strategy="flatten">
+            <port name="file" type="string" />
+        </node>
+    </node>
+</ndbx>

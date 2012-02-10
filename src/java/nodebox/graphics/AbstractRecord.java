@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Locale.ENGLISH;
+import static nodebox.util.ReflectionUtils.getGetterMethod;
 
 /**
  * A record is an abstract data structure that contains associative data based on the input fields.
@@ -50,26 +50,13 @@ public class AbstractRecord implements Map<String, Object>, IOrderedFields {
         return false;
     }
 
-    private static String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return s;
-        }
-        return s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1);
-    }
-
-    private String getterMethod(String attribute) {
-        return "get" + capitalize(attribute);
-    }
-
     private void ensureGetterMap() {
         if (getterMap != null) return;
         ImmutableMap.Builder<String, Method> b = ImmutableMap.builder();
         for (String field : fields) {
-            Method m;
-            try {
-                m = getClass().getMethod(getterMethod(field));
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
+            Method m = getGetterMethod(getClass(), field);
+            if (m == null) {
+                throw new RuntimeException("The field " + field + " could not be found in " + this);
             }
             b.put(field, m);
         }

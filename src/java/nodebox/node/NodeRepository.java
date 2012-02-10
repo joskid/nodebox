@@ -20,10 +20,11 @@ public class NodeRepository {
     static {
         NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
         NodeLibrary listLibrary = NodeLibrary.load(new File("libraries/list/list.ndbx"), NodeRepository.of());
+        NodeLibrary dataLibrary = NodeLibrary.load(new File("libraries/data/data.ndbx"), NodeRepository.of());
         NodeLibrary colorLibrary = NodeLibrary.load(new File("libraries/color/color.ndbx"), NodeRepository.of());
         NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
         //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
-        DEFAULT = NodeRepository.of(mathLibrary, listLibrary, colorLibrary, corevectorLibrary);
+        DEFAULT = NodeRepository.of(mathLibrary, listLibrary, dataLibrary, colorLibrary, corevectorLibrary);
     }
 
     public static NodeRepository of() {
@@ -67,7 +68,7 @@ public class NodeRepository {
         checkNotNull(node, "Node %s not found.", identifier);
         return node;
     }
-    
+
     public Collection<NodeLibrary> getLibraries() {
         return libraryMap.values();
     }
@@ -82,6 +83,7 @@ public class NodeRepository {
 
     /**
      * Find the given library that contains the given node.
+     *
      * @param node The node to find.
      * @return The NodeLibrary or null if the node could not be found.
      */

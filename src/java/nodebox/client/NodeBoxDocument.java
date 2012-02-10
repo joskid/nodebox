@@ -85,6 +85,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private static final FunctionRepository THE_FUNCTION_REPOSITORY = FunctionRepository.of(
             ListFunctions.LIBRARY,
             MathFunctions.LIBRARY,
+            DataFunctions.LIBRARY,
             ColorFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
     

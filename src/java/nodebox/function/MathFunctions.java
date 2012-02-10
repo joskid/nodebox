@@ -18,7 +18,7 @@ public class MathFunctions {
 
     static {
         LIBRARY = JavaLibrary.ofClass("math", MathFunctions.class,
-                "number", "invert", "add", "subtract", "multiply", "divide", "sqrt", "log",
+                "number", "invert", "add", "subtract", "multiply", "divide", "mod", "sqrt", "log",
                 "sum", "average", "compare", "min", "max",
                 "even", "odd",
                 "makeNumbers", "randomNumbers", "toInteger",
@@ -46,6 +46,11 @@ public class MathFunctions {
     public static double divide(double n1, double n2) {
         checkArgument(n2 != 0, "Divider cannot be zero.");
         return n1 / n2;
+    }
+
+    public static double mod(double n1, double n2) {
+        checkArgument(n2 != 0, "Divider cannot be zero.");
+        return n1 % n2;
     }
 
     public static double sqrt(double n) {

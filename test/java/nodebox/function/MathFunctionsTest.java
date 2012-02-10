@@ -1,7 +1,6 @@
 package nodebox.function;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import nodebox.node.Node;
 import nodebox.node.NodeContext;
 import nodebox.node.NodeRenderException;
@@ -70,6 +69,17 @@ public class MathFunctionsTest {
     }
 
     @Test
+    public void testMod() {
+        assertEquals(0.0, MathFunctions.mod(10, 2), 0.0);
+        assertEquals(3.0, MathFunctions.mod(10, 7), 0.0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testModByZero() {
+        MathFunctions.mod(10, 0);
+    }
+
+    @Test
     public void testSum() {
         assertEquals(0.0, MathFunctions.sum(ImmutableList.<Double>of()), 0.001);
         assertEquals(6.0, MathFunctions.sum(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
@@ -89,7 +99,7 @@ public class MathFunctionsTest {
         assertEquals(1.0, MathFunctions.min(ImmutableList.of(1.0, 2.0, 3.0)), 0.001);
         assertEquals(-3.0, MathFunctions.min(ImmutableList.of(-1.0, -2.0, -3.0)), 0.001);
     }
-    
+
     @Test
     public void testRandomNumbers() {
         List<Double> numbers = MathFunctions.randomNumbers(3, -10.0, 10.0, 42);
@@ -108,7 +118,7 @@ public class MathFunctionsTest {
         Assertions.assertResultsEqual(sample(3, 200, 100), 100.0, 150.0, 200.0);
         Assertions.assertResultsEqual(sample(3, 1, 1), 1.0, 1.0, 1.0);
         List<Double> values = sample(1000, 0, 100);
-        double lastValue = values.get(values.size()-1);
+        double lastValue = values.get(values.size() - 1);
         assertEquals("The last value needs to be exactly 100.", 100.0, lastValue, 0.0);
         assertTrue("The last value needs to be exactly 100.", lastValue <= 100.0);
     }

@@ -1,6 +1,5 @@
 package nodebox.client;
 
-import nodebox.node.ConnectionError;
 import nodebox.node.Port;
 import nodebox.ui.ShadowLabel;
 import nodebox.ui.Theme;
@@ -31,10 +30,7 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
     private Port port;
     private JLabel label;
     private JComponent control;
-    private JPanel expressionPanel;
-    private JTextField expressionField;
     private JPopupMenu popupMenu;
-    private JCheckBoxMenuItem expressionMenuItem;
 
     private static final int TOP_PADDING = 2;
     private static final int BOTTOM_PADDING = 2;
@@ -55,35 +51,14 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
         control.setBorder(BorderFactory.createEmptyBorder(TOP_PADDING, 0, BOTTOM_PADDING, 0));
 
         popupMenu = new JPopupMenu();
-        expressionMenuItem = new JCheckBoxMenuItem(new ToggleExpressionAction());
-        popupMenu.add(expressionMenuItem);
         popupMenu.add(new RevertToDefaultAction());
-
-        expressionPanel = new JPanel(new BorderLayout());
-        expressionPanel.setOpaque(false);
-        expressionPanel.setVisible(false);
-        expressionField = new JTextField();
-        expressionField.setAction(new ExpressionFieldChangedAction());
-        expressionField.setBackground(Theme.PARAMETER_EXPRESSION_BACKGROUND_COLOR);
-        expressionField.putClientProperty("JComponent.sizeVariant", "small");
-        expressionField.setFont(Theme.SMALL_BOLD_FONT);
-        JButton expressionButton = new JButton("...");
-        expressionButton.setBackground(Theme.PARAMETER_VALUE_BACKGROUND);
-        expressionButton.putClientProperty("JComponent.sizeVariant", "small");
-        expressionButton.putClientProperty("JButton.buttonType", "gradient");
-        expressionButton.setFont(Theme.SMALL_BOLD_FONT);
-        expressionButton.addActionListener(this);
-        expressionPanel.add(expressionField, BorderLayout.CENTER);
-        expressionPanel.add(expressionButton, BorderLayout.EAST);
 
         add(this.label);
         add(Box.createHorizontalStrut(10));
         add(this.control);
-        add(this.expressionPanel);
         add(Box.createHorizontalGlue());
         // Compensate for the popup button.
         add(Box.createHorizontalStrut(30));
-        setExpressionStatus();
         setBorder(Theme.PARAMETER_ROW_BORDER);
     }
 
@@ -124,22 +99,6 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
 
     //// Parameter context menu ////
 
-    private void setExpressionStatus() {
-        // Check if the current state is already correct.
-        if (port.hasExpression() && !control.isVisible()
-                && expressionField.getText().equals(port.getExpression())) return;
-        if (port.hasExpression()) {
-            control.setVisible(false);
-            expressionPanel.setVisible(true);
-            expressionField.setText(port.getExpression());
-
-        } else {
-            control.setVisible(true);
-            expressionPanel.setVisible(false);
-        }
-        expressionMenuItem.setState(port.hasExpression());
-    }
-
     @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
@@ -163,25 +122,6 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
 
     //// Action classes ////
 
-    private class ToggleExpressionAction extends AbstractAction {
-        private ToggleExpressionAction() {
-            putValue(Action.NAME, "Toggle Expression");
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            document.startEdits("Toggle Parameter Expression");
-            if (port.hasExpression()) {
-//                document.clearPortExpression(port);
-            } else {
-//                document.setPortExpression(port, port.getExpression());
-            }
-            document.stopEdits();
-            // We don't have to change the expression status here.
-            // Instead, we respond to the valueChanged event to update our status.
-            // This makes the handling consistent even with multiple port views.
-        }
-    }
-
     private class RevertToDefaultAction extends AbstractAction {
         private RevertToDefaultAction() {
             putValue(Action.NAME, "Revert to Default");
@@ -195,13 +135,4 @@ public class PortRow extends JComponent implements MouseListener, ActionListener
         }
     }
 
-    private class ExpressionFieldChangedAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-            try {
-//                document.setPortExpression(port, expressionField.getText());
-            } catch (ConnectionError ce) {
-                JOptionPane.showMessageDialog(PortRow.this, ce.getMessage(), "Connection error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
 }

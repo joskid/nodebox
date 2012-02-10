@@ -52,6 +52,20 @@ public class NodeLibraryControllerTest {
         assertSame(child, library.getNodeForPath("/parent/child"));
         assertNotSame("No longer the same since the new parent has an extra child.", parent, library.getNodeForPath("/parent"));
     }
+
+    /**
+     * Test that adding nodes gives them unique names.
+     * 
+     * addNode() is only used for pasting.
+     */
+    @Test
+    public void testAddNodeUniqueName() {
+        Node gamma = Node.ROOT.withName("gamma");
+        controller.addNode("/", gamma);
+        assertTrue(controller.getNodeLibrary().getRoot().hasChild("gamma"));
+        controller.addNode("/", gamma);
+        assertTrue(controller.getNodeLibrary().getRoot().hasChild("gamma1"));
+    }
     
     @Test
     public void testCreateNode() {

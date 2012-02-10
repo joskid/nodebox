@@ -64,9 +64,15 @@ public class NodeLibraryController {
         replaceNodeInPath(parentPath, newParent);
     }
 
-    public void addNode(String parentPath, Node node) {
+    public Node addNode(String parentPath, Node node) {
+        Node parent = getNode(parentPath);
+        if (parent.hasChild(node.getName())) {
+            String uniqueName = parent.uniqueName(node.getName());
+            node = node.withName(uniqueName);
+        }
         Node newParent = getNode(parentPath).withChildAdded(node);
         replaceNodeInPath(parentPath, newParent);
+        return node;
     }
 
     public void removeNode(String parentPath, String nodeName) {
@@ -94,7 +100,7 @@ public class NodeLibraryController {
             if (c.getInputNode().equals(oldName)) {
                 Node newParent = getNode(parentPath).connect(c.getOutputNode(), newNode.getName(), c.getInputPort());
                 replaceNodeInPath(parentPath, newParent);
-            } else if (c.getOutputNode().equals(oldName)){
+            } else if (c.getOutputNode().equals(oldName)) {
                 Node newParent = getNode(parentPath).connect(newNode.getName(), c.getInputNode(), c.getInputPort());
                 replaceNodeInPath(parentPath, newParent);
             }

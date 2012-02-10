@@ -1157,7 +1157,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         java.util.List<Node> newNodes = new ArrayList<Node>(nodeClipboard.nodes.size());
         for (Node node : nodeClipboard.nodes) {
             Node newNode = node.withPosition(node.getPosition().moved(20, 80));
-            controller.addNode(activeNetworkPath, newNode);
+            newNode = controller.addNode(activeNetworkPath, newNode);
             newNodes.add(newNode);
         }
 

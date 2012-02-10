@@ -542,7 +542,7 @@ def switch(shapes, index=0):
 
 def textpath(text, font_name="Verdana", font_size=24, align="CENTER", position=Point.ZERO, width=0, height=0):
     """Create a path out of text."""
-    t = Text(text, position.x, position.y, width, height)
+    t = Text(unicode(text), position.x, position.y, width, height)
     t.fontName = font_name
     t.fontSize = font_size
     # valueOf requires a correct value: LEFT, CENTER, RIGHT or JUSTIFY. Anything else will

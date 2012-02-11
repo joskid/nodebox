@@ -538,8 +538,65 @@ def switch(shapes, index=0):
     else:
         return []
 
-# TODO text_on_path
+def textwidth(text, font_metrics):
+    if not text:
+        return 0.0
+    elif len(text) == 1:
+        return float(font_metrics.charWidth(text))
+    else:
+        return float(font_metrics.stringWidth(text))
 
+def get_font_metrics(font_name, font_size):
+    from java.awt.image import BufferedImage
+    from java.awt import Font
+    tmp_img = BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+    g = tmp_img.createGraphics()
+    return g.getFontMetrics((Font(font_name, Font.PLAIN, int(font_size))))
+
+def text_on_path(shape, text, font_name="Verdana", font_size=20, start=0, loop=True, dy=2.0, keep_geometry=True):
+    if shape is None: return None
+    if not text: return None
+    
+    if isinstance(shape, Path):
+        shape = shape.asGeometry()
+    
+    g = Geometry()
+
+    if keep_geometry:
+        g.extend(shape.clone())
+    
+    fm = get_font_metrics(font_name, font_size)
+    string_width = textwidth(text, fm)
+    dw = string_width / shape.length
+    
+    first = True
+    for i, char in enumerate(text):
+        char_width = textwidth(char, fm)
+        
+        if first:
+            t = start / 100.0
+            first = False
+        else:
+            t += char_width / string_width * dw
+        
+        if loop:    
+            t = t % 1.0
+            
+        pt1 = shape.pointAt(t)
+        pt2 = shape.pointAt(t + 0.001)
+        a = angle(pt2.x, pt2.y, pt1.x, pt1.y)
+        
+        tp = Text(char, -char_width, -dy)
+        tp.align = Text.Align.LEFT
+        tp.fontName = font_name
+        tp.fontSize = font_size
+        tp.translate(pt1.x, pt1.y)
+        tp.rotate(a - 180)
+        
+        g.add(tp.path)
+    
+    return g
+    
 def textpath(text, font_name="Verdana", font_size=24, align="CENTER", position=Point.ZERO, width=0, height=0):
     """Create a path out of text."""
     t = Text(unicode(text), position.x, position.y, width, height)

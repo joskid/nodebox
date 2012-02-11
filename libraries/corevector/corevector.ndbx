@@ -288,8 +288,8 @@
         <node function="corevector/text_on_path" name="text_on_path" image="txtonpath.png" outputType="geometry"
               position="170,670" prototype="filter" description="Text following a path">
             <port type="string" name="text" value="text following a path"/>
-            <port type="string" name="font" value="Verdana"/>
-            <port type="float" name="size" value="20.0"/>
+            <port type="string" name="font_name" value="Verdana"/>
+            <port type="float" name="font_size" value="20.0"/>
             <port type="float" name="start" value="0.0"/>
             <port type="boolean" name="loop" value="true"/>
             <port type="float" name="dy" value="2.0" label="Vertical Distance"/>

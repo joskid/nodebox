@@ -533,11 +533,9 @@ def star(position, points, outer, inner):
     return p
 
 def switch(shapes, index=0):
-    selected_shape = shapes.get(index, None)
-    if selected_shape is not None:
-        return [selected_shape]
-    else:
-        return []
+    if not shapes: return None
+    if index == 0: return shapes[0]
+    return shapes[index % len(shapes)]
 
 def textwidth(text, font_metrics):
     if not text:

@@ -281,7 +281,7 @@
         </node>
 
         <node function="corevector/switch" name="switch" image="switch.png" outputType="geometry" position="330,580"
-              prototype="group" description="Switches between multiple inputs." strategy="as-is">
+              prototype="group" description="Switches between multiple inputs.">
             <port type="int" name="index" value="0"/>
         </node>
 

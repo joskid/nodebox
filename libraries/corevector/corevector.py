@@ -498,6 +498,7 @@ def shape_on_path(shape, template, amount, dist, start, keep_geometry):
         g.extend(new_shape)
     return g
 
+@_map_geo_to_paths
 def snap(shape, distance, strength, position=Point.ZERO):
     """Snap geometry to a grid."""
     def _snap(v, offset=0.0, distance=10.0, strength=1.0):

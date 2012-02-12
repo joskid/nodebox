@@ -82,14 +82,18 @@ public class NetworkPane extends Pane {
     public void setError(Throwable e) {
         StringBuilder sb = new StringBuilder("<html>&nbsp;&nbsp;&nbsp;");
         if (e instanceof NodeRenderException) {
-            Node node = ((NodeRenderException)e).getNode();
+            Node node = ((NodeRenderException) e).getNode();
             sb.append("<b>");
             sb.append(node.getName());
             sb.append(":</b> ");
         }
         sb.append("<u>");
         nodeRenderException = getRootCause(e);
-        sb.append(nodeRenderException.getMessage());
+        if (nodeRenderException instanceof OutOfMemoryError) {
+            sb.append("Out of memory. Are you trying to process an infinite loop?");
+        } else {
+            sb.append(nodeRenderException.getMessage());
+        }
         sb.append("</u></html>");
         errorLabel.setText(sb.toString());
         errorLabel.setVisible(true);

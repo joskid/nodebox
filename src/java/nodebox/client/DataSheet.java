@@ -128,7 +128,11 @@ public class DataSheet extends JPanel implements OutputView {
             if (o instanceof IOrderedFields) {
                 return ImmutableList.copyOf(((IOrderedFields)o).getOrderedFields());
             } else if (o instanceof Map) {
-                return ImmutableList.copyOf(((Map) o).keySet());
+                ImmutableList.Builder<String> b = ImmutableList.builder();
+                for (Object k : ((Map) o).keySet()) {
+                    b.add(k.toString());
+                }
+                return b.build();
             } else {
                 return ImmutableList.of("Data");
             }

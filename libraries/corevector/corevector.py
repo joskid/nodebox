@@ -290,6 +290,15 @@ def fit(shape, position, width, height, keep_proportions):
 
     return t.map(shape)
 
+def fit_to(shape, bounding, keep_proportions):
+    """Fit a shape to another shape."""
+    if shape is None: return None
+    if bounding is None: return shape
+
+    bx, by, bw, bh = list(bounding.bounds)
+
+    return fit(shape, Point(bx+bw/2, by+bh/2), bw, bh, keep_proportions)
+
 # TODO freehand
 
 def grid(rows, columns, width, height, position):

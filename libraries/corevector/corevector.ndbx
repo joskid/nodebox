@@ -281,10 +281,9 @@
               position="170,670" prototype="filter" description="Text following a path">
             <port type="string" name="text" value="text following a path"/>
             <port type="string" name="font_name" value="Verdana"/>
-            <port type="float" name="font_size" value="20.0"/>
-            <port type="float" name="start" value="0.0"/>
-            <port type="boolean" name="loop" value="true"/>
-            <port type="float" name="dy" value="2.0" label="Vertical Distance"/>
+            <port type="float" name="font_size" value="24.0"/>
+            <port type="float" name="position" value="0.0"/>
+            <port type="float" name="offset" value="0.0" label="Vertical Distance"/>
             <port type="boolean" name="keep_geometry" value="true"/>
         </node>
 

@@ -549,8 +549,8 @@ def get_font_metrics(font_name, font_size):
     g = tmp_img.createGraphics()
     return g.getFontMetrics((Font(font_name, Font.PLAIN, int(font_size))))
 
-def text_on_path(shape, text, font_name="Verdana", font_size=20, start=0, loop=True, dy=2.0, keep_geometry=True):
-    if shape is None: return None
+def text_on_path(shape, text, font_name="Verdana", font_size=20, position=0, offset=2.0, keep_geometry=True):
+    if shape is None or shape.length <= 0: return None
     if not text: return None
     
     if isinstance(shape, Path):
@@ -570,19 +570,19 @@ def text_on_path(shape, text, font_name="Verdana", font_size=20, start=0, loop=T
         char_width = textwidth(char, fm)
         
         if first:
-            t = start / 100.0
+            t = position / 100.0
             first = False
         else:
             t += char_width / string_width * dw
-        
-        if loop:    
-            t = t % 1.0
-            
+
+        # Always loop (the other behavior is weird)
+        t = t % 1.0
+
         pt1 = shape.pointAt(t)
         pt2 = shape.pointAt(t + 0.001)
         a = angle(pt2.x, pt2.y, pt1.x, pt1.y)
         
-        tp = Text(char, -char_width, -dy)
+        tp = Text(char, -char_width, -offset)
         tp.align = Text.Align.LEFT
         tp.fontName = font_name
         tp.fontSize = font_size

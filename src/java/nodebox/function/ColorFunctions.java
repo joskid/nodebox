@@ -7,7 +7,11 @@ public final class ColorFunctions {
     public static final FunctionLibrary LIBRARY;
 
     static {
-        LIBRARY = JavaLibrary.ofClass("color", ColorFunctions.class, "gray", "rgb", "hsb");
+        LIBRARY = JavaLibrary.ofClass("color", ColorFunctions.class, "color", "gray", "rgb", "hsb");
+    }
+
+    public static Color color(Color color) {
+        return color;
     }
 
     public static Color gray(double gray, double alpha, double range) {

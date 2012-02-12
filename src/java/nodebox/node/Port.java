@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import nodebox.graphics.Color;
 import nodebox.graphics.Point;
+import nodebox.util.StringUtils;
 
 import java.util.List;
 
@@ -206,7 +207,7 @@ public final class Port {
     }
 
     public String getLabel() {
-        return name;
+        return StringUtils.humanizeName(name);
     }
 
     public String getType() {

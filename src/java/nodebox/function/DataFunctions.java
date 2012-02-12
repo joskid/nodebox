@@ -6,8 +6,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import nodebox.util.ReflectionUtils;
 
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +69,8 @@ public class DataFunctions {
     public static List<Map<String, String>> importCSV(String fileName) {
         if (fileName == null || fileName.trim().isEmpty()) return ImmutableList.of();
         try {
-            CSVReader reader = new CSVReader(new FileReader(fileName));
+            InputStreamReader in = new InputStreamReader(new FileInputStream(fileName), "UTF-8");
+            CSVReader reader = new CSVReader(in);
             ImmutableList.Builder<Map<String, String>> b = ImmutableList.builder();
             String[] headers = reader.readNext();
             String[] row;

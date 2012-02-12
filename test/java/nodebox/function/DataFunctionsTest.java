@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 import static nodebox.function.DataFunctions.*;
 import static nodebox.util.Assertions.assertResultsEqual;
 
@@ -49,6 +50,17 @@ public class DataFunctionsTest {
         assertResultsEqual(black.keySet(), "Name", "Red", "Green", "Blue");
         assertEquals("Black", black.get("Name"));
         assertEquals("0", black.get("Red"));
+    }
+    
+    @Test
+    public void testImportCSVUnicode() {
+        List<Map<String,String>> l = importCSV("test/files/unicode.csv");
+        assertEquals(2, l.size());
+        Map<String, String> frederik = l.get(0);
+        assertResultsEqual(frederik.keySet(), "Name", "Age");
+        assertEquals("Frédërìk", frederik.get("Name"));
+        Map<String, String> bob = l.get(1);
+        assertEquals("Bøb", bob.get("Name"));
     }
     
     @Test

@@ -331,7 +331,7 @@ def group(shapes):
 
 def ungroup(shape):
     if shape is None: return None
-    if not isinstance(shape, Geometry): return shape
+    if not isinstance(shape, Geometry): return [shape]
     return shape.paths
 
 def import_svg(file_name, centered=False, position=Point.ZERO):

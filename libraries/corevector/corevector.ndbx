@@ -162,7 +162,7 @@
             <port type="point" name="point2" value="100,100"/>
         </node>
 
-        <node function="corevector/line_angle" name="line_angle" image="line-angle.png" outputType="geometry"
+        <node function="corevector/line_angle" name="line_angle" image="line_angle.png" outputType="geometry"
               position="180,180"
               prototype="generator" description="Draw a line between a point and angle and distance.">
             <port type="point" name="position" value="0,0"/>

@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.*;
-import static junit.framework.Assert.assertEquals;
 import static nodebox.function.DataFunctions.*;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class DataFunctionsTest {
-    
+
     @Test
     public void testLookupNull() {
         assertNull(lookup(null, "xxx"));
@@ -49,25 +48,26 @@ public class DataFunctionsTest {
 
     @Test
     public void testImportCSV() {
-        List<Map<String,String>> l = importCSV("test/files/colors.csv");
+        List<Map<String, Object>> l = importCSV("test/files/colors.csv");
         assertEquals(5, l.size());
-        Map<String, String> black = l.get(0);
+        Map<String, Object> black = l.get(0);
         assertResultsEqual(black.keySet(), "Name", "Red", "Green", "Blue");
         assertEquals("Black", black.get("Name"));
-        assertEquals("0", black.get("Red"));
+        // Numerical data is automatically converted to doubles.
+        assertEquals(0.0, black.get("Red"));
     }
-    
+
     @Test
     public void testImportCSVUnicode() {
-        List<Map<String,String>> l = importCSV("test/files/unicode.csv");
+        List<Map<String, Object>> l = importCSV("test/files/unicode.csv");
         assertEquals(2, l.size());
-        Map<String, String> frederik = l.get(0);
+        Map<String, Object> frederik = l.get(0);
         assertResultsEqual(frederik.keySet(), "Name", "Age");
         assertEquals("Fr\u00e9d\u00ebr\u00eck", frederik.get("Name"));
-        Map<String, String> bob = l.get(1);
+        Map<String, Object> bob = l.get(1);
         assertEquals("B\u00f8b", bob.get("Name"));
     }
-    
+
     @Test
     public void testImportEmptyCSV() {
         List l = importCSV(null);
@@ -81,12 +81,13 @@ public class DataFunctionsTest {
 
     @Test
     public void testImportCSVWithWhitespace() {
-        List<Map<String,String>> l = importCSV("test/files/whitespace.csv");
+        List<Map<String, Object>> l = importCSV("test/files/whitespace.csv");
         assertEquals(2, l.size());
-        Map<String, String> alice = l.get(0);
+        Map<String, Object> alice = l.get(0);
         assertResultsEqual(alice.keySet(), "Name", "Age");
         assertEquals("Alice", alice.get("Name"));
-        assertEquals("41", alice.get("Age"));
+        // Numerical data is automatically converted to doubles.
+        assertEquals(41.0, alice.get("Age"));
     }
 
 }

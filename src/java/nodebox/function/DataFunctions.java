@@ -67,12 +67,12 @@ public class DataFunctions {
      * @param fileName The file to read in.
      * @return A list of maps.
      */
-    public static List<Map<String, String>> importCSV(String fileName) {
+    public static List<Map<String, Object>> importCSV(String fileName) {
         if (fileName == null || fileName.trim().isEmpty()) return ImmutableList.of();
         try {
             InputStreamReader in = new InputStreamReader(new FileInputStream(fileName), "UTF-8");
             CSVReader reader = new CSVReader(in);
-            ImmutableList.Builder<Map<String, String>> b = ImmutableList.builder();
+            ImmutableList.Builder<Map<String, Object>> b = ImmutableList.builder();
             String[] headers = reader.readNext();
             for (int i = 0; i < headers.length; i++) {
                 headers[i] = headers[i].trim();
@@ -80,10 +80,18 @@ public class DataFunctions {
             String[] row;
 
             while ((row = reader.readNext()) != null) {
-                ImmutableMap.Builder<String, String> mb = ImmutableMap.builder();
+                ImmutableMap.Builder<String, Object> mb = ImmutableMap.builder();
                 for (int i = 0; i < row.length; i++) {
                     String header = headers[i];
-                    String value = row[i].trim();
+                    String v = row[i].trim();
+                    Object value ;
+                    try {
+                        value = Double.valueOf(v);
+                    } catch (NumberFormatException e) {
+                        value = v;
+                    }
+
+
                     mb.put(header, value);
                 }
                 b.add(mb.build());

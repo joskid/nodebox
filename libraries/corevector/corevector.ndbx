@@ -195,15 +195,7 @@
         </node>
 
         <node function="corevector/rect" name="rect" image="rect.png" outputType="geometry" position="330,90"
-              prototype="generator" description="Create a rectangle.">
-            <port type="point" name="position" value="0,0"/>
-            <port type="float" name="width" value="100.0"/>
-            <port type="float" name="height" value="100.0"/>
-        </node>
-
-        <node function="corevector/rounded_rect" name="rounded_rect" image="rounded_rect.png" outputType="geometry"
-              position="340,100"
-              prototype="generator" description="Create a rounded rectangle.">
+              prototype="generator" description="Create a rectangle or rounded rectangle.">
             <port type="point" name="position" value="0,0"/>
             <port type="float" name="width" value="100.0"/>
             <port type="float" name="height" value="100.0"/>

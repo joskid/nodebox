@@ -396,16 +396,13 @@ def polygon(position, radius, sides, align):
     p.close()
     return p
 
-def rect(position, width, height):
-    """Create a rectangle."""
+def rect(position, width, height, roundness):
+    """Create a rectangle or rounded rectangle."""
     p = Path()
-    p.rect(position.x, position.y, width, height)
-    return p
-
-def rounded_rect(position, width, height, roundness):
-    """Create a rounded rectangle."""
-    p = Path()
-    p.roundedRect(position.x, position.y, width, height, roundness.x, roundness.y)
+    if roundness == Point.ZERO:
+        p.rect(position.x, position.y, width, height)
+    else:
+        p.roundedRect(position.x, position.y, width, height, roundness.x, roundness.y)
     return p
 
 @_map_geo_to_paths

@@ -194,10 +194,11 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         controller.setRenderedChild(activeNetworkPath, newNode.getName());
         setActiveNode(newNode);
         stopEdits();
-
+        
+        Node activeNode = getActiveNode();
         networkView.updateNodes();
-        networkView.singleSelect(newNode);
-        portView.setActiveNode(newNode);
+        networkView.singleSelect(activeNode);
+        portView.setActiveNode(activeNode);
 
         requestRender();
     }
@@ -303,6 +304,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             removeNodeImpl(node);
         }
         networkView.updateAll();
+        portView.setActiveNode(getActiveNode());
         requestRender();
     }
 

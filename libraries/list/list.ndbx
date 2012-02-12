@@ -2,7 +2,7 @@
 <ndbx formatVersion="1.0" type="file">
     <link href="java:nodebox.function.ListFunctions" rel="functions"/>
     <node name="root" renderedChild="reverse">
-        <node description="Combine multiple lists into one." function="list/combine" name="combine" position="20.00,160.00" strategy="as-is">
+        <node description="Combine multiple lists into one." function="list/combine" name="combine" position="20.00,160.00" strategy="as-is" image="generic.png">
             <port name="list1" type="list"/>
             <port name="list2" type="list"/>
             <port name="list3" type="list"/>
@@ -10,41 +10,41 @@
         <node description="Count the number of items in the list." function="list/count" name="count" position="20.00,0.00" strategy="wrap-in-list">
             <port name="list" type="list"/>
         </node>
-        <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="180.00,250.00" strategy="as-is">
+        <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="180.00,250.00" strategy="as-is" image="cycle.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Take the first item of the list." function="list/first" name="first" position="20.00,80.00" strategy="as-is">
+        <node description="Take the first item of the list." function="list/first" name="first" position="20.00,80.00" strategy="as-is" image="first.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Take the last item of the list." function="list/last" name="last" position="260.00,80.00" strategy="as-is">
+        <node description="Take the last item of the list." function="list/last" name="last" position="260.00,80.00" strategy="as-is" image="last.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Pick a specified number of items from the list in random order." function="list/pick" name="pick" position="100.00,250.00" strategy="as-is">
+        <node description="Pick a specified number of items from the list in random order." function="list/pick" name="pick" position="100.00,250.00" strategy="as-is" image="generic.png">
             <port name="list" type="list"/>
             <port name="amount" type="int" value="5"/>
             <port name="seed" type="int" value="0"/>
         </node>
-        <node description="Take all but the first items of the list." function="list/rest" name="rest" position="180.00,80.00" strategy="as-is">
+        <node description="Take all but the first items of the list." function="list/rest" name="rest" position="180.00,80.00" strategy="as-is" image="rest.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Reverse the list." function="list/reverse" name="reverse" position="180.00,160.00" strategy="as-is">
+        <node description="Reverse the list." function="list/reverse" name="reverse" position="180.00,160.00" strategy="as-is" image="generic.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Take the second item of the list." function="list/second" name="second" position="100.00,80.00" strategy="as-is">
+        <node description="Take the second item of the list." function="list/second" name="second" position="100.00,80.00" strategy="as-is" image="second.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Shift the elements of a list a number of times." function="list/shift" name="shift" position="260.00,250.00" strategy="as-is">
+        <node description="Shift the elements of a list a number of times." function="list/shift" name="shift" position="260.00,250.00" strategy="as-is" image="generic.png">
             <port name="list" type="list"/>
             <port name="amount" type="int" value="1"/>
         </node>
-        <node description="Shuffle items in the list in random order." function="list/shuffle" name="shuffle" position="20.00,250.00" strategy="as-is">
+        <node description="Shuffle items in the list in random order." function="list/shuffle" name="shuffle" position="20.00,250.00" strategy="as-is" image="shuffle.png">
             <port name="list" type="list"/>
             <port name="seed" type="int" value="0"/>
         </node>
-        <node description="Sort items in the list." function="list/sort" name="sort" position="260.00,160.00" strategy="as-is">
+        <node description="Sort items in the list." function="list/sort" name="sort" position="260.00,160.00" strategy="as-is" image="generic.png">
             <port name="list" type="list"/>
         </node>
-        <node description="Take a portion of the original list." function="list/slice" image="slice.png" name="slice" position="100.00,160.00" strategy="as-is">
+        <node description="Take a portion of the original list." function="list/slice" name="slice" position="100.00,160.00" strategy="as-is" image="slice.png">
             <port name="list" type="list"/>
             <port min="0.0" name="start_index" type="int" value="0"/>
             <port min="0.0" name="size" type="int" value="10"/>

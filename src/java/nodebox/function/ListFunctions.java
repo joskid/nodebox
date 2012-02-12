@@ -29,7 +29,7 @@ public class ListFunctions {
         LIBRARY = JavaLibrary.ofClass("list", ListFunctions.class,
                 "count",
                 "first", "second", "rest", "last",
-                "combine", "subList", "shift",
+                "combine", "slice", "shift",
                 "reverse", "sort", "shuffle", "pick", "cycle");
     }
 
@@ -122,14 +122,14 @@ public class ListFunctions {
     }
 
     /**
-     * Take a slice of the original list.
+     * Take a portion of the original list.
      *
      * @param iterable   The list items.
      * @param startIndex The starting index, zero-based.
      * @param size       The amount of items.
      * @return A new list containing a slice of the original.
      */
-    public static Iterable<?> subList(Iterable<?> iterable, long startIndex, long size) {
+    public static Iterable<?> slice(Iterable<?> iterable, long startIndex, long size) {
         if (iterable == null) return ImmutableList.of();
         Iterable<?> skipped = Iterables.skip(iterable, (int) startIndex);
         return Iterables.limit(skipped, (int) size);

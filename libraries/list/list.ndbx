@@ -44,9 +44,9 @@
         <node description="Sort items in the list." function="list/sort" name="sort" position="260.00,160.00" strategy="as-is">
             <port name="list" type="list"/>
         </node>
-        <node description="Take a slice of the original list." function="list/subList" image="subList.png" name="subList" position="100.00,160.00" strategy="as-is">
+        <node description="Take a portion of the original list." function="list/slice" image="slice.png" name="slice" position="100.00,160.00" strategy="as-is">
             <port name="list" type="list"/>
-            <port min="0.0" name="startIndex" type="int" value="0"/>
+            <port min="0.0" name="start_index" type="int" value="0"/>
             <port min="0.0" name="size" type="int" value="10"/>
         </node>
     </node>

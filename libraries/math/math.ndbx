@@ -82,7 +82,7 @@
               position="120,100" strategy="wrap-in-list" image="generic.png">
             <port name="values" type="float" value="0.0"/>
         </node>
-        <node description="Set a number." function="math/number" name="number" position="20,10" image="generic.png">
+        <node description="Create a floating-point number which you can use as a variable." function="math/number" name="number" position="20,10" image="generic.png">
             <port name="value" type="float" value="0.0"/>
         </node>
         <node description="Convert degrees to radians." function="math/radians" name="radians" position="20,300"

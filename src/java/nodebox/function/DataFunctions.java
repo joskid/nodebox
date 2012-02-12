@@ -31,6 +31,7 @@ public class DataFunctions {
      * @return The value of the key if found, otherwise null.
      */
     public static Object lookup(Object o, String key) {
+        if (o == null || key == null) return null;
         if (o instanceof Map) {
             Map m = (Map) o;
             return m.get(key);

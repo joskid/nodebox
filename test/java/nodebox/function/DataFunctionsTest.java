@@ -13,6 +13,12 @@ import static nodebox.function.DataFunctions.*;
 import static nodebox.util.Assertions.assertResultsEqual;
 
 public class DataFunctionsTest {
+    
+    @Test
+    public void testLookupNull() {
+        assertNull(lookup(null, "xxx"));
+        assertNull(lookup(new Point(11, 22), null));
+    }
 
     @Test
     public void testLookupInMap() {
@@ -40,7 +46,6 @@ public class DataFunctionsTest {
         assertResultsEqual(makeStrings(null, ";"));
         assertResultsEqual(makeStrings(null, null));
     }
-
 
     @Test
     public void testImportCSV() {

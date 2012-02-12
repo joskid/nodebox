@@ -79,4 +79,14 @@ public class DataFunctionsTest {
         importCSV("blah/blah.csv");
     }
 
+    @Test
+    public void testImportCSVWithWhitespace() {
+        List<Map<String,String>> l = importCSV("test/files/whitespace.csv");
+        assertEquals(2, l.size());
+        Map<String, String> alice = l.get(0);
+        assertResultsEqual(alice.keySet(), "Name", "Age");
+        assertEquals("Alice", alice.get("Name"));
+        assertEquals("41", alice.get("Age"));
+    }
+
 }

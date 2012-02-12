@@ -74,13 +74,16 @@ public class DataFunctions {
             CSVReader reader = new CSVReader(in);
             ImmutableList.Builder<Map<String, String>> b = ImmutableList.builder();
             String[] headers = reader.readNext();
+            for (int i = 0; i < headers.length; i++) {
+                headers[i] = headers[i].trim();
+            }
             String[] row;
 
             while ((row = reader.readNext()) != null) {
                 ImmutableMap.Builder<String, String> mb = ImmutableMap.builder();
                 for (int i = 0; i < row.length; i++) {
                     String header = headers[i];
-                    String value = row[i];
+                    String value = row[i].trim();
                     mb.put(header, value);
                 }
                 b.add(mb.build());

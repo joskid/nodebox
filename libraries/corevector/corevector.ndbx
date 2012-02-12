@@ -225,20 +225,20 @@
             </port>
             <port bounding="hard" type="float" name="length" value="10.0" min="1.0"/>
             <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
-            <port type="boolean" name="perContour" value="false" label="Per Contour"/>
+            <port type="boolean" name="per_contour" value="false"/>
         </node>
 
         <node function="corevector/resample_by_length" name="resample_by_length" image="resample.png"
               outputType="geometry"
-              position="330,420" prototype="filter" description="Distribute points along a shape.">
+              position="330,420" prototype="filter" description="Distribute points evenly along a shape.">
             <port bounding="hard" type="float" name="length" value="10.0" min="1.0"/>
         </node>
 
         <node function="corevector/resample_by_amount" name="resample_by_amount" image="resample.png"
               outputType="geometry"
-              position="330,420" prototype="filter" description="Distribute points along a shape.">
+              position="330,420" prototype="filter" description="Distribute a number of points along a shape.">
             <port bounding="hard" type="int" name="points" value="10" min="1.0"/>
-            <port type="boolean" name="perContour" value="false" label="Per Contour"/>
+            <port type="boolean" name="per_contour" value="false"/>
         </node>
 
         <node function="corevector/scatter" name="scatter" image="scatter.png" outputType="list" position="410,420"

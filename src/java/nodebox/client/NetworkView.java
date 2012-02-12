@@ -485,18 +485,20 @@ public class NetworkView extends PCanvas implements PaneView, KeyListener {
     //// Network navigation ////
 
     private void goUp() {
-        getDocument().goUp();
+        JOptionPane.showMessageDialog(this, "Child nodes are not supported yet.");
+//        getDocument().goUp();
     }
 
     private void goDown() {
-        if (selection.size() != 1) {
-            Toolkit.getDefaultToolkit().beep();
-            return;
-        }
-        NodeView selectedNode = selection.iterator().next();
-
-        String childPath = Node.path(getDocument().getActiveNetworkPath(), selectedNode.getNodeName());
-        getDocument().setActiveNetwork(childPath);
+        JOptionPane.showMessageDialog(this, "Child nodes are not supported yet.");
+//        if (selection.size() != 1) {
+//            Toolkit.getDefaultToolkit().beep();
+//            return;
+//        }
+//        NodeView selectedNode = selection.iterator().next();
+//
+//        String childPath = Node.path(getDocument().getActiveNetworkPath(), selectedNode.getNodeName());
+//        getDocument().setActiveNetwork(childPath);
     }
 
     //// Other node operations ////

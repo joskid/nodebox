@@ -29,12 +29,11 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
     public static final int NODE_FULL_SIZE = 70;
     public static final int NODE_IMAGE_SIZE = 50;
     public static final int TEXT_HEIGHT = 14;
-    public static final int NODE_OUTPUT_DRAG_ZONE = 15;
-    public static final Rectangle OUTPUT_BOUNDS = new Rectangle(NODE_FULL_SIZE - NODE_OUTPUT_DRAG_ZONE, (NODE_FULL_SIZE - NODE_OUTPUT_DRAG_ZONE - 6) / 2, NODE_OUTPUT_DRAG_ZONE, NODE_OUTPUT_DRAG_ZONE + 6);
+    public static final int NODE_OUTPUT_DRAG_ZONE = 20;
+    public static final Rectangle OUTPUT_BOUNDS = new Rectangle(NODE_FULL_SIZE - NODE_OUTPUT_DRAG_ZONE, 0, NODE_OUTPUT_DRAG_ZONE, NODE_FULL_SIZE);
     public static final int NODE_PORT_HEIGHT = 7;
     private static final int NODE_PORT_MARGIN = 1;
     public static final int GRID_SIZE = 10;
-
 
     private static BufferedImage nodeMask, nodeGlow, nodeConnectionGlow, nodeInPort, nodeOutPort, nodeGeneric, nodeError, nodeRendered, nodeCodeChanged, nodeRim;
 

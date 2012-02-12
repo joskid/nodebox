@@ -63,9 +63,9 @@ public class DataFunctionsTest {
         assertEquals(2, l.size());
         Map<String, String> frederik = l.get(0);
         assertResultsEqual(frederik.keySet(), "Name", "Age");
-        assertEquals("Frédërìk", frederik.get("Name"));
+        assertEquals("Fr\u00e9d\u00ebr\u00eck", frederik.get("Name"));
         Map<String, String> bob = l.get(1);
-        assertEquals("Bøb", bob.get("Name"));
+        assertEquals("B\u00f8b", bob.get("Name"));
     }
     
     @Test

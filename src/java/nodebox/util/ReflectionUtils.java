@@ -24,7 +24,7 @@ public final class ReflectionUtils {
         return "get" + capitalize(field);
     }
 
-    public static Method getGetterMethod(Class c, String field) {
+    public static Method getGetterMethod(Class<?> c, String field) {
         try {
             return c.getMethod(getterMethod(field));
         } catch (NoSuchMethodException e) {

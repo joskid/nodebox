@@ -19,12 +19,13 @@ public class NodeRepository {
 
     static {
         NodeLibrary mathLibrary = NodeLibrary.load(new File("libraries/math/math.ndbx"), NodeRepository.of());
+        NodeLibrary stringLibrary = NodeLibrary.load(new File("libraries/string/string.ndbx"), NodeRepository.of());
+        NodeLibrary colorLibrary = NodeLibrary.load(new File("libraries/color/color.ndbx"), NodeRepository.of());
         NodeLibrary listLibrary = NodeLibrary.load(new File("libraries/list/list.ndbx"), NodeRepository.of());
         NodeLibrary dataLibrary = NodeLibrary.load(new File("libraries/data/data.ndbx"), NodeRepository.of());
-        NodeLibrary colorLibrary = NodeLibrary.load(new File("libraries/color/color.ndbx"), NodeRepository.of());
         NodeLibrary corevectorLibrary = NodeLibrary.load(new File("libraries/corevector/corevector.ndbx"), NodeRepository.of());
         //NodeLibrary coreimageLibrary = NodeLibrary.load(new File("libraries/coreimage/coreimage.ndbx"), NodeRepository.of());
-        DEFAULT = NodeRepository.of(mathLibrary, listLibrary, dataLibrary, colorLibrary, corevectorLibrary);
+        DEFAULT = NodeRepository.of(mathLibrary, stringLibrary, listLibrary, dataLibrary, colorLibrary, corevectorLibrary);
     }
 
     public static NodeRepository of() {

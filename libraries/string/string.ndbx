@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ndbx formatVersion="1.0" type="file">
+    <link href="java:nodebox.function.StringFunctions" rel="functions"/>
+    <node name="root" renderedChild="length">
+        <node description="Count the number of characters in a string." function="string/length" name="length" position="20,100">
+            <port name="string" type="string" />
+        </node>
+        <node description="Count the number of words in a string." function="string/wordCount" name="word_count" position="20,100">
+            <port name="string" type="string" />
+        </node>
+    </node>
+</ndbx>

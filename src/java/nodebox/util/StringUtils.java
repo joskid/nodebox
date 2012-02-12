@@ -25,7 +25,7 @@ import java.util.Locale;
 public class StringUtils {
 
     public static String humanizeName(String name) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String[] tokens = name.split("_");
         for (String t : tokens) {
             if (t.length() == 0) continue;
@@ -35,7 +35,6 @@ public class StringUtils {
         }
         return sb.toString().trim();
     }
-
 
     public static String humanizeConstant(String constant) {
         return humanizeName(constant.toLowerCase(Locale.US));

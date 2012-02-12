@@ -7,7 +7,6 @@ import java.awt.*;
 
 public class ToggleControl extends AbstractPortControl {
 
-    //private JCheckBox checkBox;
     private NButton checkBox;
 
     public ToggleControl(Port port) {
@@ -15,12 +14,6 @@ public class ToggleControl extends AbstractPortControl {
         setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
         checkBox = new NButton(NButton.Mode.CHECK, port.getLabel());
         checkBox.setActionMethod(this, "toggle");
-//        checkBox = new JCheckBox(port.getLabel());
-//        checkBox.putClientProperty("JComponent.sizeVariant", "small");
-//        checkBox.setOpaque(false);
-//        checkBox.setPreferredSize(new Dimension(150, 18));
-//        checkBox.setFont(Platform.getSmallFont());
-        //checkBox.addActionListener(this);
         add(checkBox);
         setValueForControl(port.getValue());
         setPreferredSize(new Dimension(120, 30));

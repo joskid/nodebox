@@ -35,10 +35,7 @@ public class StringControl extends AbstractPortControl implements ActionListener
     }
 
     public void actionPerformed(ActionEvent e) {
-        String newValue = textField.getText();
-        if (!newValue.equals(port.stringValue())) {
-            setPortValue(newValue);
-        }
+        setPortValue(textField.getText());
     }
 
 }

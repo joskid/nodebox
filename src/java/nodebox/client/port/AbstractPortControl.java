@@ -18,7 +18,8 @@ public abstract class AbstractPortControl extends JComponent implements PortCont
     }
 
     public void setPortValue(Object value) {
-        onValueChangeListener.onValueChange(this, value);
+        if (onValueChangeListener != null)
+            onValueChangeListener.onValueChange(this, value);
     }
 
     public void setValueChangeListener(OnValueChangeListener l) {

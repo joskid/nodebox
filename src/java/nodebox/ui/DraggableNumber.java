@@ -111,7 +111,7 @@ public class DraggableNumber extends JComponent implements MouseListener, MouseM
         return minimumValue == null;
     }
 
-    public void setMinimumValue(double minimumValue) {
+    public void setMinimumValue(Double minimumValue) {
         this.minimumValue = minimumValue;
     }
 
@@ -127,7 +127,7 @@ public class DraggableNumber extends JComponent implements MouseListener, MouseM
         return maximumValue == null;
     }
 
-    public void setMaximumValue(double maximumValue) {
+    public void setMaximumValue(Double maximumValue) {
         this.maximumValue = maximumValue;
     }
 

@@ -52,8 +52,7 @@ public class MenuControl extends AbstractPortControl implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         MenuItem item = (MenuItem) menuBox.getSelectedItem();
-        String value = item.getKey();
-        if (!port.getValue().equals(value)) {
+        if (item != null) {
             setPortValue(item.getKey());
         }
     }

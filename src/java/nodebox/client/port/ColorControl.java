@@ -37,7 +37,6 @@ public class ColorControl extends AbstractPortControl implements ChangeListener,
 
     public void setValueForControl(Object v) {
         colorButton.repaint();
-        //colorWell.setColor((nodebox.graphics.Color) v);
     }
 
     @Override
@@ -103,4 +102,5 @@ public class ColorControl extends AbstractPortControl implements ChangeListener,
             g.fillRect(r.x, r.y, r.width - 1, r.height - 1);
         }
     }
+
 }

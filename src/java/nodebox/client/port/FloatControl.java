@@ -18,14 +18,10 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
         setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
         draggable = new DraggableNumber();
         draggable.addChangeListener(this);
+        draggable.setMinimumValue(null);
+        draggable.setMinimumValue(port.getMinimumValue());
+        draggable.setMaximumValue(port.getMaximumValue());
         setPreferredSize(draggable.getPreferredSize());
-        // Set bounding
-        Double minimumValue = port.getMinimumValue();
-        if (minimumValue != null)
-            draggable.setMinimumValue(minimumValue);
-        Double maximumValue = port.getMaximumValue();
-        if (maximumValue != null)
-            draggable.setMaximumValue(maximumValue);
         add(draggable);
         setValueForControl(port.getValue());
     }
@@ -58,17 +54,7 @@ public class FloatControl extends AbstractPortControl implements ChangeListener,
 
     private void setValueFromControl() {
         double value = draggable.getValue();
-//        if (port.getBoundingMethod() == Parameter.BoundingMethod.HARD) {
-//            if (port.getMinimumValue() != null) {
-//                value = Math.max(port.getMinimumValue(), value);
-//            }
-//            if (port.getMaximumValue() != null) {
-//                value = Math.min(port.getMaximumValue(), value);
-//            }
-//        }
-        if (value != port.floatValue()) {
-            setPortValue(value);
-        }
+        setPortValue(value);
     }
 
 }

@@ -55,9 +55,7 @@ public class FontControl extends AbstractPortControl implements ActionListener {
         Font font = (Font) fontChooser.getSelectedItem();
         if (font == null) return;
         String fontName = font.getFontName();
-        if (!fontName.equals(port.stringValue())) {
-            setPortValue(font.getFontName());
-        }
+        setPortValue(font.getFontName());
     }
 
     private class FontDataModel implements ComboBoxModel {

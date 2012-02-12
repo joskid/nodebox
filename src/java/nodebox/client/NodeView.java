@@ -420,7 +420,7 @@ public class NodeView extends PNode implements Selectable, PropertyChangeListene
         private final Port inputPort;
 
         SelectCompatiblePortAction(Node outputNode, Node inputNode, Port inputPort) {
-            super(inputPort.getName());
+            super(inputPort.getLabel());
             this.outputNode = outputNode;
             this.inputNode = inputNode;
             this.inputPort = inputPort;

@@ -136,8 +136,8 @@
 
         <node function="corevector/grid" name="grid" image="grid.png" outputType="list" position="170,90"
               prototype="generator" description="Create a grid of points." strategy="flatten">
-            <port type="int" name="rows" value="10"/>
-            <port type="int" name="columns" value="10"/>
+            <port type="int" name="rows" value="10" min="1.0"/>
+            <port type="int" name="columns" value="10" min="1.0"/>
             <port type="float" name="width" value="300.0"/>
             <port type="float" name="height" value="300.0"/>
             <port type="point" name="position" value="0,0"/>

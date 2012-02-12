@@ -1137,4 +1137,9 @@ public class Path extends AbstractGeometry implements Colorizable, Iterable<Poin
         }
     }
 
+    @Override
+    public String toString() {
+        return "<Path>";
+    }
+
 }

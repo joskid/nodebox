@@ -387,7 +387,7 @@ public class Geometry extends AbstractGeometry implements Colorizable {
 
     @Override
     public String toString() {
-        return "<" + getClass().getSimpleName() + ">";
+        return "<Geometry>";
     }
 
 }

@@ -298,12 +298,12 @@ def grid(rows, columns, width, height, position):
         column_size = width / (columns - 1)
         left = position.x - width / 2
     else:
-        column_size = left = 0
+        column_size = left = position.x
     if rows > 1:
         row_size = height / (rows - 1)
         top = position.y - height / 2
     else:
-        row_size = top = 0
+        row_size = top = position.y
         
     points = []
     for ri in xrange(rows):

@@ -43,7 +43,7 @@
             </port>
         </node>
 
-        <node function="corevector/color" name="color" image="color.png" outputType="geometry" position="250,340"
+        <node function="corevector/colorize" name="colorize" image="colorize.png" outputType="geometry" position="250,340"
               prototype="filter" description="Change the color of a shape.">
             <port type="color" name="fill" value="#000000ff"/>
             <port type="color" name="stroke" value="#000000ff"/>

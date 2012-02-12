@@ -56,7 +56,7 @@ def arc(position, width, height, start_angle, degrees, arc_type):
     p = Path(Arc2D.Double(position.x-width/2, position.y-height/2, width, height, -start_angle, -degrees, awt_type))
     return p
 
-def color(shape, fill, stroke, strokeWidth):
+def colorize(shape, fill, stroke, strokeWidth):
     """Change the color of the input shape."""
     if shape is None: return None
     new_shape = shape.clone()

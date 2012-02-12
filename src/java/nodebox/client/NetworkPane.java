@@ -3,6 +3,7 @@ package nodebox.client;
 import nodebox.node.Node;
 import nodebox.node.NodeRenderException;
 import nodebox.ui.*;
+import org.python.core.PyException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -89,7 +90,14 @@ public class NetworkPane extends Pane {
         }
         sb.append("<u>");
         nodeRenderException = getRootCause(e);
-        if (nodeRenderException instanceof OutOfMemoryError) {
+        if (nodeRenderException instanceof PyException) {
+            PyException ex = (PyException) nodeRenderException;
+            if (ex.value != null) {
+                sb.append(ex.value.toString());
+            } else {
+                sb.append(ex.toString());
+            }
+        } else if (nodeRenderException instanceof OutOfMemoryError) {
             sb.append("Out of memory. Are you trying to process an infinite loop?");
         } else {
             sb.append(nodeRenderException.getMessage());

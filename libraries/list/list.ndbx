@@ -7,7 +7,7 @@
             <port name="list2" type="list"/>
             <port name="list3" type="list"/>
         </node>
-        <node description="Count the number of items in the list." function="list/count" name="count" position="20.00,0.00" strategy="wrap-in-list">
+        <node description="Count the number of items in the list." function="list/count" name="count" position="20.00,0.00" strategy="wrap-in-list" image="generic.png">
             <port name="list" type="list"/>
         </node>
         <node description="Cycle indefinitely over the elements of the list. This creates an infinite list." function="list/cycle" name="cycle" position="180.00,250.00" strategy="as-is" image="cycle.png">

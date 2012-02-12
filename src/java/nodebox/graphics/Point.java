@@ -1,12 +1,9 @@
 package nodebox.graphics;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 
 import java.awt.geom.Point2D;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

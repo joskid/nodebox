@@ -42,7 +42,10 @@ public class Application implements Host {
 
     private static Application instance;
 
+    private static final String PREF_OBJECT_LIMIT = "objectLimit";
+
     private JFrame hiddenFrame;
+    private Integer objectLimit;
 
     public static Application getInstance() {
         return instance;
@@ -195,8 +198,8 @@ public class Application implements Host {
      * Load the preferences and make them available to the Application object.
      */
     private void applyPreferences() {
-        Preferences preferences = Preferences.userNodeForPackage(this.getClass());
-        // There are no more preferences. Leaving this in for when there are.
+        Preferences preferences = Preferences.userNodeForPackage(Application.class);
+        objectLimit = Integer.valueOf(preferences.get(PREF_OBJECT_LIMIT, "1000"));
     }
 
     /**
@@ -332,6 +335,8 @@ public class Application implements Host {
         doc.setVisible(true);
         doc.requestFocus();
         doc.focusNetworkView();
+        doc.setObjectLimit(objectLimit);
+        doc.setActiveNetwork("/");
         documents.add(doc);
         currentDocument = doc;
     }
@@ -380,6 +385,7 @@ public class Application implements Host {
     }
 
     public void setObjectLimit(int limit) {
+        this.objectLimit = limit;
         for (NodeBoxDocument doc : getDocuments()) {
             doc.setObjectLimit(limit);
         }

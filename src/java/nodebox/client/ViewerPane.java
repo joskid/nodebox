@@ -27,7 +27,6 @@ public class ViewerPane extends Pane {
     private List<Object> limitedOutputValues;
     private final PaneTab viewerToggle;
     private final PaneTab dataSheetToggle;
-    private int objectLimit = 1000;
 
     public ViewerPane(final NodeBoxDocument document) {
         this.document = document;
@@ -81,7 +80,7 @@ public class ViewerPane extends Pane {
 
     public void setOutputValues(Iterable<?> objects) {
         this.outputValues = objects;
-        limitOutputValues(outputValues, objectLimit);
+        limitOutputValues(outputValues, getObjectLimit());
     }
 
     private void limitOutputValues(Iterable<?> objects, int objectLimit) {
@@ -125,9 +124,12 @@ public class ViewerPane extends Pane {
         return viewer.getHandle();
     }
 
-    public void setObjectLimit(int limit) {
-        objectLimit = limit;
-        limitOutputValues(outputValues, limit);
+    public int getObjectLimit() {
+        return document.getObjectLimit();
+    }
+
+    public void onUpdateObjectLimit() {
+        limitOutputValues(outputValues, getObjectLimit());
     }
 
     private class SwitchCardAction extends AbstractAction {
@@ -190,6 +192,5 @@ public class ViewerPane extends Pane {
             SwingUtils.drawShadowText((Graphics2D) g, getText(), 5, 14);
         }
     }
-
 
 }

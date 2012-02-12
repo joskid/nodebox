@@ -2,6 +2,7 @@ package nodebox.node;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import nodebox.client.NodeBoxDocument;
 import nodebox.function.Function;
 import nodebox.function.FunctionRepository;
 
@@ -11,20 +12,30 @@ import static com.google.common.base.Preconditions.*;
 
 public class NodeContext {
 
+    public static final int DEFAULT_OBJECT_LIMIT = Integer.MAX_VALUE;
+    
+    
     private final FunctionRepository repository;
     private final double frame;
     private final Map<Node, Iterable<?>> outputValuesMap = new HashMap<Node, Iterable<?>>();
     private final Map<NodePort, Iterable<?>> inputValuesMap = new HashMap<NodePort, Iterable<?>>();
     private final Set<Node> renderedNodes = new HashSet<Node>();
+    private final int objectLimit;
+    
 
     public NodeContext(FunctionRepository repository) {
-        this(repository, 1);
+        this(repository, 1, DEFAULT_OBJECT_LIMIT);
     }
 
     public NodeContext(FunctionRepository repository, double frame) {
+        this(repository, frame, DEFAULT_OBJECT_LIMIT);
+    }
+
+    public NodeContext(FunctionRepository repository, double frame, int objectLimit) {
         checkNotNull(repository);
         this.repository = repository;
         this.frame = frame;
+        this.objectLimit = objectLimit;
     }
 
     public Map<Node, Iterable<?>> getResultsMap() {
@@ -279,8 +290,10 @@ public class NodeContext {
         List<Object> results = new ArrayList<Object>();
         Map<ValueOrList, Iterator> iteratorMap = new HashMap<ValueOrList, Iterator>();
         boolean hasListArgument = false;
+        int objectCount = 0;
         while (true) {
-            if (Thread.interrupted()) throw new NodeRenderException(node, "Interrupted.");
+            if (Thread.currentThread().isInterrupted()) throw new NodeRenderException(node, "Interrupted.");
+            if (objectCount >= objectLimit) break;
             // Collect arguments by going through the input values.
             List<Object> arguments = new ArrayList<Object>();
             for (ValueOrList v : inputValues) {
@@ -302,6 +315,7 @@ public class NodeContext {
             op.call(arguments, results);
             // If none of the arguments are lists, we're done.
             if (!hasListArgument) break;
+            objectCount++;
         }
         return results;
     }

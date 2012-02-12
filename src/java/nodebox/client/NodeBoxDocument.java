@@ -2,7 +2,6 @@ package nodebox.client;
 
 import com.google.common.collect.ImmutableList;
 import nodebox.function.*;
-import nodebox.graphics.*;
 import nodebox.handle.HandleDelegate;
 import nodebox.movie.Movie;
 import nodebox.movie.VideoFormat;
@@ -13,21 +12,20 @@ import nodebox.util.FileUtils;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.Point;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -78,6 +76,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     private JSplitPane parameterNetworkSplit;
     private JSplitPane topSplit;
     private final ProgressPanel progressPanel;
+    private int objectLimit = 1000;
 
     public static NodeBoxDocument getCurrentDocument() {
         return Application.getInstance().getCurrentDocument();
@@ -89,7 +88,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
             DataFunctions.LIBRARY,
             ColorFunctions.LIBRARY,
             PythonLibrary.loadScript("corevector", "libraries/corevector/corevector.py"));
-    
+
     private static NodeLibrary createNewLibrary() {
         Node root = Node.ROOT.withName("root");
         Node rectPrototype = NodeRepository.DEFAULT.getNode("corevector.rect");
@@ -104,7 +103,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
     }
 
     public NodeBoxDocument(NodeLibrary nodeLibrary) {
-        renderService = Executors.newFixedThreadPool(1);
+        renderService = Executors.newFixedThreadPool(1, new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "node-renderer");
+                t.setPriority(Thread.MIN_PRIORITY);
+                return t;
+            }
+        });
         controller = NodeLibraryController.withLibrary(nodeLibrary);
         JPanel rootPanel = new JPanel(new BorderLayout());
         this.viewerPane = new ViewerPane(this);
@@ -144,8 +149,6 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         menuBar = new NodeBoxMenuBar(this);
         setJMenuBar(menuBar);
         loaded = true;
-
-        setActiveNetwork("/");
     }
 
     public NodeBoxDocument(File file) throws RuntimeException {
@@ -194,7 +197,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         controller.setRenderedChild(activeNetworkPath, newNode.getName());
         setActiveNode(newNode);
         stopEdits();
-        
+
         Node activeNode = getActiveNode();
         networkView.updateNodes();
         networkView.singleSelect(activeNode);
@@ -672,7 +675,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
      * @param renderedNetwork The network that was rendered.
      */
     public synchronized void finishedRendering(final NodeContext context, final Node renderedNetwork) {
-       finishCurrentRender();
+        finishCurrentRender();
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Node renderedChild = renderedNetwork.getRenderedChild();
@@ -731,7 +734,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         checkState(currentRender == null, "Another render is still in progress.");
         currentRender = renderService.submit(new Runnable() {
             public void run() {
-                final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame);
+                final NodeContext context = new NodeContext(renderLibrary.getFunctionRepository(), frame, objectLimit);
                 Exception renderException = null;
                 startRendering(context);
                 try {
@@ -1074,8 +1077,13 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         });
     }
 
+    public int getObjectLimit() {
+        return objectLimit;
+    }
+
     public void setObjectLimit(int limit) {
-        viewerPane.setObjectLimit(limit);
+        this.objectLimit = limit;
+        viewerPane.onUpdateObjectLimit();
     }
 
     private abstract class ExportDelegate {
@@ -1105,7 +1113,7 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
                         if (Thread.currentThread().isInterrupted())
                             break;
 
-                        NodeContext context = new NodeContext(exportLibrary.getFunctionRepository(), frame);
+                        NodeContext context = new NodeContext(exportLibrary.getFunctionRepository(), frame, objectLimit);
                         context.renderNetwork(exportNetwork);
                         Node renderedChild = exportNetwork.getRenderedChild();
                         Object result = context.getResults(renderedChild);

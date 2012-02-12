@@ -331,6 +331,7 @@ public class Application implements Host {
     private void addDocument(NodeBoxDocument doc) {
         doc.setVisible(true);
         doc.requestFocus();
+        doc.focusNetworkView();
         documents.add(doc);
         currentDocument = doc;
     }

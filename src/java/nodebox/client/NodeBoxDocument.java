@@ -977,6 +977,10 @@ public class NodeBoxDocument extends JFrame implements WindowListener, HandleDel
         }
     }
 
+    public void focusNetworkView() {
+        networkView.requestFocus();
+    }
+
     //// Export ////
 
     public void doExport() {

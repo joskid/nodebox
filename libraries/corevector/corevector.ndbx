@@ -308,8 +308,8 @@
                 <menu key="JUSTIFY" label="Justify"/>
             </port>
             <port type="point" name="position" value="0,0"/>
-            <port type="float" name="width" value="0.0"/>
-            <port type="float" name="height" value="0.0"/>
+            <port type="float" name="width" value="0.0" min="0.0"/>
+            <port type="float" name="height" value="0.0" min="0.0"/>
         </node>
 
         <node function="corevector/transform" name="transform" image="transform.png" outputType="geometry"

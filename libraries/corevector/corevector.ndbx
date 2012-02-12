@@ -303,23 +303,7 @@
             <port type="float" name="height" value="0.0" min="0.0"/>
         </node>
 
-        <node function="corevector/transform" name="transform" image="transform.png" outputType="geometry"
-              position="90,500" prototype="filter"
-              description="Transforms the location, rotation and scale of a shape.">
-            <port type="string" name="order" value="tsr" label="Trans Scale Rot">
-                <menu key="srt" label="Scale Rot Trans"/>
-                <menu key="str" label="Scale Trans Rot"/>
-                <menu key="rst" label="Rot Scale Trans"/>
-                <menu key="rtr" label="Rot Trans Scale"/>
-                <menu key="tsr" label="Trans Scale Rot"/>
-                <menu key="trs" label="Trans Rot Scale"/>
-            </port>
-            <port type="point" name="translate" value="0,0" label="Translate"/>
-            <port type="float" name="angle" value="0.0" label="Rotation"/>
-            <port type="point" name="scale" value="100,100" label="Scale"/>
-        </node>
-
-        <node function="corevector/translate" name="translate" image="translate.png" outputType="geometry"
+\        <node function="corevector/translate" name="translate" image="translate.png" outputType="geometry"
               position="100,500" prototype="filter"
               description="Move the shape, changing its position.">
             <port type="point" name="translate" value="0,0" label="Translate"/>
@@ -333,7 +317,7 @@
 
         <node function="corevector/scale" name="scale" image="scale.png" outputType="geometry"
               position="100,520" prototype="filter"
-              description="Change the size of the shape by scaling it.">
+              description="Resize the shape by scaling it.">
             <port type="point" name="scale" value="100,100" label="Scale"/>
         </node>
 

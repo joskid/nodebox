@@ -606,21 +606,6 @@ def textpath(text, font_name="Verdana", font_size=24, align="CENTER", position=P
     except:
         pass
     return t.path
-    
-def transform(shape, order, translate, rotate, scale):
-    """Transforms the location, rotation and scale of a shape."""
-    if shape is None: return None
-    t = Transform()
-    # Each letter of the order describes an operation.
-    for op in order:
-        if op == 't':
-            t.translate(translate.x, translate.y)
-        elif op == 'r':
-            t.rotate(rotate)
-        elif op == 's':
-            t.scale(scale.x / 100, scale.y / 100)
-    # Transform.map clones and transforms the geometry.
-    return t.map(shape)
 
 def translate(shape, translate):
     """Move the shape."""

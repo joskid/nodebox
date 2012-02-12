@@ -152,7 +152,7 @@
               position="250,90"
               prototype="generator" description="Import geometry from a SVG file.">
             <port type="string" name="file" value=""/>
-            <port type="boolean" name="centered" value="false" label="Center on Canvas"/>
+            <port type="boolean" name="centered" value="true" label="Center on Canvas"/>
             <port type="point" name="position" value="0,0"/>
         </node>
 
